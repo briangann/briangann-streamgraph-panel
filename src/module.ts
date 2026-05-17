@@ -125,7 +125,7 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
         name: 'Legend values',
         category: ['Legend'],
         defaultValue: DEFAULT_LEGEND_CALCS,
-        showIf: (config: StreamgraphOptions) => config.legend?.showLegend && config.legend?.displayMode === 'table',
+        showIf: (config: StreamgraphOptions) => config.legend?.showLegend && config.legend?.displayMode === LegendDisplayMode.Table,
         settings: {
           options: [
             { value: 'min', label: 'Min' },

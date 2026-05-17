@@ -46,6 +46,12 @@
   caused calcs to silently not appear in legend when frame had a name but no displayName
 - `StreamGraph.tsx`: `displayMode: 'hidden'` now suppresses legend rendering and flexbox space
   allocation; previously legend container was still present when `showLegend: true`
+- `StreamGraphPanel.tsx`: `computeSeriesCalcs` filters numeric fields once per frame and iterates
+  the filtered result — eliminates double-pass over all fields per frame
+- `types.ts`: `legend.displayMode` typed as `LegendDisplayMode` enum instead of string literal
+  union; all comparison sites updated to use enum members — eliminates stringly-typed comparisons
+- `StreamGraph.tsx`: y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
+  domain if stack produces non-finite values
 
 ### Added
 

@@ -96,7 +96,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     value: 0,
   });
 
-  const legendVisible = options.legend.showLegend && options.legend.displayMode !== 'hidden';
+  const legendVisible = options.legend.showLegend && options.legend.displayMode !== LegendDisplayMode.Hidden;
   const legendBottom = legendVisible && options.legend.placement === 'bottom';
 
   const colorScale = useMemo(
@@ -148,8 +148,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     let yMin = Infinity, yMax = -Infinity;
     for (const series of stackedData) {
       for (const point of series) {
-        if (point[0] < yMin) { yMin = point[0]; }
-        if (point[1] > yMax) { yMax = point[1]; }
+        if (isFinite(point[0]) && point[0] < yMin) { yMin = point[0]; }
+        if (isFinite(point[1]) && point[1] > yMax) { yMax = point[1]; }
       }
     }
     const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
@@ -240,7 +240,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       {vizLegendItems && (
         <VizLegend
           items={vizLegendItems}
-          displayMode={options.legend.displayMode as LegendDisplayMode}
+          displayMode={options.legend.displayMode}
           placement={options.legend.placement}
         />
       )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { LegendDisplayMode } from '@grafana/schema';
 import { StreamGraph } from './StreamGraph';
 import { ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 
@@ -21,7 +22,7 @@ const mockOptions: StreamgraphOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  legend: { showLegend: true, placement: 'bottom', displayMode: 'list', calcs: [] },
+  legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 
 const emptyCalcs = new Map<string, Array<import('@grafana/data').DisplayValue>>();

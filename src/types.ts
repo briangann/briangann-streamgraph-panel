@@ -1,3 +1,5 @@
+import { LegendDisplayMode } from '@grafana/schema';
+
 export enum StackOffset {
   WIGGLE = 'wiggle',
   SILHOUETTE = 'silhouette',
@@ -36,7 +38,7 @@ export interface StreamgraphOptions {
   legend: {
     showLegend: boolean;
     placement: 'bottom' | 'right';
-    displayMode: 'list' | 'table' | 'hidden';
+    displayMode: LegendDisplayMode;
     calcs?: string[];
   };
 }

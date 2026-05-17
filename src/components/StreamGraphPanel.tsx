@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { DataFrame, DisplayValue, FieldType, PanelProps, fieldReducers, reduceField } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
+import { LegendDisplayMode } from '@grafana/schema';
 
 import { DEFAULT_LEGEND_CALCS, StreamgraphOptions } from '../types';
 import { transformToD3 } from '../data/transformer';
@@ -15,11 +16,9 @@ function computeSeriesCalcs(series: DataFrame[], calcIds: string[]): Map<string,
   }
   for (const frame of series) {
     // Must mirror transformer.ts name derivation: wide uses field.name fallback, multi-frame uses frame.name
-    const isWide = frame.fields.filter((f) => f.type === FieldType.number).length > 1;
-    for (const field of frame.fields) {
-      if (field.type !== FieldType.number) {
-        continue;
-      }
+    const numericFields = frame.fields.filter((f) => f.type === FieldType.number);
+    const isWide = numericFields.length > 1;
+    for (const field of numericFields) {
       const name = field.config?.displayName ?? (isWide ? field.name : (frame.name ?? field.name ?? 'value'));
       const calcs = reduceField({ field, reducers: calcIds });
       result.set(
@@ -46,7 +45,7 @@ export const StreamGraphPanel: React.FC<Props> = ({
   const d3Data = useMemo(() => transformToD3(data), [data]);
   const seriesCalcs = useMemo(
     () => {
-      if (options.legend.displayMode !== 'table') {
+      if (options.legend.displayMode !== LegendDisplayMode.Table) {
         return new Map<string, DisplayValue[]>();
       }
       return computeSeriesCalcs(data.series, options.legend.calcs ?? DEFAULT_LEGEND_CALCS);
