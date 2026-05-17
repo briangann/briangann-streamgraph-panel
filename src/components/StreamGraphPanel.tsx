@@ -14,11 +14,13 @@ function computeSeriesCalcs(series: DataFrame[], calcIds: string[]): Map<string,
     return result;
   }
   for (const frame of series) {
+    // Must mirror transformer.ts name derivation: wide uses field.name fallback, multi-frame uses frame.name
+    const isWide = frame.fields.filter((f) => f.type === FieldType.number).length > 1;
     for (const field of frame.fields) {
       if (field.type !== FieldType.number) {
         continue;
       }
-      const name = field.config?.displayName ?? frame.name ?? field.name ?? 'value';
+      const name = field.config?.displayName ?? (isWide ? field.name : (frame.name ?? field.name ?? 'value'));
       const calcs = reduceField({ field, reducers: calcIds });
       result.set(
         name,

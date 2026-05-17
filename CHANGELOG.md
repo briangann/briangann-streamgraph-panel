@@ -41,6 +41,11 @@
   original `data.series` frames and surfaced in `VizLegend` via `getDisplayValues`
 - `StreamGraph.tsx`: removed fixed `LEGEND_HEIGHT`/`LEGEND_WIDTH` constants; SVG container now
   measured via `ResizeObserver` so `VizLegend` takes its natural size in both List and Table modes
+- `StreamGraphPanel.tsx`: `computeSeriesCalcs` name derivation now mirrors `transformer.ts` — wide
+  frames (multiple value fields) use `field.name` fallback, multi-frame uses `frame.name`; mismatch
+  caused calcs to silently not appear in legend when frame had a name but no displayName
+- `StreamGraph.tsx`: `displayMode: 'hidden'` now suppresses legend rendering and flexbox space
+  allocation; previously legend container was still present when `showLegend: true`
 
 ### Added
 

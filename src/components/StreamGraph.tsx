@@ -96,7 +96,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     value: 0,
   });
 
-  const legendBottom = options.legend.showLegend && options.legend.placement === 'bottom';
+  const legendVisible = options.legend.showLegend && options.legend.displayMode !== 'hidden';
+  const legendBottom = legendVisible && options.legend.placement === 'bottom';
 
   const colorScale = useMemo(
     () =>
@@ -193,7 +194,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     }
   }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
 
-  const vizLegendItems = options.legend.showLegend
+  const vizLegendItems = legendVisible
     ? data.seriesNames.map((name, i) => {
         const calcs = seriesCalcs.get(name);
         return {
