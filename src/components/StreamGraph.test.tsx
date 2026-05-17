@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { StreamGraph } from './StreamGraph';
-import { ColorScheme, CurveType, LegendPlacement, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 
 const mockData = {
   rows: [
@@ -21,8 +21,7 @@ const mockOptions: StreamgraphOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  showLegend: true,
-  legendPlacement: LegendPlacement.BOTTOM,
+  legend: { showLegend: true, placement: 'bottom', displayMode: 'list' },
 };
 
 describe('StreamGraph', () => {
@@ -55,7 +54,7 @@ describe('StreamGraph', () => {
         data={mockData}
         width={800}
         height={400}
-        options={{ ...mockOptions, showLegend: false }}
+        options={{ ...mockOptions, legend: { ...mockOptions.legend, showLegend: false } }}
       />
     );
     expect(queryByText('A')).not.toBeInTheDocument();

@@ -29,7 +29,6 @@ import {
   ColorScheme,
   CurveType,
   D3WideData,
-  LegendPlacement,
   StackOffset,
   StackOrder,
   StreamgraphOptions,
@@ -95,8 +94,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     value: 0,
   });
 
-  const legendBottom = options.showLegend && options.legendPlacement === LegendPlacement.BOTTOM;
-  const legendRight = options.showLegend && options.legendPlacement === LegendPlacement.RIGHT;
+  const legendBottom = options.legend.showLegend && options.legend.placement === 'bottom';
+  const legendRight = options.legend.showLegend && options.legend.placement === 'right';
 
   const colorScale = useMemo(
     () =>
@@ -182,7 +181,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     }
   }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
 
-  const vizLegendItems = options.showLegend
+  const vizLegendItems = options.legend.showLegend
     ? data.seriesNames.map((name, i) => ({ label: name, color: colorScale(i), yAxis: 1 }))
     : null;
 
@@ -219,8 +218,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       {vizLegendItems && (
         <VizLegend
           items={vizLegendItems}
-          displayMode={LegendDisplayMode.List}
-          placement={options.legendPlacement}
+          displayMode={options.legend.displayMode as LegendDisplayMode}
+          placement={options.legend.placement}
         />
       )}
     </div>

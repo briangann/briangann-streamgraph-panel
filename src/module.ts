@@ -1,10 +1,10 @@
 import { PanelPlugin } from '@grafana/data';
+import { LegendDisplayMode } from '@grafana/schema';
 
 import { StreamGraphPanel } from './components/StreamGraphPanel';
 import {
   ColorScheme,
   CurveType,
-  LegendPlacement,
   StackOffset,
   StackOrder,
   StreamgraphOptions,
@@ -16,6 +16,7 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       .addSelect({
         path: 'stackOffset',
         name: 'Stack offset',
+        category: ['Streamgraph'],
         defaultValue: StackOffset.WIGGLE,
         settings: {
           options: [
@@ -29,6 +30,7 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       .addSelect({
         path: 'stackOrder',
         name: 'Stack order',
+        category: ['Streamgraph'],
         defaultValue: StackOrder.INSIDE_OUT,
         settings: {
           options: [
@@ -42,6 +44,7 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       .addSelect({
         path: 'curveType',
         name: 'Curve type',
+        category: ['Streamgraph'],
         defaultValue: CurveType.SMOOTH,
         settings: {
           options: [
@@ -54,6 +57,7 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       .addSelect({
         path: 'colorScheme',
         name: 'Color scheme',
+        category: ['Streamgraph'],
         defaultValue: ColorScheme.CIVIDIS,
         settings: {
           options: [
@@ -67,33 +71,51 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       .addSliderInput({
         path: 'fillOpacity',
         name: 'Fill opacity',
+        category: ['Streamgraph'],
         defaultValue: 0.8,
         settings: { min: 0, max: 1, step: 0.1 },
       })
       .addBooleanSwitch({
         path: 'showXAxis',
         name: 'Show X axis',
+        category: ['Axis'],
         defaultValue: true,
       })
       .addBooleanSwitch({
         path: 'showTooltip',
         name: 'Show tooltip',
+        category: ['Tooltip'],
         defaultValue: true,
       })
       .addBooleanSwitch({
-        path: 'showLegend',
+        path: 'legend.showLegend',
         name: 'Show legend',
+        category: ['Legend'],
         defaultValue: true,
       })
       .addSelect({
-        path: 'legendPlacement',
-        name: 'Legend placement',
-        defaultValue: LegendPlacement.BOTTOM,
-        showIf: (config) => config.showLegend,
+        path: 'legend.displayMode',
+        name: 'Legend mode',
+        category: ['Legend'],
+        defaultValue: LegendDisplayMode.List,
+        showIf: (config) => config.legend?.showLegend,
         settings: {
           options: [
-            { value: LegendPlacement.BOTTOM, label: 'Bottom' },
-            { value: LegendPlacement.RIGHT, label: 'Right' },
+            { value: LegendDisplayMode.List, label: 'List' },
+            { value: LegendDisplayMode.Table, label: 'Table' },
+          ],
+        },
+      })
+      .addSelect({
+        path: 'legend.placement',
+        name: 'Legend placement',
+        category: ['Legend'],
+        defaultValue: 'bottom',
+        showIf: (config) => config.legend?.showLegend,
+        settings: {
+          options: [
+            { value: 'bottom', label: 'Bottom' },
+            { value: 'right', label: 'Right' },
           ],
         },
       });

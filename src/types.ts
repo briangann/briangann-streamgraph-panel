@@ -25,11 +25,6 @@ export enum ColorScheme {
   SPECTRAL = 'spectral',
 }
 
-export enum LegendPlacement {
-  BOTTOM = 'bottom',
-  RIGHT = 'right',
-}
-
 export interface StreamgraphOptions {
   stackOffset: StackOffset;
   stackOrder: StackOrder;
@@ -38,8 +33,11 @@ export interface StreamgraphOptions {
   fillOpacity: number;
   showXAxis: boolean;
   showTooltip: boolean;
-  showLegend: boolean;
-  legendPlacement: LegendPlacement;
+  legend: {
+    showLegend: boolean;
+    placement: 'bottom' | 'right';
+    displayMode: 'list' | 'table' | 'hidden';
+  };
 }
 
 export interface D3WideData {

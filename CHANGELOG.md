@@ -34,6 +34,9 @@
   coords change every mouse-move pixel and made the early-return path unreachable
 - `StreamGraph.tsx`: replaced hand-rolled legend divs with `VizLegend` from `@grafana/ui` —
   gets Grafana theming, dark-mode, and consistent styling for free
+- `types.ts` / `module.ts`: replaced flat `showLegend`+`legendPlacement` with nested
+  `legend: { showLegend, placement, displayMode }` — adds List/Table mode selector in panel
+  editor; removed custom `LegendPlacement` enum in favour of string literals
 
 ### Added
 
