@@ -15,9 +15,8 @@ export const StreamGraphPanel: React.FC<Props> = ({
   height,
   fieldConfig,
   id,
-  timeRange,
 }) => {
-  const d3Data = useMemo(() => transformToD3(data, timeRange), [data, timeRange]);
+  const d3Data = useMemo(() => transformToD3(data), [data]);
 
   if (!data.series.length || !d3Data.rows.length) {
     return <PanelDataErrorView fieldConfig={fieldConfig} panelId={id} data={data} needsNumberField />;

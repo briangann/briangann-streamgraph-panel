@@ -225,31 +225,63 @@ exports[`StreamGraph matches snapshot 1`] = `
       </svg>
     </div>
     <div
-      style="display: flex; flex-wrap: wrap; padding: 4px 0px; width: 800px;"
+      class="css-4hqpog"
     >
       <div
-        style="display: flex; align-items: center; gap: 4px; margin-right: 12px;"
+        class="css-k008qs"
       >
-        <div
-          style="width: 12px; height: 12px; border-radius: 2px; background-color: rgb(0, 32, 81); flex-shrink: 0;"
-        />
-        <span
-          style="font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+        <ul
+          class="css-14m29r0"
         >
-          A
-        </span>
-      </div>
-      <div
-        style="display: flex; align-items: center; gap: 4px; margin-right: 12px;"
-      >
-        <div
-          style="width: 12px; height: 12px; border-radius: 2px; background-color: rgb(253, 234, 69); flex-shrink: 0;"
-        />
-        <span
-          style="font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-        >
-          B
-        </span>
+          <li
+            class="css-1baulvz"
+          >
+            <span
+              class="css-eoftnt"
+            >
+              <div
+                class="css-olan4g-LegendItemWrapper"
+                data-testid="data-testid VizLegend series A"
+              >
+                <div
+                  class="css-3gpgbm"
+                  data-testid="series-icon"
+                  style="background: rgb(0, 32, 81); border-radius: 9999px;"
+                />
+                <button
+                  class="css-1f8mf9c-LegendLabel"
+                  type="button"
+                >
+                  A
+                </button>
+              </div>
+            </span>
+          </li>
+          <li
+            class="css-1baulvz"
+          >
+            <span
+              class="css-eoftnt"
+            >
+              <div
+                class="css-olan4g-LegendItemWrapper"
+                data-testid="data-testid VizLegend series B"
+              >
+                <div
+                  class="css-3gpgbm"
+                  data-testid="series-icon"
+                  style="background: rgb(253, 234, 69); border-radius: 9999px;"
+                />
+                <button
+                  class="css-1f8mf9c-LegendLabel"
+                  type="button"
+                >
+                  B
+                </button>
+              </div>
+            </span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>

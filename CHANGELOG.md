@@ -25,6 +25,15 @@
   when legend is hidden; added `StackDatum` type alias to remove verbose triple casts
 - `utils.ts`: `isNaN` replaced with `Number.isNaN` (avoids implicit coercion); `nullFill` now
   skips object spread when all values are already valid — returns original row reference unchanged
+- `transformer.ts`: removed unused `_timeRange` parameter from `transformToD3`; `StreamGraphPanel`
+  memo keyed on `data` only — `timeRange` is a new object every Grafana render and was defeating
+  the memo entirely
+- `StreamGraph.tsx`: replaced `extent(stackedData.flat(2))` O(N×M) allocation with a direct
+  two-loop scan over stackedData; dropped `d3-array` import (no longer needed)
+- `StreamGraph.tsx`: tooltip equality guard narrowed to `seriesName`+`value` only — x/y pixel
+  coords change every mouse-move pixel and made the early-return path unreachable
+- `StreamGraph.tsx`: replaced hand-rolled legend divs with `VizLegend` from `@grafana/ui` —
+  gets Grafana theming, dark-mode, and consistent styling for free
 
 ### Added
 

@@ -14,7 +14,6 @@ import {
   stackOrderInsideOut,
   stackOrderNone,
 } from 'd3-shape';
-import { extent } from 'd3-array';
 import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
 import {
   interpolateCividis,
@@ -23,6 +22,8 @@ import {
   interpolateViridis,
 } from 'd3-scale-chromatic';
 import { select } from 'd3-selection';
+import { VizLegend } from '@grafana/ui';
+import { LegendDisplayMode } from '@grafana/schema';
 
 import {
   ColorScheme,
@@ -132,7 +133,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       return;
     }
 
-    const [yMin, yMax] = extent(stackedData.flat(2)) as [number, number];
+    let yMin = Infinity, yMax = -Infinity;
+    for (const series of stackedData) {
+      for (const point of series) {
+        if (point[0] < yMin) { yMin = point[0]; }
+        if (point[1] > yMax) { yMax = point[1]; }
+      }
+    }
     const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
 
     const areaGen = area<StackDatum>()
@@ -162,7 +169,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         const x = event.offsetX + 12;
         const y = event.offsetY - 12;
         setTooltip((t) => {
-          if (t.visible && t.x === x && t.y === y && t.seriesName === seriesName && t.value === value) {
+          if (t.visible && t.seriesName === seriesName && t.value === value) {
             return t;
           }
           return { visible: true, x, y, seriesName, value };
@@ -175,23 +182,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     }
   }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
 
-  const legendItems = options.showLegend
-    ? data.seriesNames.map((name, i) => (
-        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 12 }}>
-          <div
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 2,
-              backgroundColor: colorScale(i),
-              flexShrink: 0,
-            }}
-          />
-          <span style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {name}
-          </span>
-        </div>
-      ))
+  const vizLegendItems = options.showLegend
+    ? data.seriesNames.map((name, i) => ({ label: name, color: colorScale(i), yAxis: 1 }))
     : null;
 
   return (
@@ -224,23 +216,12 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
           </div>
         )}
       </div>
-      {options.showLegend && legendBottom && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', padding: '4px 0', width }}>{legendItems}</div>
-      )}
-      {options.showLegend && legendRight && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            padding: '0 8px',
-            width: LEGEND_WIDTH,
-            overflowY: 'auto',
-            height,
-          }}
-        >
-          {legendItems}
-        </div>
+      {vizLegendItems && (
+        <VizLegend
+          items={vizLegendItems}
+          displayMode={LegendDisplayMode.List}
+          placement={options.legendPlacement}
+        />
       )}
     </div>
   );
