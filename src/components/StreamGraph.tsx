@@ -35,6 +35,8 @@ import {
 } from '../types';
 import { renderAxis } from './Axis';
 
+type StackDatum = [number, number] & { data: Record<string, number> };
+
 interface StreamGraphProps {
   data: D3WideData;
   width: number;
@@ -133,8 +135,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     const [yMin, yMax] = extent(stackedData.flat(2)) as [number, number];
     const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
 
-    const areaGen = area<[number, number] & { data: Record<string, number> }>()
-      .x((d) => xScale(new Date(d.data['time'])))
+    const areaGen = area<StackDatum>()
+      .x((d) => xScale(d.data['time']))
       .y0((d) => yScale(d[0]))
       .y1((d) => yScale(d[1]))
       .curve(CURVE_MAP[options.curveType]);
@@ -142,7 +144,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     g.selectAll('path')
       .data(stackedData)
       .join('path')
-      .attr('d', (d) => areaGen(d as unknown as Array<[number, number] & { data: Record<string, number> }>) ?? '')
+      .attr('d', (d) => areaGen(d as unknown as StackDatum[]) ?? '')
       .attr('fill', (_, i) => colorScale(i))
       .attr('fill-opacity', options.fillOpacity)
       .on('mousemove', function (event, d) {
@@ -151,19 +153,19 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         }
         const mouseX = event.offsetX - MARGIN.left;
         const timeValue = xScale.invert(mouseX).getTime();
-        const closest = (d as unknown as Array<[number, number] & { data: Record<string, number> }>).reduce(
-          (prev, curr) =>
-            Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue)
-              ? curr
-              : prev
+        const series = d as unknown as StackDatum[];
+        const closest = series.reduce((prev, curr) =>
+          Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue) ? curr : prev
         );
         const seriesName = (d as unknown as { key: string }).key;
-        setTooltip({
-          visible: true,
-          x: event.offsetX + 12,
-          y: event.offsetY - 12,
-          seriesName,
-          value: closest.data[seriesName] ?? 0,
+        const value = closest.data[seriesName] ?? 0;
+        const x = event.offsetX + 12;
+        const y = event.offsetY - 12;
+        setTooltip((t) => {
+          if (t.visible && t.x === x && t.y === y && t.seriesName === seriesName && t.value === value) {
+            return t;
+          }
+          return { visible: true, x, y, seriesName, value };
         });
       })
       .on('mouseleave', () => setTooltip((t) => ({ ...t, visible: false })));
@@ -171,24 +173,26 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     if (options.showXAxis) {
       renderAxis({ svg: g, xScale, innerWidth, innerHeight });
     }
-  }, [data, innerWidth, innerHeight, options, colorScale]);
+  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
 
-  const legendItems = data.seriesNames.map((name, i) => (
-    <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 12 }}>
-      <div
-        style={{
-          width: 12,
-          height: 12,
-          borderRadius: 2,
-          backgroundColor: colorScale(i),
-          flexShrink: 0,
-        }}
-      />
-      <span style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {name}
-      </span>
-    </div>
-  ));
+  const legendItems = options.showLegend
+    ? data.seriesNames.map((name, i) => (
+        <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 12 }}>
+          <div
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: 2,
+              backgroundColor: colorScale(i),
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {name}
+          </span>
+        </div>
+      ))
+    : null;
 
   return (
     <div

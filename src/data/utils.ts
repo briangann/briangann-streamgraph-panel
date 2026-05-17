@@ -24,12 +24,16 @@ export function nullFill(
   keys: string[]
 ): Array<Record<string, number>> {
   return rows.map((row) => {
-    const filled = { ...row };
+    let filled: Record<string, number> | null = null;
     for (const key of keys) {
-      if (filled[key] == null || isNaN(filled[key])) {
+      const v = row[key];
+      if (v == null || Number.isNaN(v)) {
+        if (!filled) {
+          filled = { ...row };
+        }
         filled[key] = 0;
       }
     }
-    return filled;
+    return filled ?? row;
   });
 }

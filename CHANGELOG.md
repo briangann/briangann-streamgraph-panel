@@ -12,6 +12,19 @@
   index access (time fields are pre-sorted); added consistent `?? 0` fallback in multi-frame path
 - `StreamGraph.tsx`: replaced intermediate `allValues` array + spread with `extent` from d3-array
   (single-pass, no allocation); hoisted `colorScale` to `useMemo` to avoid recomputation per render
+- `StreamGraphPanel.tsx`: `transformToD3` now memoized (`useMemo`) — avoids re-running the data
+  transform on every panel re-render (resize, hover, sibling updates); duplicate `PanelDataErrorView`
+  returns collapsed into one guard
+- `StreamGraph.tsx`: `useEffect` dep array narrowed to individual `options` fields used inside the
+  effect — prevents full D3 teardown/rebuild when unrelated options change
+- `StreamGraph.tsx`: removed `new Date()` allocation per data point in area generator hot path;
+  `scaleTime` accepts numeric timestamps directly
+- `StreamGraph.tsx`: tooltip `setTooltip` now compares new values against prior state before
+  updating — eliminates unnecessary re-renders on every mouse-move pixel
+- `StreamGraph.tsx`: `legendItems` computation guarded behind `options.showLegend` — skips map
+  when legend is hidden; added `StackDatum` type alias to remove verbose triple casts
+- `utils.ts`: `isNaN` replaced with `Number.isNaN` (avoids implicit coercion); `nullFill` now
+  skips object spread when all values are already valid — returns original row reference unchanged
 
 ### Added
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PanelProps } from '@grafana/data';
 import { PanelDataErrorView } from '@grafana/runtime';
 
@@ -17,13 +17,9 @@ export const StreamGraphPanel: React.FC<Props> = ({
   id,
   timeRange,
 }) => {
-  if (data.series.length === 0) {
-    return <PanelDataErrorView fieldConfig={fieldConfig} panelId={id} data={data} needsNumberField />;
-  }
+  const d3Data = useMemo(() => transformToD3(data, timeRange), [data, timeRange]);
 
-  const d3Data = transformToD3(data, timeRange);
-
-  if (!d3Data.rows.length) {
+  if (!data.series.length || !d3Data.rows.length) {
     return <PanelDataErrorView fieldConfig={fieldConfig} panelId={id} data={data} needsNumberField />;
   }
 
