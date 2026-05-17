@@ -25,6 +25,33 @@
   when legend is hidden; added `StackDatum` type alias to remove verbose triple casts
 - `utils.ts`: `isNaN` replaced with `Number.isNaN` (avoids implicit coercion); `nullFill` now
   skips object spread when all values are already valid — returns original row reference unchanged
+- `transformer.ts`: removed unused `_timeRange` parameter from `transformToD3`; `StreamGraphPanel`
+  memo keyed on `data` only — `timeRange` is a new object every Grafana render and was defeating
+  the memo entirely
+- `StreamGraph.tsx`: replaced `extent(stackedData.flat(2))` O(N×M) allocation with a direct
+  two-loop scan over stackedData; dropped `d3-array` import (no longer needed)
+- `StreamGraph.tsx`: tooltip equality guard narrowed to `seriesName`+`value` only — x/y pixel
+  coords change every mouse-move pixel and made the early-return path unreachable
+- `StreamGraph.tsx`: replaced hand-rolled legend divs with `VizLegend` from `@grafana/ui` —
+  gets Grafana theming, dark-mode, and consistent styling for free
+- `types.ts` / `module.ts`: replaced flat `showLegend`+`legendPlacement` with nested
+  `legend: { showLegend, placement, displayMode }` — adds List/Table mode selector in panel
+  editor; removed custom `LegendPlacement` enum in favour of string literals
+- Legend values (min/max/mean/sum/count/first/last etc.) computed via `reduceField` from
+  original `data.series` frames and surfaced in `VizLegend` via `getDisplayValues`
+- `StreamGraph.tsx`: removed fixed `LEGEND_HEIGHT`/`LEGEND_WIDTH` constants; SVG container now
+  measured via `ResizeObserver` so `VizLegend` takes its natural size in both List and Table modes
+- `StreamGraphPanel.tsx`: `computeSeriesCalcs` name derivation now mirrors `transformer.ts` — wide
+  frames (multiple value fields) use `field.name` fallback, multi-frame uses `frame.name`; mismatch
+  caused calcs to silently not appear in legend when frame had a name but no displayName
+- `StreamGraph.tsx`: `displayMode: 'hidden'` now suppresses legend rendering and flexbox space
+  allocation; previously legend container was still present when `showLegend: true`
+- `StreamGraphPanel.tsx`: `computeSeriesCalcs` filters numeric fields once per frame and iterates
+  the filtered result — eliminates double-pass over all fields per frame
+- `types.ts`: `legend.displayMode` typed as `LegendDisplayMode` enum instead of string literal
+  union; all comparison sites updated to use enum members — eliminates stringly-typed comparisons
+- `StreamGraph.tsx`: y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
+  domain if stack produces non-finite values
 
 ### Added
 

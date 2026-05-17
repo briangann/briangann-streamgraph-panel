@@ -1,3 +1,5 @@
+import { LegendDisplayMode } from '@grafana/schema';
+
 export enum StackOffset {
   WIGGLE = 'wiggle',
   SILHOUETTE = 'silhouette',
@@ -25,11 +27,6 @@ export enum ColorScheme {
   SPECTRAL = 'spectral',
 }
 
-export enum LegendPlacement {
-  BOTTOM = 'bottom',
-  RIGHT = 'right',
-}
-
 export interface StreamgraphOptions {
   stackOffset: StackOffset;
   stackOrder: StackOrder;
@@ -38,9 +35,15 @@ export interface StreamgraphOptions {
   fillOpacity: number;
   showXAxis: boolean;
   showTooltip: boolean;
-  showLegend: boolean;
-  legendPlacement: LegendPlacement;
+  legend: {
+    showLegend: boolean;
+    placement: 'bottom' | 'right';
+    displayMode: LegendDisplayMode;
+    calcs?: string[];
+  };
 }
+
+export const DEFAULT_LEGEND_CALCS = ['min', 'max', 'mean', 'lastNotNull'];
 
 export interface D3WideData {
   rows: Array<Record<string, number>>;

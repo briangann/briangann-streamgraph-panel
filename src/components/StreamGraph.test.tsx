@@ -1,7 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { LegendDisplayMode } from '@grafana/schema';
 import { StreamGraph } from './StreamGraph';
-import { ColorScheme, CurveType, LegendPlacement, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 
 const mockData = {
   rows: [
@@ -21,21 +22,22 @@ const mockOptions: StreamgraphOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  showLegend: true,
-  legendPlacement: LegendPlacement.BOTTOM,
+  legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
+
+const emptyCalcs = new Map<string, Array<import('@grafana/data').DisplayValue>>();
 
 describe('StreamGraph', () => {
   it('renders an SVG element', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
   it('SVG has the expected width attribute', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     const svg = container.querySelector('svg')!;
     expect(Number(svg.getAttribute('width'))).toBeGreaterThan(0);
@@ -43,7 +45,7 @@ describe('StreamGraph', () => {
 
   it('renders legend items when showLegend is true', () => {
     const { getByText } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(getByText('A')).toBeInTheDocument();
     expect(getByText('B')).toBeInTheDocument();
@@ -55,7 +57,8 @@ describe('StreamGraph', () => {
         data={mockData}
         width={800}
         height={400}
-        options={{ ...mockOptions, showLegend: false }}
+        options={{ ...mockOptions, legend: { ...mockOptions.legend, showLegend: false } }}
+        seriesCalcs={emptyCalcs}
       />
     );
     expect(queryByText('A')).not.toBeInTheDocument();
@@ -63,7 +66,7 @@ describe('StreamGraph', () => {
 
   it('matches snapshot', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container).toMatchSnapshot();
   });

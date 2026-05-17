@@ -1,8 +1,8 @@
-import { DataFrame, FieldType, PanelData, TimeRange } from '@grafana/data';
+import { DataFrame, FieldType, PanelData } from '@grafana/data';
 import { D3WideData } from '../types';
 import { detectFrameFormat, nullFill, unionTimestamps } from './utils';
 
-export function transformToD3(data: PanelData, _timeRange: TimeRange): D3WideData {
+export function transformToD3(data: PanelData): D3WideData {
   if (!data.series.length) {
     return { rows: [], seriesNames: [], timeRange: [0, 0] };
   }

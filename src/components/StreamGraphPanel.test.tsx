@@ -1,8 +1,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LoadingState } from '@grafana/data';
+import { LegendDisplayMode } from '@grafana/schema';
 import { StreamGraphPanel } from './StreamGraphPanel';
-import { ColorScheme, CurveType, LegendPlacement, StackOffset, StackOrder } from '../types';
+import { ColorScheme, CurveType, StackOffset, StackOrder } from "../types";
 import { multiDataFrames } from '../__mocks__/models/multiDataFrames';
 
 const baseOptions = {
@@ -13,8 +14,7 @@ const baseOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  showLegend: true,
-  legendPlacement: LegendPlacement.BOTTOM,
+  legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 
 const baseTimeRange = {
