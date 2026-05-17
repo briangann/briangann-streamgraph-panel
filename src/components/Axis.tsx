@@ -14,13 +14,13 @@ function grafanaTimeFormat(secondsPerTick: number): string {
   if (secondsPerTick <= 45) {
     return '%H:%M:%S';
   }
-  if (secondsPerTick <= 7200 || secondsPerTick <= 86400) {
+  if (secondsPerTick <= 7200) {
     return '%H:%M';
   }
   if (secondsPerTick <= 80000) {
     return '%m/%d %H:%M';
   }
-  if (secondsPerTick <= 2419200 || secondsPerTick <= 31536000) {
+  if (secondsPerTick <= 2419200) {
     return '%m/%d';
   }
   return '%Y-%m';

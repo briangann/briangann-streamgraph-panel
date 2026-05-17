@@ -119,9 +119,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       .order(ORDER_MAP[options.stackOrder]);
 
     const stackedData = stackGen(data.rows);
+    if (!stackedData.length) {
+      return;
+    }
 
-    const yMin = Math.min(...stackedData.flatMap((s) => s.map((d) => d[0])));
-    const yMax = Math.max(...stackedData.flatMap((s) => s.map((d) => d[1])));
+    const allValues = stackedData.flatMap((s) => s.flatMap((d) => [d[0], d[1]]));
+    const yMin = Math.min(...allValues);
+    const yMax = Math.max(...allValues);
     const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
 
     const colorScale = scaleSequential(SCHEME_MAP[options.colorScheme]).domain([

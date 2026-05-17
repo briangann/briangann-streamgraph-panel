@@ -34,12 +34,11 @@ function transformWideFrame(frame: DataFrame): D3WideData {
   });
 
   const filledRows = nullFill(rows, seriesNames);
-  const times = timeValues.filter(Boolean);
 
   return {
     rows: filledRows,
     seriesNames,
-    timeRange: [Math.min(...times), Math.max(...times)],
+    timeRange: [timeValues[0] ?? 0, timeValues[timeValues.length - 1] ?? 0],
   };
 }
 

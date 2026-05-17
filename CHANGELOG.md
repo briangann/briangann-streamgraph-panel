@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `grafanaTimeFormat` in `Axis.tsx`: dead OR conditions caused incorrect tick format for ranges
+  7200–86400 s and 2419200–31536000 s; cascade now matches spec thresholds
+- `StreamGraph.tsx`: `Math.min/max` spread on empty `stackedData` returned `±Infinity`; added
+  early return guard
+- `transformer.ts`: `Math.min/max(...times)` crash on empty time array replaced with direct
+  index access (time fields are pre-sorted)
+
 ### Added
 
 - Streamgraph panel visualization using D3 (d3-shape, d3-scale, d3-scale-chromatic)
