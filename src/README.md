@@ -1,4 +1,5 @@
-<!-- This README file is going to be the one displayed on the Grafana.com website for your plugin. Uncomment and replace the content here before publishing.
+<!-- This README file is going to be the one displayed on the Grafana.com website for your plugin.
+Uncomment and replace the content here before publishing.
 
 Remove any remaining comments before publishing as these may be displayed on Grafana.com -->
 
@@ -14,7 +15,8 @@ Remove any remaining comments before publishing as these may be displayed on Gra
 
 **ADD SOME BADGES**
 
-Badges convey useful information at a glance for users whether in the Catalog or viewing the source code. You can use the generator on [Shields.io](https://shields.io/badges/dynamic-json-badge) together with the Grafana.com API
+Badges convey useful information at a glance for users whether in the Catalog or viewing the source code.
+You can use the generator on [Shields.io](https://shields.io/badges/dynamic-json-badge) together with the Grafana.com API
 to create dynamic badges that update automatically when you publish a new version to the marketplace.
 
 - For the URL parameter use `https://grafana.com/api/plugins/your-plugin-id`.
@@ -43,7 +45,8 @@ List any requirements or dependencies they may need to run the plugin.
 Provide a quick start on how to configure and use the plugin.
 
 ## Documentation
-If your project has dedicated documentation available for users, provide links here. For help in following Grafana's style recommendations for technical documentation, refer to our [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/).
+If your project has dedicated documentation available for users, provide links here. For help in following
+Grafana's style recommendations for technical documentation, refer to our [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/).
 
 ## Contributing
 Do you want folks to contribute to the plugin or provide feedback through specific means? If so, tell them how!
