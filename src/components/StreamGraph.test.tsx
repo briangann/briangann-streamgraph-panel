@@ -21,7 +21,7 @@ const mockOptions: StreamgraphOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
-  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None },
+  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 

@@ -37,6 +37,7 @@ export interface StreamgraphOptions {
   tooltip: {
     mode: TooltipDisplayMode;
     sort: SortOrder;
+    hideZeros: boolean;
   };
   legend: {
     showLegend: boolean;

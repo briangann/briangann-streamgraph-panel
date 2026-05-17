@@ -110,6 +110,13 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
         },
       })
       .addBooleanSwitch({
+        path: 'tooltip.hideZeros',
+        name: 'Hide zeros',
+        category: ['Tooltip'],
+        defaultValue: false,
+        showIf: (config) => config.tooltip?.mode === TooltipDisplayMode.Multi,
+      })
+      .addBooleanSwitch({
         path: 'legend.showLegend',
         name: 'Show legend',
         category: ['Legend'],

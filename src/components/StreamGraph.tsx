@@ -195,6 +195,9 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
             const name = (s as unknown as { key: string }).key;
             return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
           });
+          if (options.tooltip.hideZeros) {
+            seriesRows = seriesRows.filter((r) => r.value !== 0);
+          }
           if (options.tooltip.sort === SortOrder.Ascending) {
             seriesRows.sort((a, b) => a.value - b.value);
           } else if (options.tooltip.sort === SortOrder.Descending) {
@@ -214,7 +217,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     if (options.showXAxis) {
       renderAxis({ svg: g, xScale, innerWidth, innerHeight });
     }
-  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.tooltip.mode, options.tooltip.sort, options.showXAxis, colorScale]);
+  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.tooltip.mode, options.tooltip.sort, options.tooltip.hideZeros, options.showXAxis, colorScale]);
 
   const vizLegendItems = legendVisible
     ? data.seriesNames.map((name, i) => {

@@ -53,8 +53,9 @@
 - `StreamGraph.tsx`: replaced hand-rolled tooltip div with `VizTooltip` + `SeriesTable` from
   `@grafana/ui` — uses `position: fixed` (no clipping), Grafana-themed styling, color swatches
 - `types.ts` / `module.ts`: replaced `showTooltip: boolean` with nested
-  `tooltip: { mode: TooltipDisplayMode; sort: SortOrder }` — Single (hovered series), Multi
-  (all series at time point), Hidden; sort order for Multi mode (Ascending/Descending/None)
+  `tooltip: { mode: TooltipDisplayMode; sort: SortOrder; hideZeros: boolean }` — Single
+  (hovered series), Multi (all series at time point), Hidden; sort order for Multi mode
+  (Ascending/Descending/None); hideZeros filters zero-value series from Multi tooltip
 - `StreamGraph.tsx`: Multi tooltip mode collects all series values at hovered time, highlights
   active series via `isActive`, and sorts rows by value when sort order is set
 - `StreamGraph.tsx`: Single tooltip mode creates one `SeriesRow` directly instead of building
