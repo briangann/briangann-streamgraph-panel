@@ -1,0 +1,18 @@
+config:
+  line-length:
+    line_length: 120
+    tables: false
+  no-duplicate-heading:
+    siblings_only: true
+ignores:
+  - CLAUDE.md
+  - GEMINI.md
+  - node_modules
+  - dist
+  - playwright-report
+  - .config
+  - .claude
+  - .codex
+  - docs
+  - test-results
+  - provisioning

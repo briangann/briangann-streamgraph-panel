@@ -1,0 +1,29 @@
+{
+  "language": "en",
+  "ignorePaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "node_modules/**",
+    "dist/**",
+    "ci/dist/**",
+    "coverage/**",
+    "provisioning/**",
+    "src/dashboards/**",
+    "tests/__mocks__/**",
+    "package-lock.json",
+    "playwright-report/**",
+    "provisioning-private/**",
+    "test-results/**"
+  ],
+  "words": [
+    "briangann",
+    "Briangann",
+    "funcs",
+    "negotiables",
+    "streamgraph",
+    "Streamgraph",
+    "subresource",
+    "unrequested"
+  ],
+  "enabled": true
+}
