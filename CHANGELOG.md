@@ -9,7 +9,9 @@
 - `StreamGraph.tsx`: `Math.min/max` spread on empty `stackedData` returned `±Infinity`; added
   early return guard
 - `transformer.ts`: `Math.min/max(...times)` crash on empty time array replaced with direct
-  index access (time fields are pre-sorted)
+  index access (time fields are pre-sorted); added consistent `?? 0` fallback in multi-frame path
+- `StreamGraph.tsx`: replaced intermediate `allValues` array + spread with `extent` from d3-array
+  (single-pass, no allocation); hoisted `colorScale` to `useMemo` to avoid recomputation per render
 
 ### Added
 

@@ -86,6 +86,6 @@ function transformMultiFrames(frames: DataFrame[]): D3WideData {
   return {
     rows: filledRows,
     seriesNames,
-    timeRange: [allTimestamps[0], allTimestamps[allTimestamps.length - 1]],
+    timeRange: [allTimestamps[0] ?? 0, allTimestamps[allTimestamps.length - 1] ?? 0],
   };
 }

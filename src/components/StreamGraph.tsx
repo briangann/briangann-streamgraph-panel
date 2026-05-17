@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   area,
   curveBasis,
@@ -14,6 +14,7 @@ import {
   stackOrderInsideOut,
   stackOrderNone,
 } from 'd3-shape';
+import { extent } from 'd3-array';
 import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
 import {
   interpolateCividis,
@@ -94,6 +95,12 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const legendBottom = options.showLegend && options.legendPlacement === LegendPlacement.BOTTOM;
   const legendRight = options.showLegend && options.legendPlacement === LegendPlacement.RIGHT;
 
+  const colorScale = useMemo(
+    () =>
+      scaleSequential(SCHEME_MAP[options.colorScheme]).domain([0, Math.max(1, data.seriesNames.length - 1)]),
+    [options.colorScheme, data.seriesNames.length]
+  );
+
   const svgWidth = legendRight ? width - LEGEND_WIDTH : width;
   const svgHeight = legendBottom ? height - LEGEND_HEIGHT : height;
   const innerWidth = svgWidth - MARGIN.left - MARGIN.right;
@@ -123,15 +130,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       return;
     }
 
-    const allValues = stackedData.flatMap((s) => s.flatMap((d) => [d[0], d[1]]));
-    const yMin = Math.min(...allValues);
-    const yMax = Math.max(...allValues);
+    const [yMin, yMax] = extent(stackedData.flat(2)) as [number, number];
     const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
-
-    const colorScale = scaleSequential(SCHEME_MAP[options.colorScheme]).domain([
-      0,
-      Math.max(1, data.seriesNames.length - 1),
-    ]);
 
     const areaGen = area<[number, number] & { data: Record<string, number> }>()
       .x((d) => xScale(new Date(d.data['time'])))
@@ -171,12 +171,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     if (options.showXAxis) {
       renderAxis({ svg: g, xScale, innerWidth, innerHeight });
     }
-  }, [data, innerWidth, innerHeight, options]);
-
-  const colorScale = scaleSequential(SCHEME_MAP[options.colorScheme]).domain([
-    0,
-    Math.max(1, data.seriesNames.length - 1),
-  ]);
+  }, [data, innerWidth, innerHeight, options, colorScale]);
 
   const legendItems = data.seriesNames.map((name, i) => (
     <div key={name} style={{ display: 'flex', alignItems: 'center', gap: 4, marginRight: 12 }}>
