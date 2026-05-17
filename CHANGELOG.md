@@ -57,6 +57,8 @@
   (all series at time point), Hidden; sort order for Multi mode (Ascending/Descending/None)
 - `StreamGraph.tsx`: Multi tooltip mode collects all series values at hovered time, highlights
   active series via `isActive`, and sorts rows by value when sort order is set
+- `StreamGraph.tsx`: Single tooltip mode creates one `SeriesRow` directly instead of building
+  full array + sorting + filtering — avoids `stackedData.map()` and sort on every mousemove
 - `StreamGraph.tsx`: y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
   domain if stack produces non-finite values
 

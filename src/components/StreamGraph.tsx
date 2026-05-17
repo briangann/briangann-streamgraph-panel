@@ -186,18 +186,21 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         );
         const hoveredSeries = (d as unknown as { key: string }).key;
 
-        const rows: SeriesRow[] = stackedData.map((s, i) => {
-          const name = (s as unknown as { key: string }).key;
-          return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
-        });
-        if (options.tooltip.sort === SortOrder.Ascending) {
-          rows.sort((a, b) => a.value - b.value);
-        } else if (options.tooltip.sort === SortOrder.Descending) {
-          rows.sort((a, b) => b.value - a.value);
+        let seriesRows: SeriesRow[];
+        if (options.tooltip.mode === TooltipDisplayMode.Single) {
+          const idx = data.seriesNames.indexOf(hoveredSeries);
+          seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: colorScale(idx) }];
+        } else {
+          seriesRows = stackedData.map((s, i) => {
+            const name = (s as unknown as { key: string }).key;
+            return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
+          });
+          if (options.tooltip.sort === SortOrder.Ascending) {
+            seriesRows.sort((a, b) => a.value - b.value);
+          } else if (options.tooltip.sort === SortOrder.Descending) {
+            seriesRows.sort((a, b) => b.value - a.value);
+          }
         }
-        const seriesRows = options.tooltip.mode === TooltipDisplayMode.Multi
-          ? rows
-          : rows.filter((r) => r.seriesName === hoveredSeries);
 
         setTooltip((t) => {
           if (t.visible && t.timeValue === timeValue && t.hoveredSeries === hoveredSeries) {
