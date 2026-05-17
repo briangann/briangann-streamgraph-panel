@@ -24,6 +24,7 @@ import {
 import { select } from 'd3-selection';
 import { VizLegend } from '@grafana/ui';
 import { LegendDisplayMode } from '@grafana/schema';
+import { DisplayValue } from '@grafana/data';
 
 import {
   ColorScheme,
@@ -42,6 +43,7 @@ interface StreamGraphProps {
   width: number;
   height: number;
   options: StreamgraphOptions;
+  seriesCalcs: Map<string, DisplayValue[]>;
 }
 
 interface TooltipState {
@@ -54,8 +56,6 @@ interface TooltipState {
 
 const MARGIN = { top: 10, right: 10, left: 10 };
 const AXIS_HEIGHT = 30;
-const LEGEND_HEIGHT = 32;
-const LEGEND_WIDTH = 160;
 
 const OFFSET_MAP = {
   [StackOffset.WIGGLE]: stackOffsetWiggle,
@@ -84,8 +84,10 @@ const SCHEME_MAP = {
   [ColorScheme.SPECTRAL]: interpolateSpectral,
 };
 
-export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options }) => {
+export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {
   const svgRef = useRef<SVGSVGElement>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const [svgSize, setSvgSize] = useState({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
     x: 0,
@@ -95,7 +97,6 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   });
 
   const legendBottom = options.legend.showLegend && options.legend.placement === 'bottom';
-  const legendRight = options.legend.showLegend && options.legend.placement === 'right';
 
   const colorScale = useMemo(
     () =>
@@ -103,10 +104,21 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [options.colorScheme, data.seriesNames.length]
   );
 
-  const svgWidth = legendRight ? width - LEGEND_WIDTH : width;
-  const svgHeight = legendBottom ? height - LEGEND_HEIGHT : height;
-  const innerWidth = svgWidth - MARGIN.left - MARGIN.right;
-  const innerHeight = svgHeight - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
+  useEffect(() => {
+    const el = svgContainerRef.current;
+    if (!el) { return; }
+    const ro = new ResizeObserver(([entry]) => {
+      const { width: w, height: h } = entry.contentRect;
+      if (w > 0 && h > 0) {
+        setSvgSize({ width: w, height: h });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
+  const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
   useEffect(() => {
     if (!svgRef.current || !data.rows.length) {
@@ -182,20 +194,29 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
 
   const vizLegendItems = options.legend.showLegend
-    ? data.seriesNames.map((name, i) => ({ label: name, color: colorScale(i), yAxis: 1 }))
+    ? data.seriesNames.map((name, i) => {
+        const calcs = seriesCalcs.get(name);
+        return {
+          label: name,
+          color: colorScale(i),
+          yAxis: 1,
+          getDisplayValues: calcs ? () => calcs : undefined,
+        };
+      })
     : null;
 
   return (
     <div
       style={{
-        position: 'relative',
-        display: legendRight ? 'flex' : 'block',
+        display: 'flex',
+        flexDirection: legendBottom ? 'column' : 'row',
         width,
         height,
+        overflow: 'hidden',
       }}
     >
-      <div style={{ position: 'relative' }}>
-        <svg ref={svgRef} width={svgWidth} height={svgHeight} />
+      <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
+        <svg ref={svgRef} width={svgSize.width} height={svgSize.height} />
         {tooltip.visible && (
           <div
             style={{

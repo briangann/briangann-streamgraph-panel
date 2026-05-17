@@ -37,6 +37,10 @@
 - `types.ts` / `module.ts`: replaced flat `showLegend`+`legendPlacement` with nested
   `legend: { showLegend, placement, displayMode }` — adds List/Table mode selector in panel
   editor; removed custom `LegendPlacement` enum in favour of string literals
+- Legend values (min/max/mean/sum/count/first/last etc.) computed via `reduceField` from
+  original `data.series` frames and surfaced in `VizLegend` via `getDisplayValues`
+- `StreamGraph.tsx`: removed fixed `LEGEND_HEIGHT`/`LEGEND_WIDTH` constants; SVG container now
+  measured via `ResizeObserver` so `VizLegend` takes its natural size in both List and Table modes
 
 ### Added
 

@@ -37,8 +37,11 @@ export interface StreamgraphOptions {
     showLegend: boolean;
     placement: 'bottom' | 'right';
     displayMode: 'list' | 'table' | 'hidden';
+    calcs?: string[];
   };
 }
+
+export const DEFAULT_LEGEND_CALCS = ['min', 'max', 'mean', 'lastNotNull'];
 
 export interface D3WideData {
   rows: Array<Record<string, number>>;

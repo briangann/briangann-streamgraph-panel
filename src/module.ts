@@ -5,6 +5,7 @@ import { StreamGraphPanel } from './components/StreamGraphPanel';
 import {
   ColorScheme,
   CurveType,
+  DEFAULT_LEGEND_CALCS,
   StackOffset,
   StackOrder,
   StreamgraphOptions,
@@ -118,6 +119,26 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
             { value: 'right', label: 'Right' },
           ],
         },
-      });
+      })
+      .addMultiSelect({
+        path: 'legend.calcs',
+        name: 'Legend values',
+        category: ['Legend'],
+        defaultValue: DEFAULT_LEGEND_CALCS,
+        showIf: (config: StreamgraphOptions) => config.legend?.showLegend && config.legend?.displayMode === 'table',
+        settings: {
+          options: [
+            { value: 'min', label: 'Min' },
+            { value: 'max', label: 'Max' },
+            { value: 'mean', label: 'Mean' },
+            { value: 'sum', label: 'Sum' },
+            { value: 'count', label: 'Count' },
+            { value: 'first', label: 'First' },
+            { value: 'firstNotNull', label: 'First *' },
+            { value: 'last', label: 'Last' },
+            { value: 'lastNotNull', label: 'Last *' },
+          ],
+        },
+      } as any);
   }
 );

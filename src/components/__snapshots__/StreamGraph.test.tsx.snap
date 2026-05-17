@@ -3,25 +3,25 @@
 exports[`StreamGraph matches snapshot 1`] = `
 <div>
   <div
-    style="position: relative; display: block; width: 800px; height: 400px;"
+    style="display: flex; flex-direction: column; width: 800px; height: 400px; overflow: hidden;"
   >
     <div
-      style="position: relative;"
+      style="flex: 1; min-height: 0; min-width: 0; position: relative;"
     >
       <svg
-        height="368"
+        height="400"
         width="800"
       >
         <g
           transform="translate(10,10)"
         >
           <path
-            d="M0,208.727L65,202.101C130,195.475,260,182.222,390,187.192C520,192.162,650,215.354,715,226.949L780,238.545L780,318.061L715,319.717C650,321.374,520,324.687,390,319.717C260,314.747,130,301.495,65,294.869L0,288.242Z"
+            d="M0,229.091L65,221.818C130,214.545,260,200,390,205.455C520,210.909,650,236.364,715,249.091L780,261.818L780,349.091L715,350.909C650,352.727,520,356.364,390,350.909C260,345.455,130,330.909,65,323.636L0,316.364Z"
             fill="rgb(0, 32, 81)"
             fill-opacity="0.8"
           />
           <path
-            d="M0,49.697L65,56.323C130,62.949,260,76.202,390,67.919C520,59.636,650,29.818,715,14.909L780,0L780,238.545L715,226.949C650,215.354,520,192.162,390,187.192C260,182.222,130,195.475,65,202.101L0,208.727Z"
+            d="M0,54.545L65,61.818C130,69.091,260,83.636,390,74.545C520,65.455,650,32.727,715,16.364L780,0L780,261.818L715,249.091C650,236.364,520,210.909,390,205.455C260,200,130,214.545,65,221.818L0,229.091Z"
             fill="rgb(253, 234, 69)"
             fill-opacity="0.8"
           />
@@ -31,7 +31,7 @@ exports[`StreamGraph matches snapshot 1`] = `
             font-family="sans-serif"
             font-size="10"
             text-anchor="middle"
-            transform="translate(0,328)"
+            transform="translate(0,360)"
           >
             <g
               class="tick"

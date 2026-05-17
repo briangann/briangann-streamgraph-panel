@@ -21,20 +21,22 @@ const mockOptions: StreamgraphOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  legend: { showLegend: true, placement: 'bottom', displayMode: 'list' },
+  legend: { showLegend: true, placement: 'bottom', displayMode: 'list', calcs: [] },
 };
+
+const emptyCalcs = new Map<string, Array<import('@grafana/data').DisplayValue>>();
 
 describe('StreamGraph', () => {
   it('renders an SVG element', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
   it('SVG has the expected width attribute', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     const svg = container.querySelector('svg')!;
     expect(Number(svg.getAttribute('width'))).toBeGreaterThan(0);
@@ -42,7 +44,7 @@ describe('StreamGraph', () => {
 
   it('renders legend items when showLegend is true', () => {
     const { getByText } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(getByText('A')).toBeInTheDocument();
     expect(getByText('B')).toBeInTheDocument();
@@ -55,6 +57,7 @@ describe('StreamGraph', () => {
         width={800}
         height={400}
         options={{ ...mockOptions, legend: { ...mockOptions.legend, showLegend: false } }}
+        seriesCalcs={emptyCalcs}
       />
     );
     expect(queryByText('A')).not.toBeInTheDocument();
@@ -62,7 +65,7 @@ describe('StreamGraph', () => {
 
   it('matches snapshot', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container).toMatchSnapshot();
   });

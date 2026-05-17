@@ -13,7 +13,7 @@ const baseOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showTooltip: true,
-  legend: { showLegend: true, placement: 'bottom' as const, displayMode: 'list' as const },
+  legend: { showLegend: true, placement: 'bottom' as const, displayMode: 'list' as const, calcs: [] },
 };
 
 const baseTimeRange = {
