@@ -16,14 +16,28 @@
     "test-results/**"
   ],
   "words": [
+    "bgann",
     "briangann",
     "Briangann",
+    "cividis",
+    "Cividis",
+    "CIVIDIS",
+    "Flot",
     "funcs",
+    "internmap",
+    "mouseleave",
+    "mousemove",
     "negotiables",
+    "rgba",
     "streamgraph",
     "Streamgraph",
+    "SVGG",
+    "SVGSVG",
     "subresource",
-    "unrequested"
+    "unrequested",
+    "viridis",
+    "Viridis",
+    "VIRIDIS"
   ],
   "enabled": true
 }
