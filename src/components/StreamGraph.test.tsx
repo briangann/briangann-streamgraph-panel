@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { LegendDisplayMode } from '@grafana/schema';
+import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { StreamGraph } from './StreamGraph';
 import { ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 
@@ -21,7 +21,7 @@ const mockOptions: StreamgraphOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
-  showTooltip: true,
+  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 

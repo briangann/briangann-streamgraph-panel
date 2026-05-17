@@ -1,4 +1,4 @@
-import { LegendDisplayMode } from '@grafana/schema';
+import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 
 export enum StackOffset {
   WIGGLE = 'wiggle',
@@ -34,7 +34,10 @@ export interface StreamgraphOptions {
   colorScheme: ColorScheme;
   fillOpacity: number;
   showXAxis: boolean;
-  showTooltip: boolean;
+  tooltip: {
+    mode: TooltipDisplayMode;
+    sort: SortOrder;
+  };
   legend: {
     showLegend: boolean;
     placement: 'bottom' | 'right';
