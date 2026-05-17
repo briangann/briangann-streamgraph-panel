@@ -3,7 +3,7 @@
 This repository contains a **Grafana plugin**. You must Read @./.config/AGENTS/instructions.md before doing changes.
 
 Grafana Streamgraph Panel plugin. React + TypeScript frontend panel plugin built with `@grafana/create-plugin`
-scaffolding. Uses npm 11, Node >= 22, React 18.
+scaffolding. Uses npm 11, Node >= 24, React 18.
 
 **Working code only. Finish job. Plausibility ≠ correctness.**
 
@@ -292,7 +292,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 - **ESLint 9** flat config extending `@grafana/eslint-config`
 - **Docker compose** runs Grafana at `localhost:3000`
 - **grafanaDependency**: `>=12.3.0` (minimum supported Grafana version)
-- **Node**: `>=22`, **package manager**: npm 11
+- **Node**: `>=24`, **package manager**: npm 11
 
 ### CI Workflow
 
