@@ -10,6 +10,8 @@ on:
       - master
       - main
 
+permissions: {}
+
 jobs:
   build:
     name: Build, lint and unit tests

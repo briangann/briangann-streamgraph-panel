@@ -10,9 +10,13 @@ on:
 # `pull requests: read and write`
 # `workflows: read and write`
 
+permissions: {}
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: grafana/plugin-actions/create-plugin-update@create-plugin-update/v2.0.1
         with:
