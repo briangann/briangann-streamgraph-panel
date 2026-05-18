@@ -43,6 +43,13 @@ components and strengthen type safety with schema enums.
 - Ignore `@types/node` 25.x (non-LTS odd release)
 - Ignore major bumps for `typescript` and `@grafana/schema`
 
+#### E2E tests
+
+- Replaced scaffold e2e tests with streamgraph smoke tests (SVG renders,
+  5 paths for 5 series, no-data state, legend items, X axis)
+- Updated provisioned dashboard with proper streamgraph options and
+  Random Walk data source (5 series)
+
 ### Code Quality
 
 #### types.ts
