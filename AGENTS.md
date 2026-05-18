@@ -366,6 +366,8 @@ Flat config (ESLint 9). Common rules applied:
   - Always create as drafts (`gh pr create --draft`).
   - Use categories in summaries: `### Added`, `### Fixed`, `### Changed`, `### Removed`, `### Dependencies`,
     `### CI/CD`, `### Documentation`, `### Tooling`.
+  - Format dependency updates as a table: `| Package | Previous | Updated | SHA |` (SHA column
+    for GitHub Actions only, use short 8-char SHA).
   - Always include a `## Test plan` section with a verification checklist.
 
 ### Changelog Policy
