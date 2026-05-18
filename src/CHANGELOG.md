@@ -38,6 +38,11 @@ components and strengthen type safety with schema enums.
 
 - Added `ResizeObserver` mock to `jest-setup.js` for JSDOM test environment
 
+#### Dependabot
+
+- Ignore `@types/node` 25.x (non-LTS odd release)
+- Ignore major bumps for `typescript` and `@grafana/schema`
+
 ### Code Quality
 
 #### types.ts
