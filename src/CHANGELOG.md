@@ -50,6 +50,8 @@ components and strengthen type safety with schema enums.
 - `bundle-stats.yml`: moved permissions from top-level to job-level
 - `release.yml`: replaced `read-all` with `{}` top-level + `contents: write`
   job-level
+- Updated `build-plugin` v1.0.2 → v1.2.0, `bundle-size` v1.0.2 → v1.1.0,
+  `create-plugin-update` v2.0.1 → v2.0.2, `wait-for-grafana` v1.0.2 → v1.0.3
 
 #### E2E tests
 
