@@ -60,6 +60,41 @@ components and strengthen type safety with schema enums.
 - Replaced hand-rolled tooltip div with `VizTooltip` + `SeriesTable` from
   `@grafana/ui`
 
+### Performance
+
+#### StreamGraph.tsx
+
+- Replaced `extent(stackedData.flat(2))` O(N×M) allocation with direct
+  two-loop scan; dropped `d3-array` import
+- Removed `new Date()` allocation per data point in area generator hot path;
+  `scaleTime` accepts numeric timestamps directly
+- `useEffect` dep array narrowed to individual `options` fields — prevents full
+  D3 teardown/rebuild when unrelated options change
+- `colorScale` hoisted to `useMemo` to avoid recomputation per render
+- y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
+  domain
+- Tooltip `setTooltip` equality guard on `seriesName`+`value` — eliminates
+  re-renders on every mouse-move pixel
+- Single tooltip mode creates one `SeriesRow` directly — skips
+  `stackedData.map()` and sort on every mousemove
+
+#### StreamGraphPanel.tsx
+
+- `transformToD3` memoized via `useMemo`; `timeRange` dropped from deps (new
+  reference every Grafana render defeated the memo)
+- `computeSeriesCalcs` numeric fields filtered once per frame — eliminates
+  double-pass over all fields
+
+#### transformer.ts
+
+- `Math.min/max(...times)` crash on empty time array replaced with direct index
+  access; added `?? 0` fallback in multi-frame path
+
+#### Axis.tsx
+
+- Dead OR conditions in `grafanaTimeFormat` caused incorrect tick format for
+  7200–86400 s and 2419200–31536000 s ranges
+
 ### E2E / Docker
 
 #### React 19

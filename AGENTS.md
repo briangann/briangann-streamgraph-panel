@@ -369,11 +369,15 @@ Flat config (ESLint 9). Common rules applied:
 
 This project maintains two changelog files:
 
-- **`CHANGELOG.md`** — end-user facing. Covers features, bug fixes, breaking
-  changes, and Grafana compatibility updates that affect plugin users.
-- **`src/CHANGELOG.md`** — technical/developer facing. Covers dependency
-  upgrades, CI/CD changes, build tooling, test infrastructure, ESLint,
-  Docker, and other contributor-relevant changes.
+- **`CHANGELOG.md`** — end-user facing. High-level descriptions of features,
+  bug fixes, breaking changes, and Grafana compatibility updates. No file
+  names, function names, or implementation details — describe *what changed
+  for the user*, not how it was built.
+- **`src/CHANGELOG.md`** — technical/developer facing. Covers performance
+  optimizations, dependency upgrades, CI/CD changes, build tooling, test
+  infrastructure, code quality refactors, and implementation details (file
+  names, function names, technical rationale). Technical detail stripped from
+  `CHANGELOG.md` belongs here.
 
 Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
 
@@ -389,7 +393,7 @@ Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) forma
 - Subsections (h3) for `CHANGELOG.md`: `### Breaking changes`, `### Features / Enhancements`,
   `### Bug fixes` as appropriate
 - Subsections (h3) for `src/CHANGELOG.md` (in this order): `### Build / Tooling`,
-  `### Code Quality`, `### E2E / Docker`, `### Dependencies`
+  `### Code Quality`, `### Performance`, `### E2E / Docker`, `### Dependencies`
 - Subject groups (h4) within each subsection to cluster related bullets
   (e.g., `#### Legend`, `#### Tooltip`, `#### Data layer`, `#### Rendering`).
   Add new group names as needed; reuse existing ones when the subject matches.
