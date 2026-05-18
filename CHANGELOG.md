@@ -1,86 +1,66 @@
 # Changelog
 
+All notable changes to this project will be documented in this file. The format
+is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this
+project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+For build tooling, CI/CD, dependency, and contributor-facing changes, see
+[`src/CHANGELOG.md`](src/CHANGELOG.md).
+
 ## [Unreleased]
 
-### Fixed
+Initial implementation of the Grafana Streamgraph Panel plugin. Renders D3-based
+streamgraph visualizations with configurable stacking, curves, and color schemes.
+Includes a Grafana-native legend (List and Table modes with calc columns) and
+tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
-- `grafanaTimeFormat` in `Axis.tsx`: dead OR conditions caused incorrect tick format for ranges
-  7200–86400 s and 2419200–31536000 s; cascade now matches spec thresholds
-- `StreamGraph.tsx`: `Math.min/max` spread on empty `stackedData` returned `±Infinity`; added
-  early return guard
-- `transformer.ts`: `Math.min/max(...times)` crash on empty time array replaced with direct
-  index access (time fields are pre-sorted); added consistent `?? 0` fallback in multi-frame path
-- `StreamGraph.tsx`: replaced intermediate `allValues` array + spread with `extent` from d3-array
-  (single-pass, no allocation); hoisted `colorScale` to `useMemo` to avoid recomputation per render
-- `StreamGraphPanel.tsx`: `transformToD3` now memoized (`useMemo`) — avoids re-running the data
-  transform on every panel re-render (resize, hover, sibling updates); duplicate `PanelDataErrorView`
-  returns collapsed into one guard
-- `StreamGraph.tsx`: `useEffect` dep array narrowed to individual `options` fields used inside the
-  effect — prevents full D3 teardown/rebuild when unrelated options change
-- `StreamGraph.tsx`: removed `new Date()` allocation per data point in area generator hot path;
-  `scaleTime` accepts numeric timestamps directly
-- `StreamGraph.tsx`: tooltip `setTooltip` now compares new values against prior state before
-  updating — eliminates unnecessary re-renders on every mouse-move pixel
-- `StreamGraph.tsx`: `legendItems` computation guarded behind `options.showLegend` — skips map
-  when legend is hidden; added `StackDatum` type alias to remove verbose triple casts
-- `utils.ts`: `isNaN` replaced with `Number.isNaN` (avoids implicit coercion); `nullFill` now
-  skips object spread when all values are already valid — returns original row reference unchanged
-- `transformer.ts`: removed unused `_timeRange` parameter from `transformToD3`; `StreamGraphPanel`
-  memo keyed on `data` only — `timeRange` is a new object every Grafana render and was defeating
-  the memo entirely
-- `StreamGraph.tsx`: replaced `extent(stackedData.flat(2))` O(N×M) allocation with a direct
-  two-loop scan over stackedData; dropped `d3-array` import (no longer needed)
-- `StreamGraph.tsx`: tooltip equality guard narrowed to `seriesName`+`value` only — x/y pixel
-  coords change every mouse-move pixel and made the early-return path unreachable
-- `StreamGraph.tsx`: replaced hand-rolled legend divs with `VizLegend` from `@grafana/ui` —
-  gets Grafana theming, dark-mode, and consistent styling for free
-- `types.ts` / `module.ts`: replaced flat `showLegend`+`legendPlacement` with nested
-  `legend: { showLegend, placement, displayMode }` — adds List/Table mode selector in panel
-  editor; removed custom `LegendPlacement` enum in favour of string literals
-- Legend values (min/max/mean/sum/count/first/last etc.) computed via `reduceField` from
-  original `data.series` frames and surfaced in `VizLegend` via `getDisplayValues`
-- `StreamGraph.tsx`: removed fixed `LEGEND_HEIGHT`/`LEGEND_WIDTH` constants; SVG container now
-  measured via `ResizeObserver` so `VizLegend` takes its natural size in both List and Table modes
-- `StreamGraphPanel.tsx`: `computeSeriesCalcs` name derivation now mirrors `transformer.ts` — wide
-  frames (multiple value fields) use `field.name` fallback, multi-frame uses `frame.name`; mismatch
-  caused calcs to silently not appear in legend when frame had a name but no displayName
-- `StreamGraph.tsx`: `displayMode: 'hidden'` now suppresses legend rendering and flexbox space
-  allocation; previously legend container was still present when `showLegend: true`
-- `StreamGraphPanel.tsx`: `computeSeriesCalcs` filters numeric fields once per frame and iterates
-  the filtered result — eliminates double-pass over all fields per frame
-- `types.ts`: `legend.displayMode` typed as `LegendDisplayMode` enum instead of string literal
-  union; all comparison sites updated to use enum members — eliminates stringly-typed comparisons
-- `StreamGraph.tsx`: replaced hand-rolled tooltip div with `VizTooltip` + `SeriesTable` from
-  `@grafana/ui` — uses `position: fixed` (no clipping), Grafana-themed styling, color swatches
-- `types.ts` / `module.ts`: replaced `showTooltip: boolean` with nested
-  `tooltip: { mode: TooltipDisplayMode; sort: SortOrder; hideZeros: boolean }` — Single
-  (hovered series), Multi (all series at time point), Hidden; sort order for Multi mode
-  (Ascending/Descending/None); hideZeros filters zero-value series from Multi tooltip
-- `StreamGraph.tsx`: Multi tooltip mode collects all series values at hovered time, highlights
-  active series via `isActive`, and sorts rows by value when sort order is set
-- `StreamGraph.tsx`: Single tooltip mode creates one `SeriesRow` directly instead of building
-  full array + sorting + filtering — avoids `stackedData.map()` and sort on every mousemove
-- `StreamGraph.tsx`: y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
-  domain if stack produces non-finite values
+### Features / Enhancements
 
-### Added
+#### Streamgraph visualization
 
-- Streamgraph panel visualization using D3 (d3-shape, d3-scale, d3-scale-chromatic)
-- Panel options: stack offset, stack order, curve type, color scheme, fill opacity,
-  show/hide X axis, tooltip, legend (with bottom/right placement)
-- Data transformer supporting wide DataFrame and multi-frame time series input
-- Null/gap fill for sparse series (required for D3 stack)
-- Hover tooltip showing series name and value
-- Legend rendering (bottom or right placement)
-- Full unit test coverage for data layer; component tests for StreamGraph and StreamGraphPanel
+- Stack offset: Wiggle, Silhouette, Zero (stacked), Expand (normalized)
+- Stack order: Inside out, Ascending, Descending, None
+- Curve type: Smooth, Linear, Step
+- Color scheme: Cividis, Turbo, Viridis, Spectral
+- Fill opacity slider (0–1)
+- Show/hide X axis toggle
 
-### Project Updates
+#### Data handling
 
-- Update AGENTS.md to reflect repo stack (npm 11, React 18, Grafana SDK 12.4.2, Node 24)
-- Pin Node to 24 via .nvmrc, mise.toml, and package.json engines
-- Prepare plugin for React 19 compatibility: externalize jsx-runtime, enable React 19 E2E preview image in CI
-- Add spellcheck and markdownlint scripts with configs from grafana-polystat-panel
-- Fix README.md and src/README.md line length and duplicate heading lint errors
+- Wide-format and multi-frame time series input
+- Automatic null/gap fill for sparse series
+
+#### Legend
+
+- Show/hide with bottom or right placement
+- List and Table display modes
+- Table mode: configurable calc columns (min, max, mean, sum, count, first,
+  last, etc.), defaults to min, max, mean, last non-null
+- Dynamic sizing — legend takes natural space, chart fills the remainder
+
+#### Tooltip
+
+- Single (hovered series), All series, or Hidden
+- Sort order (Ascending/Descending/None) in All series mode
+- Hide zeros toggle in All series mode
+
+### Bug fixes
+
+#### Data layer
+
+- Fixed crash on empty time arrays
+- Fixed legend calcs not appearing when data source returns named frames
+  without explicit display names
+
+#### Rendering
+
+- Fixed empty dataset producing infinite axis range
+- Fixed incorrect X axis tick format for certain time ranges
+- Reduced unnecessary re-renders when hovering and changing unrelated options
+
+#### Legend
+
+- Hidden display mode no longer reserves layout space
 
 ## 1.0.0 (Unreleased)
 
