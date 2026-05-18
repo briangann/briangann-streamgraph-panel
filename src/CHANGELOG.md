@@ -43,6 +43,16 @@ components and strengthen type safety with schema enums.
 - Ignore `@types/node` 25.x (non-LTS odd release)
 - Ignore major bumps for `typescript` and `@grafana/schema`
 
+#### GitHub Actions
+
+- All workflows: top-level `permissions: {}` (deny-all default), grant
+  minimum required permissions at job level
+- `bundle-stats.yml`: moved permissions from top-level to job-level
+- `release.yml`: replaced `read-all` with `{}` top-level + `contents: write`
+  job-level
+- Updated `build-plugin` v1.0.2 → v1.2.0, `bundle-size` v1.0.2 → v1.1.0,
+  `create-plugin-update` v2.0.1 → v2.0.2, `wait-for-grafana` v1.0.2 → v1.0.3
+
 #### E2E tests
 
 - Replaced scaffold e2e tests with streamgraph smoke tests (SVG renders,
