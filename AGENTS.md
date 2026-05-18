@@ -310,7 +310,10 @@ CI runs via `.github/workflows/ci.yml`:
 - **Always:**
   - Use webpack from `.config/` for builds; no custom bundler.
   - Use `@grafana/plugin-e2e` for E2E tests.
-  - Pin all GitHub Actions to SHAs.
+  - Pin **all** GitHub Actions to full-length commit SHAs with a version comment.
+    This applies to every action — `actions/*`, `grafana/*`, third-party. The repo
+    enforces this; tag refs like `@v6` will fail CI.
+    Format: `uses: owner/repo@<sha> # <tag>`
 - **Dependencies (npm 11):**
   - `npm install --save-dev` for build/test/lint tools. `npm install` for runtime deps shipped in the bundle.
   - Use `overrides` in package.json to pin transitive deps when needed.
