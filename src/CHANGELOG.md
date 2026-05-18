@@ -10,6 +10,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+Project scaffolding, Node/npm pinning, lint tooling, Jest mocks, and React 19
+prep. Code quality improvements replace hand-rolled UI with Grafana SDK
+components and strengthen type safety with schema enums.
+
 ### Build / Tooling
 
 #### AGENTS.md

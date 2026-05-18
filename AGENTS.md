@@ -382,6 +382,9 @@ Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) forma
   in this file. The format is based on Keep a Changelog, and this project
   adheres to Semantic Versioning."
 - Unreleased section: `## [Unreleased]`
+- Release summary: a short plain-language paragraph immediately after the
+  `## [Unreleased]` or `## [X.Y.Z]` heading, before the first `###` subsection.
+  Summarize what changed and why in 1–3 sentences for quick scanning.
 - Released versions: `## [X.Y.Z] - YYYY-MM-DD`
 - Subsections (h3) for `CHANGELOG.md`: `### Breaking changes`, `### Features / Enhancements`,
   `### Bug fixes` as appropriate

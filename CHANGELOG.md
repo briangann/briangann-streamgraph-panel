@@ -9,6 +9,11 @@ For build tooling, CI/CD, dependency, and contributor-facing changes, see
 
 ## [Unreleased]
 
+Initial implementation of the Grafana Streamgraph Panel plugin. Renders D3-based
+streamgraph visualizations with configurable stacking, curves, and color schemes.
+Includes a Grafana-native legend (List and Table modes with calc columns) and
+tooltip (Single, All series, and Hidden modes with sort and zero filtering).
+
 ### Features / Enhancements
 
 #### Streamgraph visualization
