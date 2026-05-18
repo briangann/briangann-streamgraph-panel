@@ -383,10 +383,13 @@ Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) forma
   adheres to Semantic Versioning."
 - Unreleased section: `## [Unreleased]`
 - Released versions: `## [X.Y.Z] - YYYY-MM-DD`
-- Subsections for `CHANGELOG.md`: `### Breaking changes`, `### Features / Enhancements`,
+- Subsections (h3) for `CHANGELOG.md`: `### Breaking changes`, `### Features / Enhancements`,
   `### Bug fixes` as appropriate
-- Subsections for `src/CHANGELOG.md` (in this order): `### Build / Tooling`,
+- Subsections (h3) for `src/CHANGELOG.md` (in this order): `### Build / Tooling`,
   `### Code Quality`, `### E2E / Docker`, `### Dependencies`
+- Subject groups (h4) within each subsection to cluster related bullets
+  (e.g., `#### Legend`, `#### Tooltip`, `#### Data layer`, `#### Rendering`).
+  Add new group names as needed; reuse existing ones when the subject matches.
 
 Add entries to one or both files depending on the nature of the change.
 Every commit that modifies code, documentation, dependencies, or configuration
