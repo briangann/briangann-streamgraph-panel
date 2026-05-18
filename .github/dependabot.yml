@@ -11,6 +11,13 @@ updates:
       exclude:
         - '@grafana/plugin-e2e'
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '@types/node'
+        versions: ['>=25.0.0, <26.0.0']
+      - dependency-name: 'typescript'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@grafana/schema'
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: 'chore'
       include: 'scope'
