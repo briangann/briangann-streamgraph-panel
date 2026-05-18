@@ -326,7 +326,7 @@ Run all and fix issues before committing:
 3. `npm run lint` — fix errors with `npm run lint:fix`
 4. `npm run markdownlint` — on any `.md` file created or modified
 5. `npm run spellcheck` — fix issues, add legit words to `cspell.config.json`
-6. Update `CHANGELOG.md` — see Critical Rules for format
+6. Update changelog(s) — see Changelog Policy for which file and format
 
 ### ESLint Rules
 
@@ -342,8 +342,7 @@ Flat config (ESLint 9). Common rules applied:
 
 - **Commits:**
   - NEVER commit unless the user explicitly asks.
-  - Always update `CHANGELOG.md` in the same commit. Add entries under `[Unreleased]`, categorized as
-    `### Added`, `### Changed`, `### Removed`, `### Fixed`, or `### Project Updates`.
+  - Always update changelog(s) in the same commit — see Changelog Policy for which file and format.
 - **Pushing:**
   - NEVER push unless the user explicitly asks. Never chain `git commit && git push`.
   - After pushing, always update the PR summary using `gh pr edit` with title and body reflecting all changes
@@ -365,6 +364,37 @@ Flat config (ESLint 9). Common rules applied:
   - Use categories in summaries: `### Added`, `### Fixed`, `### Changed`, `### Removed`, `### Dependencies`,
     `### CI/CD`, `### Documentation`, `### Tooling`.
   - Always include a `## Test plan` section with a verification checklist.
+
+### Changelog Policy
+
+This project maintains two changelog files:
+
+- **`CHANGELOG.md`** — end-user facing. Covers features, bug fixes, breaking
+  changes, and Grafana compatibility updates that affect plugin users.
+- **`src/CHANGELOG.md`** — technical/developer facing. Covers dependency
+  upgrades, CI/CD changes, build tooling, test infrastructure, ESLint,
+  Docker, and other contributor-relevant changes.
+
+Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
+
+- Title: `# Changelog`
+- Header boilerplate: "All notable changes to this project will be documented
+  in this file. The format is based on Keep a Changelog, and this project
+  adheres to Semantic Versioning."
+- Unreleased section: `## [Unreleased]`
+- Released versions: `## [X.Y.Z] - YYYY-MM-DD`
+- Subsections for `CHANGELOG.md`: `### Breaking changes`, `### Features / Enhancements`,
+  `### Bug fixes` as appropriate
+- Subsections for `src/CHANGELOG.md` (in this order): `### Build / Tooling`,
+  `### Code Quality`, `### E2E / Docker`, `### Dependencies`
+
+Add entries to one or both files depending on the nature of the change.
+Every commit that modifies code, documentation, dependencies, or configuration
+must have a corresponding entry before pushing.
+
+The `## [Unreleased]` heading is automatically replaced with the release version
+and date by the publish workflow (`publish.yml`). **Never manually stamp it** —
+always leave it as `## [Unreleased]` and let the workflow handle it on release.
 
 ## 10. Project Learnings
 
