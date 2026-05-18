@@ -82,7 +82,7 @@
     "@grafana/data": "12.4.2",
     "@grafana/i18n": "12.4.2",
     "@grafana/runtime": "12.4.2",
-    "@grafana/schema": "12.4.2",
+    "@grafana/schema": "13.0.1",
     "@grafana/ui": "12.4.2",
     "d3-array": "^3.2.4",
     "d3-axis": "^3.0.0",
