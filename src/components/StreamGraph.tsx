@@ -22,8 +22,8 @@ import {
   interpolateViridis,
 } from 'd3-scale-chromatic';
 import { select } from 'd3-selection';
-import { VizLegend } from '@grafana/ui';
-import { LegendDisplayMode } from '@grafana/schema';
+import { SeriesTable, VizLegend, VizTooltip } from '@grafana/ui';
+import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { DisplayValue } from '@grafana/data';
 
 import {
@@ -38,6 +38,12 @@ import { renderAxis } from './Axis';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
 
+interface SeriesRow {
+  seriesName: string;
+  value: number;
+  color: string;
+}
+
 interface StreamGraphProps {
   data: D3WideData;
   width: number;
@@ -48,10 +54,11 @@ interface StreamGraphProps {
 
 interface TooltipState {
   visible: boolean;
-  x: number;
-  y: number;
-  seriesName: string;
-  value: number;
+  clientX: number;
+  clientY: number;
+  timeValue: number;
+  hoveredSeries: string;
+  seriesRows: SeriesRow[];
 }
 
 const MARGIN = { top: 10, right: 10, left: 10 };
@@ -90,10 +97,11 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const [svgSize, setSvgSize] = useState({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
-    x: 0,
-    y: 0,
-    seriesName: '',
-    value: 0,
+    clientX: 0,
+    clientY: 0,
+    timeValue: 0,
+    hoveredSeries: '',
+    seriesRows: [],
   });
 
   const legendVisible = options.legend.showLegend && options.legend.displayMode !== LegendDisplayMode.Hidden;
@@ -167,7 +175,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       .attr('fill', (_, i) => colorScale(i))
       .attr('fill-opacity', options.fillOpacity)
       .on('mousemove', function (event, d) {
-        if (!options.showTooltip) {
+        if (options.tooltip.mode === TooltipDisplayMode.None) {
           return;
         }
         const mouseX = event.offsetX - MARGIN.left;
@@ -176,15 +184,32 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         const closest = series.reduce((prev, curr) =>
           Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue) ? curr : prev
         );
-        const seriesName = (d as unknown as { key: string }).key;
-        const value = closest.data[seriesName] ?? 0;
-        const x = event.offsetX + 12;
-        const y = event.offsetY - 12;
+        const hoveredSeries = (d as unknown as { key: string }).key;
+
+        let seriesRows: SeriesRow[];
+        if (options.tooltip.mode === TooltipDisplayMode.Single) {
+          const idx = data.seriesNames.indexOf(hoveredSeries);
+          seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: colorScale(idx) }];
+        } else {
+          seriesRows = stackedData.map((s, i) => {
+            const name = (s as unknown as { key: string }).key;
+            return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
+          });
+          if (options.tooltip.hideZeros) {
+            seriesRows = seriesRows.filter((r) => r.value !== 0);
+          }
+          if (options.tooltip.sort === SortOrder.Ascending) {
+            seriesRows.sort((a, b) => a.value - b.value);
+          } else if (options.tooltip.sort === SortOrder.Descending) {
+            seriesRows.sort((a, b) => b.value - a.value);
+          }
+        }
+
         setTooltip((t) => {
-          if (t.visible && t.seriesName === seriesName && t.value === value) {
+          if (t.visible && t.timeValue === timeValue && t.hoveredSeries === hoveredSeries) {
             return t;
           }
-          return { visible: true, x, y, seriesName, value };
+          return { visible: true, clientX: event.clientX, clientY: event.clientY, timeValue, hoveredSeries, seriesRows };
         });
       })
       .on('mouseleave', () => setTooltip((t) => ({ ...t, visible: false })));
@@ -192,7 +217,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     if (options.showXAxis) {
       renderAxis({ svg: g, xScale, innerWidth, innerHeight });
     }
-  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.showTooltip, options.showXAxis, colorScale]);
+  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.tooltip.mode, options.tooltip.sort, options.tooltip.hideZeros, options.showXAxis, colorScale]);
 
   const vizLegendItems = legendVisible
     ? data.seriesNames.map((name, i) => {
@@ -219,22 +244,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg ref={svgRef} width={svgSize.width} height={svgSize.height} />
         {tooltip.visible && (
-          <div
-            style={{
-              position: 'absolute',
-              left: tooltip.x,
-              top: tooltip.y,
-              background: 'rgba(0,0,0,0.75)',
-              color: '#fff',
-              padding: '4px 8px',
-              borderRadius: 4,
-              fontSize: 12,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <strong>{tooltip.seriesName}</strong>: {tooltip.value.toFixed(2)}
-          </div>
+          <VizTooltip
+            content={
+              <SeriesTable
+                series={tooltip.seriesRows.map((r) => ({
+                  color: r.color,
+                  label: r.seriesName,
+                  value: r.value.toFixed(2),
+                  isActive: r.seriesName === tooltip.hoveredSeries,
+                }))}
+              />
+            }
+            position={{ x: tooltip.clientX, y: tooltip.clientY }}
+            offset={{ x: 10, y: 10 }}
+          />
         )}
       </div>
       {vizLegendItems && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LoadingState } from '@grafana/data';
-import { LegendDisplayMode } from '@grafana/schema';
+import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { StreamGraphPanel } from './StreamGraphPanel';
 import { ColorScheme, CurveType, StackOffset, StackOrder } from "../types";
 import { multiDataFrames } from '../__mocks__/models/multiDataFrames';
@@ -13,7 +13,7 @@ const baseOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
-  showTooltip: true,
+  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 

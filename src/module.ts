@@ -1,5 +1,5 @@
 import { PanelPlugin } from '@grafana/data';
-import { LegendDisplayMode } from '@grafana/schema';
+import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 
 import { StreamGraphPanel } from './components/StreamGraphPanel';
 import {
@@ -82,11 +82,39 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
         category: ['Axis'],
         defaultValue: true,
       })
-      .addBooleanSwitch({
-        path: 'showTooltip',
-        name: 'Show tooltip',
+      .addSelect({
+        path: 'tooltip.mode',
+        name: 'Tooltip mode',
         category: ['Tooltip'],
-        defaultValue: true,
+        defaultValue: TooltipDisplayMode.Single,
+        settings: {
+          options: [
+            { value: TooltipDisplayMode.Single, label: 'Single' },
+            { value: TooltipDisplayMode.Multi, label: 'All series' },
+            { value: TooltipDisplayMode.None, label: 'Hidden' },
+          ],
+        },
+      })
+      .addSelect({
+        path: 'tooltip.sort',
+        name: 'Sort order',
+        category: ['Tooltip'],
+        defaultValue: SortOrder.None,
+        showIf: (config) => config.tooltip?.mode === TooltipDisplayMode.Multi,
+        settings: {
+          options: [
+            { value: SortOrder.None, label: 'None' },
+            { value: SortOrder.Ascending, label: 'Ascending' },
+            { value: SortOrder.Descending, label: 'Descending' },
+          ],
+        },
+      })
+      .addBooleanSwitch({
+        path: 'tooltip.hideZeros',
+        name: 'Hide zeros',
+        category: ['Tooltip'],
+        defaultValue: false,
+        showIf: (config) => config.tooltip?.mode === TooltipDisplayMode.Multi,
       })
       .addBooleanSwitch({
         path: 'legend.showLegend',

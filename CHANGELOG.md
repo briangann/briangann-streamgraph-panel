@@ -50,6 +50,16 @@
   the filtered result — eliminates double-pass over all fields per frame
 - `types.ts`: `legend.displayMode` typed as `LegendDisplayMode` enum instead of string literal
   union; all comparison sites updated to use enum members — eliminates stringly-typed comparisons
+- `StreamGraph.tsx`: replaced hand-rolled tooltip div with `VizTooltip` + `SeriesTable` from
+  `@grafana/ui` — uses `position: fixed` (no clipping), Grafana-themed styling, color swatches
+- `types.ts` / `module.ts`: replaced `showTooltip: boolean` with nested
+  `tooltip: { mode: TooltipDisplayMode; sort: SortOrder; hideZeros: boolean }` — Single
+  (hovered series), Multi (all series at time point), Hidden; sort order for Multi mode
+  (Ascending/Descending/None); hideZeros filters zero-value series from Multi tooltip
+- `StreamGraph.tsx`: Multi tooltip mode collects all series values at hovered time, highlights
+  active series via `isActive`, and sorts rows by value when sort order is set
+- `StreamGraph.tsx`: Single tooltip mode creates one `SeriesRow` directly instead of building
+  full array + sorting + filtering — avoids `stackedData.map()` and sort on every mousemove
 - `StreamGraph.tsx`: y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
   domain if stack produces non-finite values
 
