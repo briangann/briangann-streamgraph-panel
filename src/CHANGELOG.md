@@ -10,18 +10,16 @@ and this project adheres to
 
 ## [Unreleased]
 
-Project scaffolding, Node/npm pinning, lint tooling, Jest mocks, and React 19
-prep. Code quality improvements replace hand-rolled UI with Grafana SDK
-components and strengthen type safety with schema enums.
+Band label rendering, React SVG migration, and a provisioned demo dashboard.
+Earlier work: project scaffolding, Node/npm pinning, lint tooling, Jest setup,
+and code quality improvements replacing hand-rolled UI with Grafana SDK
+components.
 
 ### Build / Tooling
 
 #### AGENTS.md
 
-- Updated to reflect repo stack (npm 11, React 18, Grafana SDK 12.4.2, Node 24)
-- Changelog Policy added: two-file split (`CHANGELOG.md` user-facing,
-  `src/CHANGELOG.md` developer-facing) with Keep a Changelog format and h4
-  subject grouping
+- Documents repo stack, coding conventions, changelog policy, and branching rules
 
 #### Node / package.json
 
@@ -29,152 +27,91 @@ components and strengthen type safety with schema enums.
 
 #### Linting
 
-- Added spellcheck (`cspell`) and markdownlint (`markdownlint-cli2`) scripts
-  with configs from grafana-polystat-panel
-- Fixed `README.md` and `src/README.md` line length and duplicate heading lint
-  errors
+- Added spellcheck and markdownlint scripts
 
 #### Jest
 
-- Added `ResizeObserver` mock to `jest-setup.js` for JSDOM test environment
+- Added `ResizeObserver` mock for JSDOM test environment
 
 #### Dependabot
 
-- Ignore `@types/node` 25.x (non-LTS odd release)
-- Ignore major bumps for `typescript` and `@grafana/schema`
+- Ignore `@types/node` 25.x and major bumps for `typescript` and `@grafana/schema`
 
 #### GitHub Actions
 
-- All workflows: top-level `permissions: {}` (deny-all default), grant
-  minimum required permissions at job level
-- `bundle-stats.yml`: moved permissions from top-level to job-level
-- `release.yml`: replaced `read-all` with `{}` top-level + `contents: write`
-  job-level
-- Updated `build-plugin` v1.0.2 → v1.2.0, `bundle-size` v1.0.2 → v1.1.0,
-  `create-plugin-update` v2.0.1 → v2.0.2, `wait-for-grafana` v1.0.2 → v1.0.3
+- Least-privilege permissions across all workflows (deny-all default,
+  minimum grants per job)
+- Updated `build-plugin`, `bundle-size`, `create-plugin-update`,
+  `wait-for-grafana` to latest versions
 
 #### E2E tests
 
-- Replaced scaffold e2e tests with streamgraph smoke tests (SVG renders,
-  5 paths for 5 series, no-data state, legend items, X axis)
-- Updated provisioned dashboard with proper streamgraph options and
-  Random Walk data source (5 series)
+- Replaced scaffold tests with streamgraph smoke tests
+- Added band label toggle on/off tests; assertions use `data-testid="band-label"`
+  so they target labels specifically rather than all SVG text
 
 ### Code Quality
 
 #### StreamGraph.tsx / Axis.tsx
 
-- Replaced D3 DOM manipulation with React SVG rendering — D3 now used only as
-  computation (scales, stack layout, area path strings via `useMemo`)
-- Eliminated `d3-selection` dependency; bundle reduced ~32 KiB (190 → 158 KiB)
-- Single `useEffect` for `ResizeObserver` only; resize no longer triggers full
-  SVG teardown and rebuild, eliminating label flicker on panel resize
-- `XAxis` rewritten as React component replacing `renderAxis` D3 function
-- Mouse coordinate calculation uses `getBoundingClientRect()` on `gRef` instead
-  of D3 event helpers
+- Migrated from D3 DOM manipulation to React SVG rendering — D3 is now
+  used only for math (scales, stacking, path strings), React owns the DOM
+- Removed `d3-selection`; bundle size dropped ~32 KiB
+- Resize no longer tears down and rebuilds the SVG, eliminating label flicker
+- X axis rewritten as a React component
 
 #### bandLabels.ts
 
-- New `computeBandLabels` pure function extracts label placement logic from
-  rendering — takes stacked data and scale functions, returns label descriptors
-- `invertColor` helper parses `rgb()` strings and inverts each channel
-- `autoContrastColor` helper uses ITU-R BT.601 perceived luminance to choose
-  black or white text for maximum contrast against the band fill
-- `BandLabelColor` enum: `INVERSE`, `AUTO`, `WHITE`, `BLACK`
-- `BandLabelComputeOptions` interface groups all user-configurable label
-  parameters; replaces the growing individual parameter list on `computeBandLabels`
-- Named module-level constants for all magic numbers with inline WHY comments:
-  `FONT_HEIGHT_FACTOR`, `FONT_HEIGHT_SCALE`, `FONT_WIDTH_SCALE`,
-  `CHAR_WIDTH_FACTOR`, `TEXT_PADDING`, `CAP_HEIGHT_FACTOR`, `PEAK_NUDGE`,
-  `Y_SMOOTH_RANGE`
-- `DEFAULT_MIN_FONT`, `DEFAULT_MAX_FONT`, `DEFAULT_MIN_BAND_HEIGHT`,
-  `DEFAULT_FONT_SCALE_FACTOR` as fallback defaults when user values are invalid
-- `minBandHeight`, `fontScaleFactor`, `opacityFade` user-configurable via
-  `BandLabelComputeOptions`; invalid values (NaN, out-of-range) fall back to
-  module defaults
-- `minFontSize`/`maxFontSize` user-configurable with guard: if min ≥ max,
-  effective max is raised to `max(min + 1, DEFAULT_MAX_FONT)`
-- Merged find-max-height loop and find-band-bounds loop into a single O(n) pass
-  per series, reducing total passes from 4 to 3
-- All placement math (x clamping, y recalculation at rendered x, font capping)
-  consolidated inside `computeBandLabels`; render loop is now a plain `<text>`
-  map with no post-processing
+- New module containing all band label placement logic, isolated from rendering
+  and covered by 18 unit tests
+- Label color, font sizing, band height threshold, opacity fade, and font scale
+  are all user-configurable with safe fallbacks for invalid values
+- All tuning values are named constants with comments explaining their purpose
 
 #### types.ts
 
-- Replaced custom `LegendPlacement` enum with `@grafana/schema` string literals
-- `legend.displayMode` typed as `LegendDisplayMode` enum from `@grafana/schema`
-  instead of string literal union
-- Replaced `showTooltip: boolean` with structured
-  `tooltip: { mode: TooltipDisplayMode; sort: SortOrder; hideZeros: boolean }`
-
-#### utils.ts
-
-- `isNaN` replaced with `Number.isNaN` (avoids implicit coercion)
-- `nullFill` skips object spread when all values are already valid — returns
-  original row reference unchanged
+- Adopted Grafana SDK types for legend and tooltip options instead of custom
+  string literals and booleans
 
 #### StreamGraph.tsx
 
-- Replaced hand-rolled legend divs with `VizLegend` from `@grafana/ui`
-- Replaced hand-rolled tooltip div with `VizTooltip` + `SeriesTable` from
-  `@grafana/ui`
+- Replaced hand-rolled legend and tooltip with Grafana SDK components
+
+#### utils.ts
+
+- Minor correctness fixes (type coercion guard, redundant allocation)
 
 ### Performance
 
 #### bandLabels.ts
 
-- Nearest-point search replaced from O(n) linear scan to O(log n) binary search
-  — data points are time-ordered and `xScale` is monotonic, so sorted search
-  is always valid
+- Finding the nearest data point to a label's rendered position now uses binary
+  search instead of a full scan — significantly faster on large datasets
 
 #### StreamGraph.tsx
 
-- Replaced `extent(stackedData.flat(2))` O(N×M) allocation with direct
-  two-loop scan; dropped `d3-array` import
-- Removed `new Date()` allocation per data point in area generator hot path;
-  `scaleTime` accepts numeric timestamps directly
-- `useEffect` dep array narrowed to individual `options` fields — prevents full
-  D3 teardown/rebuild when unrelated options change
-- `colorScale` hoisted to `useMemo` to avoid recomputation per render
-- y-extent loop guards with `isFinite()` — prevents NaN poisoning the scale
-  domain
-- Tooltip `setTooltip` equality guard on `seriesName`+`value` — eliminates
-  re-renders on every mouse-move pixel
-- Single tooltip mode creates one `SeriesRow` directly — skips
-  `stackedData.map()` and sort on every mousemove
+- y-scale extent computed with a direct loop rather than flattening the entire
+  dataset into a temporary array
+- Tooltip state update skips re-render when the hovered series and value have
+  not changed
 
 #### StreamGraphPanel.tsx
 
-- `transformToD3` memoized via `useMemo`; `timeRange` dropped from deps (new
-  reference every Grafana render defeated the memo)
-- `computeSeriesCalcs` numeric fields filtered once per frame — eliminates
-  double-pass over all fields
-
-#### transformer.ts
-
-- `Math.min/max(...times)` crash on empty time array replaced with direct index
-  access; added `?? 0` fallback in multi-frame path
-
-#### Axis.tsx
-
-- Dead OR conditions in `grafanaTimeFormat` caused incorrect tick format for
-  7200–86400 s and 2419200–31536000 s ranges
+- Data transformation memoized correctly — previously a new object reference on
+  every Grafana render defeated the memo
 
 ### E2E / Docker
 
 #### React 19
 
-- Prepared plugin for React 19 compatibility: externalize jsx-runtime, enable
-  React 19 E2E preview image in CI
+- Prepared plugin for React 19 compatibility; enabled React 19 E2E preview in CI
 
 ### Dependencies
 
 #### D3
 
-- d3-shape, d3-scale, d3-scale-chromatic, d3-selection (modular imports)
+- d3-shape, d3-scale, d3-scale-chromatic (modular imports); d3-selection removed
 
 #### Grafana SDK
 
-- `@grafana/data`, `@grafana/runtime`, `@grafana/ui`, `@grafana/schema` at
-  12.4.2
+- `@grafana/data`, `@grafana/runtime`, `@grafana/ui`, `@grafana/schema` at 12.4.2
