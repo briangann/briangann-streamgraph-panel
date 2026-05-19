@@ -34,24 +34,14 @@ function computeSeriesCalcs(series: DataFrame[], calcIds: string[]): Map<string,
   return result;
 }
 
-export const StreamGraphPanel: React.FC<Props> = ({
-  options,
-  data,
-  width,
-  height,
-  fieldConfig,
-  id,
-}) => {
+export const StreamGraphPanel: React.FC<Props> = ({ options, data, width, height, fieldConfig, id }) => {
   const d3Data = useMemo(() => transformToD3(data), [data]);
-  const seriesCalcs = useMemo(
-    () => {
-      if (options.legend.displayMode !== LegendDisplayMode.Table) {
-        return new Map<string, DisplayValue[]>();
-      }
-      return computeSeriesCalcs(data.series, options.legend.calcs ?? DEFAULT_LEGEND_CALCS);
-    },
-    [data.series, options.legend.calcs, options.legend.displayMode]
-  );
+  const seriesCalcs = useMemo(() => {
+    if (options.legend.displayMode !== LegendDisplayMode.Table) {
+      return new Map<string, DisplayValue[]>();
+    }
+    return computeSeriesCalcs(data.series, options.legend.calcs ?? DEFAULT_LEGEND_CALCS);
+  }, [data.series, options.legend.calcs, options.legend.displayMode]);
 
   if (!data.series.length || !d3Data.rows.length) {
     return <PanelDataErrorView fieldConfig={fieldConfig} panelId={id} data={data} needsNumberField />;

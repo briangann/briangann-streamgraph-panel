@@ -22,7 +22,12 @@ describe('detectFrameFormat', () => {
 
 describe('unionTimestamps', () => {
   it('merges and deduplicates two sparse timestamp arrays, sorted ascending', () => {
-    expect(unionTimestamps([[1000, 3000], [2000, 3000]])).toStrictEqual([1000, 2000, 3000]);
+    expect(
+      unionTimestamps([
+        [1000, 3000],
+        [2000, 3000],
+      ])
+    ).toStrictEqual([1000, 2000, 3000]);
   });
 
   it('returns a single array unchanged', () => {

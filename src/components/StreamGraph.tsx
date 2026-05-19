@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   area,
   curveBasis,
@@ -15,26 +15,14 @@ import {
   stackOrderNone,
 } from 'd3-shape';
 import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
-import {
-  interpolateCividis,
-  interpolateSpectral,
-  interpolateTurbo,
-  interpolateViridis,
-} from 'd3-scale-chromatic';
-import { select } from 'd3-selection';
+import { interpolateCividis, interpolateSpectral, interpolateTurbo, interpolateViridis } from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { DisplayValue } from '@grafana/data';
 
-import {
-  ColorScheme,
-  CurveType,
-  D3WideData,
-  StackOffset,
-  StackOrder,
-  StreamgraphOptions,
-} from '../types';
-import { renderAxis } from './Axis';
+import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { XAxis } from './Axis';
+import { computeBandLabels } from '../data/bandLabels';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
 
@@ -92,8 +80,8 @@ const SCHEME_MAP = {
 };
 
 export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {
-  const svgRef = useRef<SVGSVGElement>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
+  const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
@@ -107,117 +95,166 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const legendVisible = options.legend.showLegend && options.legend.displayMode !== LegendDisplayMode.Hidden;
   const legendBottom = legendVisible && options.legend.placement === 'bottom';
 
-  const colorScale = useMemo(
-    () =>
-      scaleSequential(SCHEME_MAP[options.colorScheme]).domain([0, Math.max(1, data.seriesNames.length - 1)]),
-    [options.colorScheme, data.seriesNames.length]
-  );
-
   useEffect(() => {
-    const el = svgContainerRef.current;
-    if (!el) { return; }
-    const ro = new ResizeObserver(([entry]) => {
-      const { width: w, height: h } = entry.contentRect;
-      if (w > 0 && h > 0) {
-        setSvgSize({ width: w, height: h });
+    const containerElement = svgContainerRef.current;
+    if (!containerElement) {
+      return;
+    }
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      const { width: newWidth, height: newHeight } = entry.contentRect;
+      if (newWidth > 0 && newHeight > 0) {
+        setSvgSize({ width: newWidth, height: newHeight });
       }
     });
-    ro.observe(el);
-    return () => ro.disconnect();
+    resizeObserver.observe(containerElement);
+    return () => resizeObserver.disconnect();
   }, []);
 
   const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
-  useEffect(() => {
-    if (!svgRef.current || !data.rows.length) {
-      return;
+  const colorScale = useMemo(
+    () => scaleSequential(SCHEME_MAP[options.colorScheme]).domain([0, Math.max(1, data.seriesNames.length - 1)]),
+    [options.colorScheme, data.seriesNames.length]
+  );
+
+  const stackedData = useMemo(() => {
+    if (!data.rows.length) {
+      return [];
     }
-
-    const svg = select(svgRef.current);
-    svg.selectAll('*').remove();
-
-    const g = svg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
-
-    const xScale = scaleTime()
-      .domain([new Date(data.timeRange[0]), new Date(data.timeRange[1])])
-      .range([0, innerWidth]);
-
     const stackGen = stack<Record<string, number>>()
       .keys(data.seriesNames)
       .offset(OFFSET_MAP[options.stackOffset])
       .order(ORDER_MAP[options.stackOrder]);
+    return stackGen(data.rows);
+  }, [data.rows, data.seriesNames, options.stackOffset, options.stackOrder]);
 
-    const stackedData = stackGen(data.rows);
-    if (!stackedData.length) {
-      return;
-    }
+  const xScale = useMemo(
+    () =>
+      scaleTime()
+        .domain([new Date(data.timeRange[0]), new Date(data.timeRange[1])])
+        .range([0, innerWidth]),
+    [data.timeRange, innerWidth]
+  );
 
-    let yMin = Infinity, yMax = -Infinity;
+  const yScale = useMemo(() => {
+    let yMin = Infinity;
+    let yMax = -Infinity;
     for (const series of stackedData) {
       for (const point of series) {
-        if (isFinite(point[0]) && point[0] < yMin) { yMin = point[0]; }
-        if (isFinite(point[1]) && point[1] > yMax) { yMax = point[1]; }
+        if (isFinite(point[0]) && point[0] < yMin) {
+          yMin = point[0];
+        }
+        if (isFinite(point[1]) && point[1] > yMax) {
+          yMax = point[1];
+        }
       }
     }
-    const yScale = scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
-
-    const areaGen = area<StackDatum>()
-      .x((d) => xScale(d.data['time']))
-      .y0((d) => yScale(d[0]))
-      .y1((d) => yScale(d[1]))
-      .curve(CURVE_MAP[options.curveType]);
-
-    g.selectAll('path')
-      .data(stackedData)
-      .join('path')
-      .attr('d', (d) => areaGen(d as unknown as StackDatum[]) ?? '')
-      .attr('fill', (_, i) => colorScale(i))
-      .attr('fill-opacity', options.fillOpacity)
-      .on('mousemove', function (event, d) {
-        if (options.tooltip.mode === TooltipDisplayMode.None) {
-          return;
-        }
-        const mouseX = event.offsetX - MARGIN.left;
-        const timeValue = xScale.invert(mouseX).getTime();
-        const series = d as unknown as StackDatum[];
-        const closest = series.reduce((prev, curr) =>
-          Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue) ? curr : prev
-        );
-        const hoveredSeries = (d as unknown as { key: string }).key;
-
-        let seriesRows: SeriesRow[];
-        if (options.tooltip.mode === TooltipDisplayMode.Single) {
-          const idx = data.seriesNames.indexOf(hoveredSeries);
-          seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: colorScale(idx) }];
-        } else {
-          seriesRows = stackedData.map((s, i) => {
-            const name = (s as unknown as { key: string }).key;
-            return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
-          });
-          if (options.tooltip.hideZeros) {
-            seriesRows = seriesRows.filter((r) => r.value !== 0);
-          }
-          if (options.tooltip.sort === SortOrder.Ascending) {
-            seriesRows.sort((a, b) => a.value - b.value);
-          } else if (options.tooltip.sort === SortOrder.Descending) {
-            seriesRows.sort((a, b) => b.value - a.value);
-          }
-        }
-
-        setTooltip((t) => {
-          if (t.visible && t.timeValue === timeValue && t.hoveredSeries === hoveredSeries) {
-            return t;
-          }
-          return { visible: true, clientX: event.clientX, clientY: event.clientY, timeValue, hoveredSeries, seriesRows };
-        });
-      })
-      .on('mouseleave', () => setTooltip((t) => ({ ...t, visible: false })));
-
-    if (options.showXAxis) {
-      renderAxis({ svg: g, xScale, innerWidth, innerHeight });
+    if (!isFinite(yMin) || !isFinite(yMax)) {
+      return scaleLinear().domain([0, 1]).range([innerHeight, 0]);
     }
-  }, [data, innerWidth, innerHeight, options.stackOffset, options.stackOrder, options.curveType, options.fillOpacity, options.tooltip.mode, options.tooltip.sort, options.tooltip.hideZeros, options.showXAxis, colorScale]);
+    return scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
+  }, [stackedData, innerHeight]);
+
+  const areaGen = useMemo(
+    () =>
+      area<StackDatum>()
+        .x((d) => xScale(d.data['time']))
+        .y0((d) => yScale(d[0]))
+        .y1((d) => yScale(d[1]))
+        .curve(CURVE_MAP[options.curveType]),
+    [xScale, yScale, options.curveType]
+  );
+
+  const bandLabels = useMemo(() => {
+    if (!options.showBandLabels || !stackedData.length) {
+      return [];
+    }
+    return computeBandLabels(
+      stackedData,
+      (time: number) => xScale(time),
+      (val: number) => yScale(val),
+      (i: number) => colorScale(i),
+      innerWidth,
+      innerHeight,
+      {
+        colorMode: options.bandLabelColor,
+        minFontSize: options.bandLabelMinFontSize,
+        maxFontSize: options.bandLabelMaxFontSize,
+        minBandHeight: options.bandLabelMinBandHeight,
+        fontScaleFactor: options.bandLabelFontScaleFactor,
+        opacityFade: options.bandLabelOpacityFade,
+      }
+    );
+  }, [
+    stackedData,
+    xScale,
+    yScale,
+    colorScale,
+    options.showBandLabels,
+    options.bandLabelColor,
+    options.bandLabelMinFontSize,
+    options.bandLabelMaxFontSize,
+    options.bandLabelMinBandHeight,
+    options.bandLabelFontScaleFactor,
+    options.bandLabelOpacityFade,
+    innerWidth,
+    innerHeight,
+  ]);
+
+  const handlePathMouseMove = useCallback(
+    (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
+      if (options.tooltip.mode === TooltipDisplayMode.None) {
+        return;
+      }
+      const g = gRef.current;
+      if (!g) {
+        return;
+      }
+      const rect = g.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const timeValue = xScale.invert(mouseX).getTime();
+      const hoveredSeries = (stackedData[seriesIdx] as any).key as string;
+      const closest = series.reduce((prev, curr) =>
+        Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue) ? curr : prev
+      );
+
+      let seriesRows: SeriesRow[];
+      if (options.tooltip.mode === TooltipDisplayMode.Single) {
+        const idx = data.seriesNames.indexOf(hoveredSeries);
+        seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: colorScale(idx) }];
+      } else {
+        seriesRows = stackedData.map((s, i) => {
+          const name = (s as any).key as string;
+          return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
+        });
+        if (options.tooltip.hideZeros) {
+          seriesRows = seriesRows.filter((r) => r.value !== 0);
+        }
+        if (options.tooltip.sort === SortOrder.Ascending) {
+          seriesRows.sort((a, b) => a.value - b.value);
+        } else if (options.tooltip.sort === SortOrder.Descending) {
+          seriesRows.sort((a, b) => b.value - a.value);
+        }
+      }
+
+      setTooltip((previousTooltip) => {
+        if (
+          previousTooltip.visible &&
+          previousTooltip.timeValue === timeValue &&
+          previousTooltip.hoveredSeries === hoveredSeries
+        ) {
+          return previousTooltip;
+        }
+        return { visible: true, clientX: event.clientX, clientY: event.clientY, timeValue, hoveredSeries, seriesRows };
+      });
+    },
+    [xScale, stackedData, colorScale, options.tooltip, data.seriesNames]
+  );
+
+  const handlePathMouseLeave = useCallback(() => {
+    setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
+  }, []);
 
   const vizLegendItems = legendVisible
     ? data.seriesNames.map((name, i) => {
@@ -242,7 +279,40 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       }}
     >
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
-        <svg ref={svgRef} width={svgSize.width} height={svgSize.height} />
+        <svg width={svgSize.width} height={svgSize.height}>
+          <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
+            {stackedData.map((series, i) => (
+              <path
+                key={(series as any).key}
+                d={areaGen(series as unknown as StackDatum[]) ?? ''}
+                fill={colorScale(i)}
+                fillOpacity={options.fillOpacity}
+                onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
+                onMouseLeave={handlePathMouseLeave}
+              />
+            ))}
+            {options.showXAxis && <XAxis xScale={xScale} innerWidth={innerWidth} innerHeight={innerHeight} />}
+            {bandLabels.map((label) => (
+              <text
+                key={label.seriesName}
+                data-testid="band-label"
+                x={label.x}
+                y={label.y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={`${label.fontSize}px`}
+                fill={label.color}
+                opacity={label.opacity}
+                stroke={options.bandLabelStrokeWidth > 0 ? label.strokeColor : undefined}
+                strokeWidth={options.bandLabelStrokeWidth > 0 ? options.bandLabelStrokeWidth : undefined}
+                paintOrder={options.bandLabelStrokeWidth > 0 ? 'stroke' : undefined}
+                pointerEvents="none"
+              >
+                {label.seriesName}
+              </text>
+            ))}
+          </g>
+        </svg>
         {tooltip.visible && (
           <VizTooltip
             content={

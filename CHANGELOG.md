@@ -16,6 +16,26 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Band labels
+
+- Configurable label color: Inverse (default), Auto (contrast), White, Black
+- Configurable min/max font size (defaults: 8–48px); invalid or inverted values
+  are sanitized automatically
+- Configurable minimum band height threshold — bands below this pixel height
+  are unlabeled (default 8px)
+- Configurable font scale factor — controls font size as a fraction of band
+  height (default 0.7; range 0.1–1.5)
+- Configurable text stroke width — outline drawn behind label text for
+  contrast; stroke color is the inverse of the label color (default 0, off)
+- Opacity fade toggle — when off, labels are full opacity above the minimum
+  band height threshold with no ramp (default on)
+- Show metric names inside streamgraph bands at their widest point
+- Font scales to fit band height (8--48px), fades out when band is too narrow
+- Inverted band color for contrast
+- Toggle via Show band labels in Streamgraph options (off by default)
+- Labels and panel resize are stable — no flicker when resizing the browser or
+  dashboard panel
+
 #### Streamgraph visualization
 
 - Stack offset: Wiggle, Silhouette, Zero (stacked), Expand (normalized)

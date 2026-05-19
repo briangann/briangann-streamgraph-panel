@@ -369,6 +369,12 @@ Flat config (ESLint 9). Common rules applied:
   - Format dependency updates as a table: `| Package | Previous | Updated | SHA |` (SHA column
     for GitHub Actions only, use short 8-char SHA).
   - Always include a `## Test plan` section with a verification checklist.
+  - **Tone and content:** Write for a human reviewer who has not seen the code.
+    Plain English throughout — no internal function names, no type signatures,
+    no algorithmic notation. Describe what the PR does and why, not how it was
+    implemented. A reviewer should understand the change and be able to verify
+    it without reading the diff. Options tables, before/after behavior, and
+    test plan steps are all appropriate; code symbols are not.
 
 ### Changelog Policy
 
@@ -376,13 +382,15 @@ This project maintains two changelog files:
 
 - **`CHANGELOG.md`** — end-user facing. High-level descriptions of features,
   bug fixes, breaking changes, and Grafana compatibility updates. No file
-  names, function names, or implementation details — describe *what changed
-  for the user*, not how it was built.
+  names, function names, or implementation details — describe _what changed
+  for the user_, not how it was built.
 - **`src/CHANGELOG.md`** — technical/developer facing. Covers performance
   optimizations, dependency upgrades, CI/CD changes, build tooling, test
-  infrastructure, code quality refactors, and implementation details (file
-  names, function names, technical rationale). Technical detail stripped from
-  `CHANGELOG.md` belongs here.
+  infrastructure, and code quality refactors. Write in plain English — describe
+  what changed and why it matters to a developer, not a blow-by-blow of the
+  implementation. File names and module names are fine; internal function
+  signatures, constant names, and algorithmic notation are not. A contributor
+  skimming the changelog should understand the change without reading the diff.
 
 Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
 

@@ -27,6 +27,13 @@ export enum ColorScheme {
   SPECTRAL = 'spectral',
 }
 
+export enum BandLabelColor {
+  INVERSE = 'inverse',
+  WHITE = 'white',
+  BLACK = 'black',
+  AUTO = 'auto',
+}
+
 export interface StreamgraphOptions {
   stackOffset: StackOffset;
   stackOrder: StackOrder;
@@ -34,6 +41,14 @@ export interface StreamgraphOptions {
   colorScheme: ColorScheme;
   fillOpacity: number;
   showXAxis: boolean;
+  showBandLabels: boolean;
+  bandLabelColor: BandLabelColor;
+  bandLabelMinFontSize: number;
+  bandLabelMaxFontSize: number;
+  bandLabelMinBandHeight: number;
+  bandLabelFontScaleFactor: number;
+  bandLabelStrokeWidth: number;
+  bandLabelOpacityFade: boolean;
   tooltip: {
     mode: TooltipDisplayMode;
     sort: SortOrder;
