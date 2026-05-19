@@ -62,6 +62,44 @@ components and strengthen type safety with schema enums.
 
 ### Code Quality
 
+#### StreamGraph.tsx / Axis.tsx
+
+- Replaced D3 DOM manipulation with React SVG rendering — D3 now used only as
+  computation (scales, stack layout, area path strings via `useMemo`)
+- Eliminated `d3-selection` dependency; bundle reduced ~32 KiB (190 → 158 KiB)
+- Single `useEffect` for `ResizeObserver` only; resize no longer triggers full
+  SVG teardown and rebuild, eliminating label flicker on panel resize
+- `XAxis` rewritten as React component replacing `renderAxis` D3 function
+- Mouse coordinate calculation uses `getBoundingClientRect()` on `gRef` instead
+  of D3 event helpers
+
+#### bandLabels.ts
+
+- New `computeBandLabels` pure function extracts label placement logic from
+  rendering — takes stacked data and scale functions, returns label descriptors
+- `invertColor` helper parses `rgb()` strings and inverts each channel
+- `autoContrastColor` helper uses ITU-R BT.601 perceived luminance to choose
+  black or white text for maximum contrast against the band fill
+- `BandLabelColor` enum: `INVERSE`, `AUTO`, `WHITE`, `BLACK`
+- `BandLabelComputeOptions` interface groups all user-configurable label
+  parameters; replaces the growing individual parameter list on `computeBandLabels`
+- Named module-level constants for all magic numbers with inline WHY comments:
+  `FONT_HEIGHT_FACTOR`, `FONT_HEIGHT_SCALE`, `FONT_WIDTH_SCALE`,
+  `CHAR_WIDTH_FACTOR`, `TEXT_PADDING`, `CAP_HEIGHT_FACTOR`, `PEAK_NUDGE`,
+  `Y_SMOOTH_RANGE`
+- `DEFAULT_MIN_FONT`, `DEFAULT_MAX_FONT`, `DEFAULT_MIN_BAND_HEIGHT`,
+  `DEFAULT_FONT_SCALE_FACTOR` as fallback defaults when user values are invalid
+- `minBandHeight`, `fontScaleFactor`, `opacityFade` user-configurable via
+  `BandLabelComputeOptions`; invalid values (NaN, out-of-range) fall back to
+  module defaults
+- `minFontSize`/`maxFontSize` user-configurable with guard: if min ≥ max,
+  effective max is raised to `max(min + 1, DEFAULT_MAX_FONT)`
+- Merged find-max-height loop and find-band-bounds loop into a single O(n) pass
+  per series, reducing total passes from 4 to 3
+- All placement math (x clamping, y recalculation at rendered x, font capping)
+  consolidated inside `computeBandLabels`; render loop is now a plain `<text>`
+  map with no post-processing
+
 #### types.ts
 
 - Replaced custom `LegendPlacement` enum with `@grafana/schema` string literals
@@ -83,6 +121,12 @@ components and strengthen type safety with schema enums.
   `@grafana/ui`
 
 ### Performance
+
+#### bandLabels.ts
+
+- Nearest-point search replaced from O(n) linear scan to O(log n) binary search
+  — data points are time-ordered and `xScale` is monotonic, so sorted search
+  is always valid
 
 #### StreamGraph.tsx
 
