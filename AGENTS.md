@@ -380,9 +380,11 @@ This project maintains two changelog files:
   for the user_, not how it was built.
 - **`src/CHANGELOG.md`** — technical/developer facing. Covers performance
   optimizations, dependency upgrades, CI/CD changes, build tooling, test
-  infrastructure, code quality refactors, and implementation details (file
-  names, function names, technical rationale). Technical detail stripped from
-  `CHANGELOG.md` belongs here.
+  infrastructure, and code quality refactors. Write in plain English — describe
+  what changed and why it matters to a developer, not a blow-by-blow of the
+  implementation. File names and module names are fine; internal function
+  signatures, constant names, and algorithmic notation are not. A contributor
+  skimming the changelog should understand the change without reading the diff.
 
 Both files follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
 
