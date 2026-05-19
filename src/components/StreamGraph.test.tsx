@@ -2,7 +2,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { StreamGraph } from './StreamGraph';
-import { ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { BandLabelColor, ColorScheme, CurveType, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 
 const mockData = {
   rows: [
@@ -21,6 +21,14 @@ const mockOptions: StreamgraphOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
+  showBandLabels: false,
+  bandLabelColor: BandLabelColor.INVERSE,
+  bandLabelMinFontSize: 8,
+  bandLabelMaxFontSize: 48,
+  bandLabelMinBandHeight: 8,
+  bandLabelFontScaleFactor: 0.7,
+  bandLabelStrokeWidth: 0,
+  bandLabelOpacityFade: true,
   tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
@@ -62,6 +70,37 @@ describe('StreamGraph', () => {
       />
     );
     expect(queryByText('A')).not.toBeInTheDocument();
+  });
+
+  it('renders text labels when showBandLabels is true', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, showBandLabels: true }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    const texts = Array.from(container.querySelectorAll('svg text'));
+    const bandLabels = texts.filter((t) => t.textContent === 'A' || t.textContent === 'B');
+    expect(bandLabels.some((t) => t.textContent === 'A')).toBe(true);
+    expect(bandLabels.some((t) => t.textContent === 'B')).toBe(true);
+  });
+
+  it('does not render band label text when showBandLabels is false', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, showBandLabels: false }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    const texts = Array.from(container.querySelectorAll('svg text'));
+    const bandLabels = texts.filter((t) => t.textContent === 'A' || t.textContent === 'B');
+    expect(bandLabels).toHaveLength(0);
   });
 
   it('matches snapshot', () => {
