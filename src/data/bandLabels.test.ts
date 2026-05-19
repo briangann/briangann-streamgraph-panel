@@ -66,6 +66,22 @@ describe('computeBandLabels', () => {
   // Single visible band, used by many option tests.
   const oneBand = [mockSeries('A', [{ y0: 0, y1: 20, time: 1000 }])];
 
+  // ── edge cases ────────────────────────────────────────────────────────────
+
+  describe('edge cases', () => {
+    it('skips series with no data points', () => {
+      const emptySeries: any = [];
+      (emptySeries as any).key = 'A';
+      expect(compute([emptySeries])).toHaveLength(0);
+    });
+
+    it('skips series where all band heights are negative (inverted y1 < y0)', () => {
+      // y1 < y0 everywhere → h = y1-y0 < 0, maxIndices stays empty
+      const labels = compute([mockSeries('A', [{ y0: 10, y1: 5, time: 1000 }])]);
+      expect(labels).toHaveLength(0);
+    });
+  });
+
   // ── label placement ────────────────────────────────────────────────────────
 
   describe('label placement', () => {
