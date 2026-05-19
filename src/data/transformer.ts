@@ -7,9 +7,7 @@ export function transformToD3(data: PanelData): D3WideData {
     return { rows: [], seriesNames: [], timeRange: [0, 0] };
   }
 
-  return detectFrameFormat(data) === 'wide'
-    ? transformWideFrame(data.series[0])
-    : transformMultiFrames(data.series);
+  return detectFrameFormat(data) === 'wide' ? transformWideFrame(data.series[0]) : transformMultiFrames(data.series);
 }
 
 function transformWideFrame(frame: DataFrame): D3WideData {
@@ -50,8 +48,7 @@ function transformMultiFrames(frames: DataFrame[]): D3WideData {
       if (!timeField || !valueField) {
         return null;
       }
-      const name =
-        valueField.config?.displayName ?? frame.name ?? valueField.name ?? 'value';
+      const name = valueField.config?.displayName ?? frame.name ?? valueField.name ?? 'value';
       return {
         name,
         times: timeField.values as number[],

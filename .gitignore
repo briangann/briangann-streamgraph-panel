@@ -46,3 +46,14 @@ ci/
 .idea
 
 .eslintcache
+
+# macOS metadata
+.DS_Store
+
+# Playwright MCP session files
+.playwright-mcp/
+
+# Session screenshots captured during development
+/grafana-*.png
+/grafana-*.jpeg
+/grafana-*.jpg

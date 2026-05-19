@@ -19,10 +19,7 @@ export function unionTimestamps(timestampArrays: number[][]): number[] {
   return Array.from(set).sort((a, b) => a - b);
 }
 
-export function nullFill(
-  rows: Array<Record<string, number>>,
-  keys: string[]
-): Array<Record<string, number>> {
+export function nullFill(rows: Array<Record<string, number>>, keys: string[]): Array<Record<string, number>> {
   return rows.map((row) => {
     let filled: Record<string, number> | null = null;
     for (const key of keys) {

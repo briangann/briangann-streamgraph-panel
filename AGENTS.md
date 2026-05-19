@@ -376,8 +376,8 @@ This project maintains two changelog files:
 
 - **`CHANGELOG.md`** — end-user facing. High-level descriptions of features,
   bug fixes, breaking changes, and Grafana compatibility updates. No file
-  names, function names, or implementation details — describe *what changed
-  for the user*, not how it was built.
+  names, function names, or implementation details — describe _what changed
+  for the user_, not how it was built.
 - **`src/CHANGELOG.md`** — technical/developer facing. Covers performance
   optimizations, dependency upgrades, CI/CD changes, build tooling, test
   infrastructure, code quality refactors, and implementation details (file

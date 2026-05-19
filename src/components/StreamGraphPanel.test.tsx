@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { LoadingState } from '@grafana/data';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { StreamGraphPanel } from './StreamGraphPanel';
-import { ColorScheme, CurveType, StackOffset, StackOrder } from "../types";
+import { ColorScheme, CurveType, StackOffset, StackOrder } from '../types';
 import { multiDataFrames } from '../__mocks__/models/multiDataFrames';
 
 const baseOptions = {
@@ -13,6 +13,7 @@ const baseOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
+  showBandLabels: false,
   tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
