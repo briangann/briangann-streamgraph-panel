@@ -2,24 +2,23 @@ import { BandLabelColor } from '../types';
 
 const RGB_REGEX = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 
-export function invertColor(rgb: string): string {
+function parseRgb(rgb: string): [number, number, number] | null {
   const match = rgb.match(RGB_REGEX);
-  if (!match) {
-    return 'rgb(255, 255, 255)';
-  }
-  const r = 255 - Number(match[1]);
-  const g = 255 - Number(match[2]);
-  const b = 255 - Number(match[3]);
-  return `rgb(${r}, ${g}, ${b})`;
+  if (!match) { return null; }
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+export function invertColor(rgb: string): string {
+  const channels = parseRgb(rgb);
+  if (!channels) { return 'rgb(255, 255, 255)'; }
+  return `rgb(${255 - channels[0]}, ${255 - channels[1]}, ${255 - channels[2]})`;
 }
 
 // ITU-R BT.601 perceived luminance — >0.5 means band is light, use dark text
 function autoContrastColor(rgb: string): string {
-  const match = rgb.match(RGB_REGEX);
-  if (!match) {
-    return 'rgb(255, 255, 255)';
-  }
-  const luminance = (0.299 * Number(match[1]) + 0.587 * Number(match[2]) + 0.114 * Number(match[3])) / 255;
+  const channels = parseRgb(rgb);
+  if (!channels) { return 'rgb(255, 255, 255)'; }
+  const luminance = (0.299 * channels[0] + 0.587 * channels[1] + 0.114 * channels[2]) / 255;
   return luminance > 0.5 ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
 }
 
@@ -43,6 +42,7 @@ export interface BandLabel {
   fontSize: number;
   opacity: number;
   color: string;
+  strokeColor: string;
 }
 
 export interface BandLabelComputeOptions {
@@ -194,7 +194,7 @@ export function computeBandLabels(
         color = invertColor(bandColor); // INVERSE
     }
 
-    labels.push({ seriesName, x, y, fontSize, opacity, color });
+    labels.push({ seriesName, x, y, fontSize, opacity, color, strokeColor: invertColor(color) });
   }
 
   return labels;

@@ -22,7 +22,7 @@ import { DisplayValue } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
-import { computeBandLabels, invertColor } from '../data/bandLabels';
+import { computeBandLabels } from '../data/bandLabels';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
 
@@ -303,7 +303,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 fontSize={`${label.fontSize}px`}
                 fill={label.color}
                 opacity={label.opacity}
-                stroke={options.bandLabelStrokeWidth > 0 ? invertColor(label.color) : undefined}
+                stroke={options.bandLabelStrokeWidth > 0 ? label.strokeColor : undefined}
                 strokeWidth={options.bandLabelStrokeWidth > 0 ? options.bandLabelStrokeWidth : undefined}
                 paintOrder={options.bandLabelStrokeWidth > 0 ? 'stroke' : undefined}
                 pointerEvents="none"
