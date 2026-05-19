@@ -369,6 +369,12 @@ Flat config (ESLint 9). Common rules applied:
   - Format dependency updates as a table: `| Package | Previous | Updated | SHA |` (SHA column
     for GitHub Actions only, use short 8-char SHA).
   - Always include a `## Test plan` section with a verification checklist.
+  - **Tone and content:** Write for a human reviewer who has not seen the code.
+    Plain English throughout — no internal function names, no type signatures,
+    no algorithmic notation. Describe what the PR does and why, not how it was
+    implemented. A reviewer should understand the change and be able to verify
+    it without reading the diff. Options tables, before/after behavior, and
+    test plan steps are all appropriate; code symbols are not.
 
 ### Changelog Policy
 
