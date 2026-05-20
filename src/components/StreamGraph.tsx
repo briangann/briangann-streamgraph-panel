@@ -29,7 +29,7 @@ import {
 } from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
+import { dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
@@ -363,14 +363,19 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         {tooltip.visible && (
           <VizTooltip
             content={
-              <SeriesTable
-                series={tooltip.seriesRows.map((r) => ({
-                  color: r.color,
-                  label: r.seriesName,
-                  value: r.value.toFixed(2),
-                  isActive: r.seriesName === tooltip.hoveredSeries,
-                }))}
-              />
+              <div style={{ maxWidth: options.tooltip.maxWidth }}>
+                <div style={{ maxHeight: options.tooltip.maxHeight, overflowY: options.tooltip.maxHeight ? 'auto' : undefined }}>
+                  <SeriesTable
+                    timestamp={dateTimeFormat(tooltip.timeValue, { timeZone: 'browser' })}
+                    series={tooltip.seriesRows.map((r) => ({
+                      color: r.color,
+                      label: r.seriesName,
+                      value: r.value.toFixed(2),
+                      isActive: r.seriesName === tooltip.hoveredSeries,
+                    }))}
+                  />
+                </div>
+              </div>
             }
             position={{ x: tooltip.clientX, y: tooltip.clientY }}
             offset={{ x: 10, y: 10 }}
