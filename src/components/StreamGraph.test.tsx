@@ -136,4 +136,18 @@ describe('color schemes', () => {
       expect(container.querySelectorAll('path')).toHaveLength(2);
     });
   });
+
+  it('renders without crashing with grafana color scheme (fallback until theme integration)', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, colorScheme: ColorScheme.GRAFANA }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
 });

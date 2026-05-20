@@ -131,7 +131,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
   const colorScale = useMemo(
-    () => scaleSequential(SCHEME_MAP[options.colorScheme]).domain([0, Math.max(1, data.seriesNames.length - 1)]),
+    () => scaleSequential(SCHEME_MAP[options.colorScheme] ?? interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]),
     [options.colorScheme, data.seriesNames.length]
   );
 
