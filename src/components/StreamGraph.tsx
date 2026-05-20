@@ -184,7 +184,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   // Color by original series index so each series keeps the same color when others are hidden.
   const seriesColor = useCallback(
-    (seriesName: string) => colorScale(data.seriesNames.indexOf(seriesName)),
+    (seriesName: string) => colorScale(Math.max(0, data.seriesNames.indexOf(seriesName))),
     [colorScale, data.seriesNames]
   );
 
