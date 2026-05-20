@@ -206,7 +206,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   );
 
   const stackedData = useMemo(() => {
-    if (!data.rows.length) {
+    if (!zeroedRows.length) {
       return [];
     }
     const stackGen = stack<Record<string, number>>()

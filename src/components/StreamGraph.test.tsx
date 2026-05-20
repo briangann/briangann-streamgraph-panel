@@ -24,6 +24,8 @@ const mockOptions: StreamgraphOptions = {
   showCrosshair: true,
   hoverDimming: true,
   hoverDimmingOpacity: 0.3,
+  enableTransitions: true,
+  transitionDuration: 300,
   showBandLabels: false,
   bandLabelColor: BandLabelColor.INVERSE,
   bandLabelMinFontSize: 8,
@@ -359,6 +361,29 @@ describe('legend series toggle', () => {
     );
     clickFirstLegendItem(container);
     clickFirstLegendItem(container);
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+});
+
+describe('transitions', () => {
+  it('renders paths when enableTransitions is true', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    // @react-spring/web animated.path renders as a regular <path> in JSDOM
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+
+  it('renders paths when enableTransitions is false', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, enableTransitions: false }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 });
