@@ -1,5 +1,8 @@
 # Grafana Streamgraph Panel
 
+[![License](https://img.shields.io/github/license/briangann/briangann-streamgraph-panel)](LICENSE)
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+
 A [streamgraph](https://en.wikipedia.org/wiki/Streamgraph) panel for Grafana.
 Stacked areas flow around a central baseline, so you can see relative volume
 across many series at a glance.
@@ -62,6 +65,40 @@ Everything lives in the panel editor sidebar:
 | Legend      | Legend values     | Min, Max, Mean, Sum, Count, First, Last, etc.                                                                                                                                                                    |         |
 
 † Only visible when **Show labels** is enabled.
+
+## Contributing
+
+Build commands, code style, branching policy, and PR conventions are documented
+in [AGENTS.md](AGENTS.md). That file is the single source of truth for contributor
+setup and is also read by AI coding assistants.
+
+Quick start:
+
+```bash
+npm ci           # install dependencies
+npm run dev      # dev build with watch + livereload
+npm run server   # start Grafana via Docker on localhost:3000
+npm run test:ci  # unit tests
+npm run lint     # ESLint
+```
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/briangann"><img src="https://avatars.githubusercontent.com/u/7364245?v=4" width="100px;" alt="Brian Gann"/><br /><sub><b>Brian Gann</b></sub></a><br /><a href="https://github.com/briangann/briangann-streamgraph-panel/commits?author=briangann" title="Code">💻</a> <a href="https://github.com/briangann/briangann-streamgraph-panel/commits?author=briangann" title="Documentation">📖</a> <a href="#maintenance-briangann" title="Maintenance">🚧</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## License
 

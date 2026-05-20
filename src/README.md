@@ -1,53 +1,103 @@
-<!-- This README file is going to be the one displayed on the Grafana.com website for your plugin.
-Uncomment and replace the content here before publishing.
+# Grafana Streamgraph Panel
 
-Remove any remaining comments before publishing as these may be displayed on Grafana.com -->
+A [streamgraph](https://en.wikipedia.org/wiki/Streamgraph) panel for Grafana.
+Stacked areas flow around a central baseline so you can see relative volume
+across many series at a glance.
 
-# Streamgraph
+![Streamgraph with 5 series, Cividis color scheme](https://raw.githubusercontent.com/briangann/briangann-streamgraph-panel/main/src/img/screenshots/grafana-streamgraph-5series.png)
 
-<!-- To help maximize the impact of your README and improve usability for users, we propose the following loose structure:
+## Overview
 
-**BEFORE YOU BEGIN**
-- Ensure all links are absolute URLs so that they will work when the README is displayed within Grafana and Grafana.com
-- Be inspired ✨
-  - [grafana-polystat-panel](https://github.com/grafana/grafana-polystat-panel)
-  - [volkovlabs-variable-panel](https://github.com/volkovlabs/volkovlabs-variable-panel)
+The streamgraph panel renders time series data as flowing, stacked bands.
+Unlike a stacked bar chart, the bands are centered around a shared baseline
+rather than stacked from zero, which makes it easier to see peaks and trends
+across many series simultaneously.
 
-**ADD SOME BADGES**
+Key capabilities:
 
-Badges convey useful information at a glance for users whether in the Catalog or viewing the source code.
-You can use the generator on [Shields.io](https://shields.io/badges/dynamic-json-badge) together with the Grafana.com API
-to create dynamic badges that update automatically when you publish a new version to the marketplace.
+- **21 color schemes** — 10 D3 gradients (Viridis, Turbo, Plasma, and more) plus
+  11 Grafana palette registry schemes that adapt to dark and light theme
+- **Band labels** — series names rendered inside their bands at the widest visible
+  point, with configurable color, font sizing, contrast stroke, and opacity fade
+- **Hover dimming** — non-hovered bands dim on hover to highlight the active series
+- **Crosshair** — vertical cursor line aligned to the time axis
+- **Modern tooltip** — hovered timestamp header above series rows, with configurable
+  max width and height
+- **Four stack offsets** (Wiggle, Silhouette, Zero, Expand) and four orderings
+- **Smooth, Linear, or Step** curve interpolation
+- **Interactive legend** in List or Table mode (Table supports calc columns)
 
-- For the URL parameter use `https://grafana.com/api/plugins/your-plugin-id`.
-- Example queries:
-  - Downloads: `$.downloads`
-  - Catalog Version: `$.version`
-  - Grafana Dependency: `$.grafanaDependency`
-  - Signature Type: `$.versionSignatureType`
-- Optionally, for the logo parameter use `grafana`.
-
-Full example: ![Dynamic JSON Badge](https://img.shields.io/badge/dynamic/json?logo=grafana&query=$.version&url=https://grafana.com/api/plugins/grafana-polystat-panel&label=Marketplace&prefix=v&color=F47A20)
-
-Consider other [badges](https://shields.io/badges) as you feel appropriate for your project.
-
-## Overview / Introduction
-Provide one or more paragraphs as an introduction to your plugin to help users understand why they should use it.
-
-Consider including screenshots:
-- in [plugin.json](https://grafana.com/developers/plugin-tools/reference/plugin-json#info) include them as relative links.
-- in the README ensure they are absolute URLs.
+![Turbo color scheme](https://raw.githubusercontent.com/briangann/briangann-streamgraph-panel/main/src/img/screenshots/grafana-streamgraph-turbo.png)
 
 ## Requirements
-List any requirements or dependencies they may need to run the plugin.
+
+Grafana 12.3.0+
 
 ## Getting Started
-Provide a quick start on how to configure and use the plugin.
 
-## Documentation
-If your project has dedicated documentation available for users, provide links here. For help in following
-Grafana's style recommendations for technical documentation, refer to our [Writer's Toolkit](https://grafana.com/docs/writers-toolkit/).
+1. Add a new panel and select **Streamgraph** from the visualization picker.
+2. Connect any wide-format or multi-frame time series data source.
+3. Use the **Streamgraph** section in the panel editor to choose a color scheme,
+   stack offset, and curve type.
+4. Enable **Band Labels** to render series names inside the bands.
+5. Enable **Dim on hover** (on by default) so hovering highlights the active series.
+
+## Options
+
+### Streamgraph
+
+| Option | Values | Default |
+| --- | --- | --- |
+| Stack offset | Wiggle, Silhouette, Zero, Expand | Wiggle |
+| Stack order | Inside out, Ascending, Descending, None | Inside out |
+| Curve type | Smooth, Linear, Step | Smooth |
+| Color scheme | 21 options across D3 Gradients and Grafana Palettes groups | Cividis |
+| Fill opacity | 0–1 | 0.8 |
+| Dim on hover | on/off | on |
+| Dim opacity | 0–1 — opacity of non-hovered bands | 0.3 |
+
+### Axis
+
+| Option | Values | Default |
+| --- | --- | --- |
+| Show X axis | on/off | on |
+| Show crosshair | on/off | on |
+
+### Band Labels
+
+All band label options are hidden until **Show labels** is enabled.
+
+| Option | Values | Default |
+| --- | --- | --- |
+| Show labels | on/off | off |
+| Label color | Inverse, Auto (contrast), White, Black | Inverse |
+| Min font size | px | 8 |
+| Max font size | px | 48 |
+| Min band height | px — bands narrower than this are unlabeled | 8 |
+| Font scale | 0.1–1.5 | 0.7 |
+| Stroke width | 0–3 px | 0 |
+| Opacity fade | on/off | on |
+
+### Tooltip
+
+| Option | Values | Default |
+| --- | --- | --- |
+| Tooltip mode | Single, All series, Hidden | Single |
+| Sort order | None, Ascending, Descending | None |
+| Hide zeros | on/off | off |
+| Max width | px, blank = automatic | — |
+| Max height | px, blank = automatic | — |
+
+### Legend
+
+| Option | Values | Default |
+| --- | --- | --- |
+| Show legend | on/off | on |
+| Legend mode | List, Table | List |
+| Legend placement | Bottom, Right | Bottom |
+| Legend values | Min, Max, Mean, Sum, Count, First, Last, etc. | — |
 
 ## Contributing
-Do you want folks to contribute to the plugin or provide feedback through specific means? If so, tell them how!
--->
+
+Issues and pull requests are welcome at
+[github.com/briangann/briangann-streamgraph-panel](https://github.com/briangann/briangann-streamgraph-panel).
