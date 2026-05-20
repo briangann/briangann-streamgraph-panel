@@ -94,6 +94,22 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       settings: { min: 0, max: 1, step: 0.1 },
     })
     .addBooleanSwitch({
+      path: 'enableTransitions',
+      name: 'Enable transitions',
+      description: 'Animate band paths smoothly when series are toggled or data updates.',
+      category: ['Streamgraph'],
+      defaultValue: true,
+    })
+    .addSliderInput({
+      path: 'transitionDuration',
+      name: 'Transition duration',
+      description: 'How long each band animation takes in milliseconds.',
+      category: ['Streamgraph'],
+      defaultValue: 300,
+      showIf: (config) => config.enableTransitions,
+      settings: { min: 100, max: 800, step: 50 },
+    })
+    .addBooleanSwitch({
       path: 'hoverDimming',
       name: 'Dim on hover',
       description: 'Dim non-hovered bands when hovering to highlight the active series.',
