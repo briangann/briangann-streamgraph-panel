@@ -72,6 +72,8 @@ export interface StreamgraphOptions {
     mode: TooltipDisplayMode;
     sort: SortOrder;
     hideZeros: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
   };
   legend: {
     showLegend: boolean;
