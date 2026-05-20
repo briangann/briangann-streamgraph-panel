@@ -52,11 +52,7 @@ describe('computeBandLabels', () => {
   };
 
   // Shorthand: call computeBandLabels with shared defaults, override as needed.
-  function compute(
-    stackedData: any[],
-    overrides: Partial<BandLabelComputeOptions> = {},
-    panelHeight = innerHeight
-  ) {
+  function compute(stackedData: any[], overrides: Partial<BandLabelComputeOptions> = {}, panelHeight = innerHeight) {
     return computeBandLabels(stackedData, xScale, yScale, colorFn, innerWidth, panelHeight, {
       ...defaultOptions,
       ...overrides,
@@ -142,27 +138,37 @@ describe('computeBandLabels', () => {
   describe('visibility threshold', () => {
     it('skips label when band height is below minimum', () => {
       const labels = computeBandLabels(
-        [mockSeries('A', [{ y0: 0, y1: 1, time: 1000 }, { y0: 0, y1: 1, time: 2000 }])],
-        yScale, yScale, colorFn, innerWidth, innerHeight, defaultOptions
+        [
+          mockSeries('A', [
+            { y0: 0, y1: 1, time: 1000 },
+            { y0: 0, y1: 1, time: 2000 },
+          ]),
+        ],
+        yScale,
+        yScale,
+        colorFn,
+        innerWidth,
+        innerHeight,
+        defaultOptions
       );
       expect(labels).toHaveLength(0);
     });
 
     it('hides a band below a custom minBandHeight', () => {
       // pixelHeight = 4*4 = 16px < minBandHeight=20
-      const labels = compute(
-        [mockSeries('A', [{ y0: 0, y1: 4, time: 1000 }])],
-        { minBandHeight: 20, opacityFade: false }
-      );
+      const labels = compute([mockSeries('A', [{ y0: 0, y1: 4, time: 1000 }])], {
+        minBandHeight: 20,
+        opacityFade: false,
+      });
       expect(labels).toHaveLength(0);
     });
 
     it('shows a band above a custom minBandHeight', () => {
       // pixelHeight = 6*4 = 24px > minBandHeight=20
-      const labels = compute(
-        [mockSeries('A', [{ y0: 0, y1: 6, time: 1000 }])],
-        { minBandHeight: 20, opacityFade: false }
-      );
+      const labels = compute([mockSeries('A', [{ y0: 0, y1: 6, time: 1000 }])], {
+        minBandHeight: 20,
+        opacityFade: false,
+      });
       expect(labels).toHaveLength(1);
     });
   });
@@ -204,12 +210,10 @@ describe('computeBandLabels', () => {
 
     it('auto contrast picks dark text on a light band', () => {
       // rgb(200, 200, 200) luminance ≈ 0.78 → Grafana returns near-black
-      const labels = computeBandLabels(
-        oneBand, xScale, yScale,
-        () => 'rgb(200, 200, 200)',
-        innerWidth, innerHeight,
-        { ...defaultOptions, colorMode: BandLabelColor.AUTO }
-      );
+      const labels = computeBandLabels(oneBand, xScale, yScale, () => 'rgb(200, 200, 200)', innerWidth, innerHeight, {
+        ...defaultOptions,
+        colorMode: BandLabelColor.AUTO,
+      });
       expect(labels[0].color).toBe('rgb(32, 34, 38)');
     });
 

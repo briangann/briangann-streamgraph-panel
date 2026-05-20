@@ -53,7 +53,11 @@ test.describe('Streamgraph panel', () => {
     const newSchemes = ['Plasma', 'Inferno', 'Magma', 'Cool', 'Warm', 'Rainbow'];
 
     for (const scheme of newSchemes) {
-      test(`renders correctly with ${scheme} color scheme`, async ({ gotoPanelEditPage, readProvisionedDashboard, page }) => {
+      test(`renders correctly with ${scheme} color scheme`, async ({
+        gotoPanelEditPage,
+        readProvisionedDashboard,
+        page,
+      }) => {
         const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
         const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
         const content = page.getByTestId('data-testid panel content');
@@ -63,7 +67,11 @@ test.describe('Streamgraph panel', () => {
       });
     }
 
-    test('renders correctly with Grafana categorical palette', async ({ gotoPanelEditPage, readProvisionedDashboard, page }) => {
+    test('renders correctly with Grafana categorical palette', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
       const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
       const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');

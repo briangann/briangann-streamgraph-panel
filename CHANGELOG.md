@@ -19,8 +19,10 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 #### Color schemes
 
 - Added Plasma, Inferno, Magma, Cool, Warm, and Rainbow gradient palettes
-- Added Grafana palette — uses the current Grafana theme's series colors,
-  adapting automatically when switching between dark and light mode
+- Added 11 Grafana palette registry schemes: Classic (theme series colors),
+  Green-Yellow-Red, Red-Yellow-Green, Blue-Yellow-Red, Yellow-Red, Blue-Purple,
+  Yellow-Blue, Blues, Reds, Greens, and Purples — all adapt automatically to
+  Grafana's dark and light themes
 
 #### Band labels
 

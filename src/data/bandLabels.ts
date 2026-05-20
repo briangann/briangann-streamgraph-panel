@@ -100,7 +100,9 @@ export function computeBandLabels(
         }
       }
     }
-    if (maxIndices.length === 0) { continue; }
+    if (maxIndices.length === 0) {
+      continue;
+    }
     const maxIdx = maxIndices[Math.floor(maxIndices.length / 2)];
 
     const point = series[maxIdx];
