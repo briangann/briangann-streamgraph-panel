@@ -15,7 +15,18 @@ import {
   stackOrderNone,
 } from 'd3-shape';
 import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
-import { interpolateCividis, interpolateSpectral, interpolateTurbo, interpolateViridis } from 'd3-scale-chromatic';
+import {
+  interpolateCividis,
+  interpolateCool,
+  interpolateInferno,
+  interpolateMagma,
+  interpolatePlasma,
+  interpolateRainbow,
+  interpolateSpectral,
+  interpolateTurbo,
+  interpolateViridis,
+  interpolateWarm,
+} from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { DisplayValue } from '@grafana/data';
@@ -72,11 +83,17 @@ const CURVE_MAP = {
   [CurveType.STEP]: curveStep,
 };
 
-const SCHEME_MAP = {
+const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
   [ColorScheme.CIVIDIS]: interpolateCividis,
   [ColorScheme.TURBO]: interpolateTurbo,
   [ColorScheme.VIRIDIS]: interpolateViridis,
   [ColorScheme.SPECTRAL]: interpolateSpectral,
+  [ColorScheme.PLASMA]: interpolatePlasma,
+  [ColorScheme.INFERNO]: interpolateInferno,
+  [ColorScheme.MAGMA]: interpolateMagma,
+  [ColorScheme.COOL]: interpolateCool,
+  [ColorScheme.WARM]: interpolateWarm,
+  [ColorScheme.RAINBOW]: interpolateRainbow,
 };
 
 export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {

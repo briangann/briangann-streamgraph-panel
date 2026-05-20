@@ -66,6 +66,13 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
           { value: ColorScheme.TURBO, label: 'Turbo' },
           { value: ColorScheme.VIRIDIS, label: 'Viridis' },
           { value: ColorScheme.SPECTRAL, label: 'Spectral' },
+          { value: ColorScheme.PLASMA, label: 'Plasma' },
+          { value: ColorScheme.INFERNO, label: 'Inferno' },
+          { value: ColorScheme.MAGMA, label: 'Magma' },
+          { value: ColorScheme.COOL, label: 'Cool' },
+          { value: ColorScheme.WARM, label: 'Warm' },
+          { value: ColorScheme.RAINBOW, label: 'Rainbow' },
+          { value: ColorScheme.GRAFANA, label: 'Grafana' },
         ],
       },
     })
