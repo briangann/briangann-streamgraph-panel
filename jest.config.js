@@ -23,4 +23,5 @@ const additionalESModules = [
 module.exports = {
   ...require('./.config/jest.config'),
   transformIgnorePatterns: [nodeModulesToTransform([...grafanaESModules, ...additionalESModules])],
+  setupFiles: ['<rootDir>/jest-suppress-logs.js'],
 };
