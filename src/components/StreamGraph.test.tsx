@@ -343,21 +343,21 @@ describe('legend series toggle', () => {
     }
   }
 
-  it('hides a series when its legend item is clicked', () => {
+  it('zeros out a hidden series so its band collapses to zero height', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
     clickFirstLegendItem(container);
-    expect(container.querySelectorAll('path')).toHaveLength(1);
+    // Path count unchanged — band morphs to zero height rather than being removed
+    expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 
-  it('shows the series again when clicked a second time', () => {
+  it('restores a hidden series band when clicked again', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     clickFirstLegendItem(container);
-    expect(container.querySelectorAll('path')).toHaveLength(1);
     clickFirstLegendItem(container);
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });

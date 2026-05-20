@@ -188,21 +188,33 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [colorScale, data.seriesNames]
   );
 
-  const visibleSeriesNames = useMemo(
-    () => data.seriesNames.filter((name) => !hiddenSeries.has(name)),
-    [data.seriesNames, hiddenSeries]
+  // Zero out hidden series values instead of removing them from the stack.
+  // This keeps all series in D3's stack at all times so React Spring can animate
+  // each band's path from its current shape to the new zero-height shape.
+  const zeroedRows = useMemo(
+    () =>
+      hiddenSeries.size === 0
+        ? data.rows
+        : data.rows.map((row) => {
+            const result = { ...row };
+            hiddenSeries.forEach((name) => {
+              result[name] = 0;
+            });
+            return result;
+          }),
+    [data.rows, hiddenSeries]
   );
 
   const stackedData = useMemo(() => {
-    if (!data.rows.length || !visibleSeriesNames.length) {
+    if (!data.rows.length) {
       return [];
     }
     const stackGen = stack<Record<string, number>>()
-      .keys(visibleSeriesNames)
+      .keys(data.seriesNames)
       .offset(OFFSET_MAP[options.stackOffset])
       .order(ORDER_MAP[options.stackOrder]);
-    return stackGen(data.rows);
-  }, [data.rows, visibleSeriesNames, options.stackOffset, options.stackOrder]);
+    return stackGen(zeroedRows);
+  }, [zeroedRows, data.seriesNames, options.stackOffset, options.stackOrder]);
 
   const xScale = useMemo(
     () =>
