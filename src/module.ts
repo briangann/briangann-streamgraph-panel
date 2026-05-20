@@ -226,14 +226,14 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       name: 'Max width',
       description: 'Maximum width of the tooltip in pixels. Leave blank for automatic sizing.',
       category: ['Tooltip'],
-      settings: { placeholder: 'Auto' },
+      settings: { placeholder: 'Auto', min: 1 },
     })
     .addNumberInput({
       path: 'tooltip.maxHeight',
       name: 'Max height',
       description: 'Maximum height of the tooltip in pixels when showing all series. Leave blank for automatic sizing.',
       category: ['Tooltip'],
-      settings: { placeholder: 'Auto' },
+      settings: { placeholder: 'Auto', min: 1 },
     })
     .addBooleanSwitch({
       path: 'legend.showLegend',

@@ -364,7 +364,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
           <VizTooltip
             content={
               <div style={{ maxWidth: options.tooltip.maxWidth }}>
-                <div style={{ maxHeight: options.tooltip.maxHeight, overflowY: options.tooltip.maxHeight ? 'auto' : undefined }}>
+                <div
+                  style={
+                    options.tooltip.maxHeight
+                      ? { maxHeight: options.tooltip.maxHeight, overflowY: 'auto' }
+                      : undefined
+                  }
+                >
                   <SeriesTable
                     timestamp={dateTimeFormat(tooltip.timeValue, { timeZone: 'browser' })}
                     series={tooltip.seriesRows.map((r) => ({
