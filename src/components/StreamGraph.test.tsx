@@ -268,3 +268,68 @@ describe('tooltip', () => {
     expect(scrollWrapper?.style.overflowY).toBeFalsy();
   });
 });
+
+describe('hover dimming', () => {
+  function hoverFirstPath(container: HTMLElement) {
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+  }
+
+  it('dims non-hovered paths on hover', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    hoverFirstPath(container);
+    const paths = container.querySelectorAll('path');
+    // first path is the hovered series — keeps full fillOpacity
+    expect(paths[0].getAttribute('fill-opacity')).toBe(String(mockOptions.fillOpacity));
+    // second path is non-hovered — dimmed to hoverDimmingOpacity
+    expect(paths[1].getAttribute('fill-opacity')).toBe(String(mockOptions.hoverDimmingOpacity));
+  });
+
+  it('uses the configured hoverDimmingOpacity value', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, hoverDimmingOpacity: 0.1 }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    hoverFirstPath(container);
+    const paths = container.querySelectorAll('path');
+    expect(paths[1].getAttribute('fill-opacity')).toBe('0.1');
+  });
+
+  it('does not dim when hoverDimming is off', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, hoverDimming: false }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    hoverFirstPath(container);
+    const paths = container.querySelectorAll('path');
+    // all paths keep full fillOpacity when dimming is disabled
+    paths.forEach((path) => {
+      expect(path.getAttribute('fill-opacity')).toBe(String(mockOptions.fillOpacity));
+    });
+  });
+
+  it('restores full opacity on mouse leave', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    const firstPath = container.querySelector('path')!;
+    hoverFirstPath(container);
+    fireEvent.mouseLeave(firstPath);
+    const paths = container.querySelectorAll('path');
+    paths.forEach((path) => {
+      expect(path.getAttribute('fill-opacity')).toBe(String(mockOptions.fillOpacity));
+    });
+  });
+});
