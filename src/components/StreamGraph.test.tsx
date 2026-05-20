@@ -366,21 +366,63 @@ describe('legend series toggle', () => {
 });
 
 describe('transitions', () => {
-  it('renders paths when enableTransitions is true', () => {
+  // Use immediate mode (enableTransitions: false) so spring d values apply
+  // synchronously in JSDOM without a requestAnimationFrame loop.
+  const immediateOptions = { ...mockOptions, enableTransitions: false };
+
+  function clickFirstLegendItem(container: HTMLElement) {
+    const button = container.querySelector('[data-testid*="VizLegend series"] button');
+    if (button) {
+      fireEvent.click(button);
+    }
+  }
+
+  it('all paths remain in DOM when a series is hidden', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
     );
-    // @react-spring/web animated.path renders as a regular <path> in JSDOM
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+    clickFirstLegendItem(container);
+    // zeroedRows keeps all series in the stack — path count unchanged
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 
-  it('renders paths when enableTransitions is false', () => {
+  it('hidden series legend item is marked disabled after click', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+    );
+    const legendWrapper = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    expect(legendWrapper?.className).not.toContain('Disabled');
+    clickFirstLegendItem(container);
+    const legendWrapperAfter = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    // VizLegend applies itemDisabled class when disabled=true
+    expect(legendWrapperAfter?.className).toContain('Disabled');
+  });
+
+  it('legend item re-enables when clicked again', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+    );
+    clickFirstLegendItem(container);
+    clickFirstLegendItem(container);
+    const legendWrapper = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    expect(legendWrapper?.className).not.toContain('Disabled');
+  });
+
+  it('renders without errors with enableTransitions true', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+
+  it('renders without errors at minimum transitionDuration', () => {
     const { container } = render(
       <StreamGraph
         data={mockData}
         width={800}
         height={400}
-        options={{ ...mockOptions, enableTransitions: false }}
+        options={{ ...mockOptions, transitionDuration: 100 }}
         seriesCalcs={emptyCalcs}
       />
     );

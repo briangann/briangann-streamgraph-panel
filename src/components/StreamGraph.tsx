@@ -293,7 +293,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     () =>
       stackedData.map((series) => ({
         to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
-        config: options.enableTransitions ? { duration: options.transitionDuration } : { duration: 0 },
+        immediate: !options.enableTransitions,
+        config: { duration: options.transitionDuration },
       })),
     [stackedData, areaGen, options.enableTransitions, options.transitionDuration]
   );
