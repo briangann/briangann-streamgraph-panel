@@ -345,17 +345,16 @@ describe('legend series toggle', () => {
     }
   }
 
-  it('zeros out a hidden series so its band collapses to zero height', () => {
+  it('all paths remain in DOM when a series is hidden (band zeroes rather than disappears)', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
     clickFirstLegendItem(container);
-    // Path count unchanged — band morphs to zero height rather than being removed
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 
-  it('restores a hidden series band when clicked again', () => {
+  it('all paths remain in DOM after toggling a series twice', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
