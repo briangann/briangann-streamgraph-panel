@@ -137,7 +137,7 @@ describe('color schemes', () => {
     });
   });
 
-  it('renders without crashing with grafana color scheme (fallback until theme integration)', () => {
+  it('renders without crashing with Grafana categorical scheme', () => {
     const { container } = render(
       <StreamGraph
         data={mockData}

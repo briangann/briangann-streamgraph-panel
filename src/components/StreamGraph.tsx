@@ -27,7 +27,7 @@ import {
   interpolateViridis,
   interpolateWarm,
 } from 'd3-scale-chromatic';
-import { SeriesTable, VizLegend, VizTooltip } from '@grafana/ui';
+import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { DisplayValue } from '@grafana/data';
 
@@ -127,13 +127,23 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     return () => resizeObserver.disconnect();
   }, []);
 
+  const theme = useTheme2();
+
   const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
-  const colorScale = useMemo(
-    () => scaleSequential(SCHEME_MAP[options.colorScheme] ?? interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]),
-    [options.colorScheme, data.seriesNames.length]
-  );
+  const colorScale = useMemo((): ((i: number) => string) => {
+    if (options.colorScheme === ColorScheme.GRAFANA) {
+      const palette = theme.visualization.palette;
+      if (!palette || palette.length === 0) {
+        return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
+      }
+      const resolvedColors = palette.map((name) => theme.visualization.getColorByName(name));
+      return (i: number) => resolvedColors[Math.round(i) % resolvedColors.length];
+    }
+    const interpolator = SCHEME_MAP[options.colorScheme] ?? interpolateCividis;
+    return scaleSequential(interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
+  }, [options.colorScheme, data.seriesNames.length, theme]);
 
   const stackedData = useMemo(() => {
     if (!data.rows.length) {
