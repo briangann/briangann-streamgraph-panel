@@ -100,6 +100,13 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       defaultValue: true,
     })
     .addBooleanSwitch({
+      path: 'showCrosshair',
+      name: 'Show crosshair',
+      description: 'Show a vertical line that follows the cursor to align the tooltip with the time axis.',
+      category: ['Axis'],
+      defaultValue: true,
+    })
+    .addBooleanSwitch({
       path: 'showBandLabels',
       name: 'Show labels',
       description: 'Render each series name inside its band at the widest visible point.',

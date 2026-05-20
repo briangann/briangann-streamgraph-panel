@@ -60,6 +60,7 @@ export interface StreamgraphOptions {
   colorScheme: ColorScheme;
   fillOpacity: number;
   showXAxis: boolean;
+  showCrosshair: boolean;
   showBandLabels: boolean;
   bandLabelColor: BandLabelColor;
   bandLabelMinFontSize: number;

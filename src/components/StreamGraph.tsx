@@ -55,6 +55,7 @@ interface TooltipState {
   visible: boolean;
   clientX: number;
   clientY: number;
+  svgX: number;
   timeValue: number;
   hoveredSeries: string;
   seriesRows: SeriesRow[];
@@ -104,6 +105,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     visible: false,
     clientX: 0,
     clientY: 0,
+    svgX: 0,
     timeValue: 0,
     hoveredSeries: '',
     seriesRows: [],
@@ -293,7 +295,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         ) {
           return previousTooltip;
         }
-        return { visible: true, clientX: event.clientX, clientY: event.clientY, timeValue, hoveredSeries, seriesRows };
+        return { visible: true, clientX: event.clientX, clientY: event.clientY, svgX: mouseX, timeValue, hoveredSeries, seriesRows };
       });
     },
     [xScale, stackedData, colorScale, options.tooltip, data.seriesNames]
@@ -338,6 +340,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 onMouseLeave={handlePathMouseLeave}
               />
             ))}
+            {options.showCrosshair && tooltip.visible && (
+              <line
+                x1={tooltip.svgX}
+                x2={tooltip.svgX}
+                y1={0}
+                y2={innerHeight}
+                stroke="currentColor"
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            )}
             {options.showXAxis && <XAxis xScale={xScale} innerWidth={innerWidth} innerHeight={innerHeight} />}
             {bandLabels.map((label) => (
               <text

@@ -21,6 +21,7 @@ const mockOptions: StreamgraphOptions = {
   colorScheme: ColorScheme.CIVIDIS,
   fillOpacity: 0.8,
   showXAxis: true,
+  showCrosshair: true,
   showBandLabels: false,
   bandLabelColor: BandLabelColor.INVERSE,
   bandLabelMinFontSize: 8,
