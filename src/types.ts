@@ -25,6 +25,13 @@ export enum ColorScheme {
   TURBO = 'turbo',
   VIRIDIS = 'viridis',
   SPECTRAL = 'spectral',
+  PLASMA = 'plasma',
+  INFERNO = 'inferno',
+  MAGMA = 'magma',
+  COOL = 'cool',
+  WARM = 'warm',
+  RAINBOW = 'rainbow',
+  GRAFANA = 'grafana',
 }
 
 export enum BandLabelColor {
