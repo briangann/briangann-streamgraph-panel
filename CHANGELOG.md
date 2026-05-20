@@ -30,6 +30,13 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 - Vertical cursor line appears on hover to align the tooltip position with the
   time axis; toggle on or off in the Axis section of the panel editor (default on)
 
+#### Legend series toggle
+
+- Clicking a legend item hides that series; clicking again shows it
+- Hidden series are grayed out in the legend
+- Colors remain consistent — each series keeps its color regardless of which
+  other series are hidden
+
 #### Hover dimming
 
 - Non-hovered bands dim when hovering to highlight the active series, matching

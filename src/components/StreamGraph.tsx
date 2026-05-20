@@ -112,6 +112,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     seriesRows: [],
   });
 
+  const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
+
+  const toggleSeries = useCallback((item: { label: string }) => {
+    setHiddenSeries((previousHidden) => {
+      const next = new Set(previousHidden);
+      if (next.has(item.label)) {
+        next.delete(item.label);
+      } else {
+        next.add(item.label);
+      }
+      return next;
+    });
+  }, []);
+
   const legendVisible = options.legend.showLegend && options.legend.displayMode !== LegendDisplayMode.Hidden;
   const legendBottom = legendVisible && options.legend.placement === 'bottom';
 
@@ -168,16 +182,27 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
   }, [options.colorScheme, data.seriesNames.length, theme]);
 
+  // Color by original series index so each series keeps the same color when others are hidden.
+  const seriesColor = useCallback(
+    (seriesName: string) => colorScale(Math.max(0, data.seriesNames.indexOf(seriesName))),
+    [colorScale, data.seriesNames]
+  );
+
+  const visibleSeriesNames = useMemo(
+    () => data.seriesNames.filter((name) => !hiddenSeries.has(name)),
+    [data.seriesNames, hiddenSeries]
+  );
+
   const stackedData = useMemo(() => {
-    if (!data.rows.length) {
+    if (!data.rows.length || !visibleSeriesNames.length) {
       return [];
     }
     const stackGen = stack<Record<string, number>>()
-      .keys(data.seriesNames)
+      .keys(visibleSeriesNames)
       .offset(OFFSET_MAP[options.stackOffset])
       .order(ORDER_MAP[options.stackOrder]);
     return stackGen(data.rows);
-  }, [data.rows, data.seriesNames, options.stackOffset, options.stackOrder]);
+  }, [data.rows, visibleSeriesNames, options.stackOffset, options.stackOrder]);
 
   const xScale = useMemo(
     () =>
@@ -224,7 +249,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       stackedData,
       (time: number) => xScale(time),
       (val: number) => yScale(val),
-      (i: number) => colorScale(i),
+      (i: number) => seriesColor((stackedData[i] as any).key as string),
       innerWidth,
       innerHeight,
       {
@@ -240,7 +265,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     stackedData,
     xScale,
     yScale,
-    colorScale,
+    seriesColor,
     options.showBandLabels,
     options.bandLabelColor,
     options.bandLabelMinFontSize,
@@ -271,12 +296,11 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
       let seriesRows: SeriesRow[];
       if (options.tooltip.mode === TooltipDisplayMode.Single) {
-        const idx = data.seriesNames.indexOf(hoveredSeries);
-        seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: colorScale(idx) }];
+        seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) }];
       } else {
-        seriesRows = stackedData.map((s, i) => {
+        seriesRows = stackedData.map((s) => {
           const name = (s as any).key as string;
-          return { seriesName: name, value: closest.data[name] ?? 0, color: colorScale(i) };
+          return { seriesName: name, value: closest.data[name] ?? 0, color: seriesColor(name) };
         });
         if (options.tooltip.hideZeros) {
           seriesRows = seriesRows.filter((r) => r.value !== 0);
@@ -308,7 +332,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, colorScale, options.tooltip, data.seriesNames]
+    [xScale, stackedData, seriesColor, options.tooltip]
   );
 
   const handlePathMouseLeave = useCallback(() => {
@@ -316,12 +340,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   }, []);
 
   const vizLegendItems = legendVisible
-    ? data.seriesNames.map((name, i) => {
+    ? data.seriesNames.map((name) => {
         const calcs = seriesCalcs.get(name);
         return {
           label: name,
-          color: colorScale(i),
+          color: seriesColor(name),
           yAxis: 1,
+          disabled: hiddenSeries.has(name),
           getDisplayValues: calcs ? () => calcs : undefined,
         };
       })
@@ -347,7 +372,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 <path
                   key={seriesName}
                   d={areaGen(series as unknown as StackDatum[]) ?? ''}
-                  fill={colorScale(i)}
+                  fill={seriesColor(seriesName)}
                   fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
                   style={PATH_TRANSITION_STYLE}
                   onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
@@ -420,6 +445,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
           items={vizLegendItems}
           displayMode={options.legend.displayMode}
           placement={options.legend.placement}
+          onLabelClick={toggleSeries}
         />
       )}
     </div>
