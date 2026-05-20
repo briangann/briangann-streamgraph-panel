@@ -363,7 +363,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         {tooltip.visible && (
           <VizTooltip
             content={
-              <div style={{ maxWidth: options.tooltip.maxWidth }}>
+              <div style={options.tooltip.maxWidth ? { maxWidth: options.tooltip.maxWidth } : undefined}>
                 <div
                   style={
                     options.tooltip.maxHeight
