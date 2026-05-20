@@ -333,3 +333,32 @@ describe('hover dimming', () => {
     });
   });
 });
+
+describe('legend series toggle', () => {
+  function clickFirstLegendItem(container: HTMLElement) {
+    // VizLegendListItem renders a <button> inside the testid wrapper; click the button.
+    const button = container.querySelector('[data-testid*="VizLegend series"] button');
+    if (button) {
+      fireEvent.click(button);
+    }
+  }
+
+  it('hides a series when its legend item is clicked', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+    clickFirstLegendItem(container);
+    expect(container.querySelectorAll('path')).toHaveLength(1);
+  });
+
+  it('shows the series again when clicked a second time', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    clickFirstLegendItem(container);
+    expect(container.querySelectorAll('path')).toHaveLength(1);
+    clickFirstLegendItem(container);
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+});
