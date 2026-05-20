@@ -293,9 +293,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     stackedData.length,
     stackedData.map((series) => ({
       to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
-      config: options.enableTransitions
-        ? { duration: options.transitionDuration }
-        : { duration: 0 },
+      config: options.enableTransitions ? { duration: options.transitionDuration } : { duration: 0 },
     }))
   );
 
@@ -318,7 +316,9 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
       let seriesRows: SeriesRow[];
       if (options.tooltip.mode === TooltipDisplayMode.Single) {
-        seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) }];
+        seriesRows = [
+          { seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) },
+        ];
       } else {
         seriesRows = stackedData.map((s) => {
           const name = (s as any).key as string;
