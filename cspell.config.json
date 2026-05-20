@@ -16,13 +16,18 @@
     "test-results/**"
   ],
   "words": [
+    "Briangann",
+    "CIVIDIS",
+    "Cividis",
+    "Flot",
+    "SVGG",
+    "SVGSVG",
+    "Streamgraph",
+    "VIRIDIS",
+    "Viridis",
     "bgann",
     "briangann",
-    "Briangann",
     "cividis",
-    "Cividis",
-    "CIVIDIS",
-    "Flot",
     "funcs",
     "internmap",
     "mouseleave",
@@ -30,15 +35,11 @@
     "negotiables",
     "rgba",
     "streamgraph",
-    "Streamgraph",
-    "SVGG",
-    "SVGSVG",
     "subresource",
     "unparseable",
+    "unrecognised",
     "unrequested",
-    "viridis",
-    "Viridis",
-    "VIRIDIS"
+    "viridis"
   ],
   "enabled": true
 }
