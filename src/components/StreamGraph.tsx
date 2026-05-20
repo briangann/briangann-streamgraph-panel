@@ -63,6 +63,7 @@ interface TooltipState {
 
 const MARGIN = { top: 10, right: 10, left: 10 };
 const AXIS_HEIGHT = 30;
+const PATH_TRANSITION_STYLE = { transition: 'fill-opacity 150ms ease' };
 
 const OFFSET_MAP = {
   [StackOffset.WIGGLE]: stackOffsetWiggle,
@@ -348,7 +349,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                   d={areaGen(series as unknown as StackDatum[]) ?? ''}
                   fill={colorScale(i)}
                   fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
-                  style={{ transition: 'fill-opacity 150ms ease' }}
+                  style={PATH_TRANSITION_STYLE}
                   onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
                   onMouseLeave={handlePathMouseLeave}
                 />
