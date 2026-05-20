@@ -55,7 +55,7 @@ test.describe('Streamgraph panel', () => {
       readProvisionedDashboard,
       page,
     }) => {
-      const dashboard = await readProvisionedDashboard({ fileName: 'interactions.json' });
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
       await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
       await expect(content.locator('svg path')).toHaveCount(5);
@@ -72,7 +72,7 @@ test.describe('Streamgraph panel', () => {
       readProvisionedDashboard,
       page,
     }) => {
-      const dashboard = await readProvisionedDashboard({ fileName: 'interactions.json' });
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
       await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
 
@@ -91,7 +91,7 @@ test.describe('Streamgraph panel', () => {
       readProvisionedDashboard,
       page,
     }) => {
-      const dashboard = await readProvisionedDashboard({ fileName: 'interactions.json' });
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
       await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
 
@@ -112,7 +112,7 @@ test.describe('Streamgraph panel', () => {
       readProvisionedDashboard,
       page,
     }) => {
-      const dashboard = await readProvisionedDashboard({ fileName: 'interactions.json' });
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
       const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
 
