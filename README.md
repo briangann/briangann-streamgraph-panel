@@ -63,6 +63,22 @@ Everything lives in the panel editor sidebar:
 
 † Only visible when **Show labels** is enabled.
 
+## Contributing
+
+Build commands, code style, branching policy, and PR conventions are documented
+in [AGENTS.md](AGENTS.md). That file is the single source of truth for contributor
+setup and is also read by AI coding assistants.
+
+Quick start:
+
+```bash
+npm ci           # install dependencies
+npm run dev      # dev build with watch + livereload
+npm run server   # start Grafana via Docker on localhost:3000
+npm run test:ci  # unit tests
+npm run lint     # ESLint
+```
+
 ## License
 
 Apache 2.0
