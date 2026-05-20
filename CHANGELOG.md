@@ -16,6 +16,12 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Color schemes
+
+- Added Plasma, Inferno, Magma, Cool, Warm, and Rainbow gradient palettes
+- Added Grafana palette — uses the current Grafana theme's series colors,
+  adapting automatically when switching between dark and light mode
+
 #### Band labels
 
 - Configurable label color: Inverse (default), Auto (contrast), White, Black
