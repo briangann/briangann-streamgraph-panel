@@ -68,6 +68,9 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 #### Tooltip
 
+- Tooltip now shows the hovered timestamp as a header above the series rows
+- Added Max width and Max height options to control tooltip size; useful when
+  showing many series in All series mode
 - Single (hovered series), All series, or Hidden
 - Sort order (Ascending/Descending/None) in All series mode
 - Hide zeros toggle in All series mode
