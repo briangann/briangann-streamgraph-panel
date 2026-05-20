@@ -289,13 +289,16 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     innerHeight,
   ]);
 
-  const pathSprings = useSprings(
-    stackedData.length,
-    stackedData.map((series) => ({
-      to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
-      config: options.enableTransitions ? { duration: options.transitionDuration } : { duration: 0 },
-    }))
+  const springConfigs = useMemo(
+    () =>
+      stackedData.map((series) => ({
+        to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
+        config: options.enableTransitions ? { duration: options.transitionDuration } : { duration: 0 },
+      })),
+    [stackedData, areaGen, options.enableTransitions, options.transitionDuration]
   );
+
+  const pathSprings = useSprings(stackedData.length, springConfigs);
 
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
