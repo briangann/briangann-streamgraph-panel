@@ -291,11 +291,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         if (
           previousTooltip.visible &&
           previousTooltip.timeValue === timeValue &&
-          previousTooltip.hoveredSeries === hoveredSeries
+          previousTooltip.hoveredSeries === hoveredSeries &&
+          previousTooltip.svgX === mouseX
         ) {
           return previousTooltip;
         }
-        return { visible: true, clientX: event.clientX, clientY: event.clientY, svgX: mouseX, timeValue, hoveredSeries, seriesRows };
+        return {
+          visible: true,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          svgX: mouseX,
+          timeValue,
+          hoveredSeries,
+          seriesRows,
+        };
       });
     },
     [xScale, stackedData, colorScale, options.tooltip, data.seriesNames]
@@ -380,9 +389,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
               <div style={options.tooltip.maxWidth ? { maxWidth: options.tooltip.maxWidth } : undefined}>
                 <div
                   style={
-                    options.tooltip.maxHeight
-                      ? { maxHeight: options.tooltip.maxHeight, overflowY: 'auto' }
-                      : undefined
+                    options.tooltip.maxHeight ? { maxHeight: options.tooltip.maxHeight, overflowY: 'auto' } : undefined
                   }
                 >
                   <SeriesTable
