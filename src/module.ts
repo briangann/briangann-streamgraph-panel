@@ -221,6 +221,20 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       defaultValue: false,
       showIf: (config) => config.tooltip?.mode === TooltipDisplayMode.Multi,
     })
+    .addNumberInput({
+      path: 'tooltip.maxWidth',
+      name: 'Max width',
+      description: 'Maximum width of the tooltip in pixels. Leave blank for automatic sizing.',
+      category: ['Tooltip'],
+      settings: { placeholder: 'Auto' },
+    })
+    .addNumberInput({
+      path: 'tooltip.maxHeight',
+      name: 'Max height',
+      description: 'Maximum height of the tooltip in pixels when showing all series. Leave blank for automatic sizing.',
+      category: ['Tooltip'],
+      settings: { placeholder: 'Auto' },
+    })
     .addBooleanSwitch({
       path: 'legend.showLegend',
       name: 'Show legend',
