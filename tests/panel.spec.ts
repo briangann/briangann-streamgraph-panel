@@ -54,7 +54,7 @@ test.describe('Streamgraph panel', () => {
 
     for (const scheme of newSchemes) {
       test(`renders correctly with ${scheme} color scheme`, async ({ gotoPanelEditPage, readProvisionedDashboard, page }) => {
-        const dashboard = await readProvisionedDashboard({ fileName: 'dashboard.json' });
+        const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
         const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
         const content = page.getByTestId('data-testid panel content');
         await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption(scheme);
@@ -64,7 +64,7 @@ test.describe('Streamgraph panel', () => {
     }
 
     test('renders correctly with Grafana categorical palette', async ({ gotoPanelEditPage, readProvisionedDashboard, page }) => {
-      const dashboard = await readProvisionedDashboard({ fileName: 'dashboard.json' });
+      const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
       const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
       await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption('Grafana');
