@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSprings, animated } from '@react-spring/web';
 import {
   area,
   curveBasis,
@@ -63,7 +64,6 @@ interface TooltipState {
 
 const MARGIN = { top: 10, right: 10, left: 10 };
 const AXIS_HEIGHT = 30;
-const PATH_TRANSITION_STYLE = { transition: 'fill-opacity 150ms ease' };
 
 const OFFSET_MAP = {
   [StackOffset.WIGGLE]: stackOffsetWiggle,
@@ -289,6 +289,16 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     innerHeight,
   ]);
 
+  const pathSprings = useSprings(
+    stackedData.length,
+    stackedData.map((series) => ({
+      to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
+      config: options.enableTransitions
+        ? { duration: options.transitionDuration }
+        : { duration: 0 },
+    }))
+  );
+
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
       if (options.tooltip.mode === TooltipDisplayMode.None) {
@@ -377,16 +387,17 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg width={svgSize.width} height={svgSize.height}>
           <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-            {stackedData.map((series, i) => {
+            {pathSprings.map((springProps, i) => {
+              const series = stackedData[i];
               const seriesName = (series as any).key as string;
               const isDimmed = options.hoverDimming && tooltip.visible && tooltip.hoveredSeries !== seriesName;
               return (
-                <path
+                <animated.path
                   key={seriesName}
-                  d={areaGen(series as unknown as StackDatum[]) ?? ''}
+                  d={springProps.d}
                   fill={seriesColor(seriesName)}
                   fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
-                  style={PATH_TRANSITION_STYLE}
+                  style={{ transition: 'fill-opacity 150ms ease' }}
                   onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
                   onMouseLeave={handlePathMouseLeave}
                 />
