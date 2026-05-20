@@ -143,7 +143,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     }
     const interpolator = SCHEME_MAP[options.colorScheme] ?? interpolateCividis;
     return scaleSequential(interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-  }, [options.colorScheme, data.seriesNames.length, theme.name]);
+  }, [options.colorScheme, data.seriesNames.length, theme.visualization]);
 
   const stackedData = useMemo(() => {
     if (!data.rows.length) {
