@@ -10,10 +10,11 @@ and this project adheres to
 
 ## [Unreleased]
 
-Band label rendering, React SVG migration, and a provisioned demo dashboard.
-Earlier work: project scaffolding, Node/npm pinning, lint tooling, Jest setup,
-and code quality improvements replacing hand-rolled UI with Grafana SDK
-components.
+Full interactive streamgraph: band labels, 21 color schemes with Grafana palette
+registry, tooltip timestamp header and size controls, vertical crosshair, hover
+dimming, legend series toggle, and animated band transitions via React Spring.
+Earlier work: project scaffolding, React SVG migration, Grafana SDK integration,
+and performance improvements.
 
 ### Build / Tooling
 
@@ -32,6 +33,8 @@ components.
 #### Jest
 
 - Added `ResizeObserver` mock for JSDOM test environment
+- Added jest-suppress-logs.js via setupFiles to silence the i18next/Locize
+  marketing banner that printed on every test run
 
 #### Dependabot
 
@@ -49,6 +52,26 @@ components.
 - Added useTheme2 hook to support theme-aware Grafana categorical palette
 - Color scale computation split into sequential gradient path and categorical
   palette path
+- Grafana registry path uses getFieldColorMode with a minimal fakeField object
+  and try/catch fallback to Cividis for unrecognised scheme IDs
+- hiddenSeries state and toggleSeries callback drive legend series toggle
+- zeroedRows useMemo zeroes hidden series values rather than removing them from
+  the stack, keeping all series in D3 at all times for smooth animation
+- seriesColor helper maps by original series name index for consistent colors
+  regardless of which other series are hidden
+- springConfigs useMemo wraps useSprings configuration to avoid per-render
+  array allocation; immediate: true bypasses animation loop when transitions
+  are disabled
+- Crosshair cursor line: svgX field added to TooltipState, rendered as SVG
+  line element; state guard includes svgX so crosshair tracks every pixel of
+  cursor movement
+
+#### bandLabels.ts
+
+- parseRgb replaced with colorManipulator.decomposeColor from @grafana/data
+- autoContrastColor replaced with getTextColorForBackground from @grafana/ui
+- strokeColor added to BandLabel; precomputed once in computeBandLabels rather
+  than on every render
 
 #### E2E tests
 
@@ -113,6 +136,11 @@ components.
 - Prepared plugin for React 19 compatibility; enabled React 19 E2E preview in CI
 
 ### Dependencies
+
+#### @react-spring/web
+
+- Added for animated band path transitions; `useSprings` animates SVG `d`
+  attribute between stack reflows without D3 DOM manipulation
 
 #### D3
 
