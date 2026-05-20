@@ -167,7 +167,7 @@ describe('tooltip', () => {
     fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
   }
 
-  it('does not render tooltip rows before any hover', () => {
+  it('renders tooltip rows after hovering a path', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
