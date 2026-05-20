@@ -202,21 +202,21 @@ describe('computeBandLabels', () => {
       expect(labels[0].color).toBe('rgb(0, 0, 0)');
     });
 
-    it('auto contrast picks black on a light band', () => {
-      // rgb(200, 200, 200) luminance ≈ 0.78 → dark text
+    it('auto contrast picks dark text on a light band', () => {
+      // rgb(200, 200, 200) luminance ≈ 0.78 → Grafana returns near-black
       const labels = computeBandLabels(
         oneBand, xScale, yScale,
         () => 'rgb(200, 200, 200)',
         innerWidth, innerHeight,
         { ...defaultOptions, colorMode: BandLabelColor.AUTO }
       );
-      expect(labels[0].color).toBe('rgb(0, 0, 0)');
+      expect(labels[0].color).toBe('rgb(32, 34, 38)');
     });
 
-    it('auto contrast picks white on a dark band', () => {
-      // rgb(0, 32, 81) luminance ≈ 0.09 → light text
+    it('auto contrast picks light text on a dark band', () => {
+      // rgb(0, 32, 81) luminance ≈ 0.09 → Grafana returns near-white
       const labels = compute(oneBand, { colorMode: BandLabelColor.AUTO });
-      expect(labels[0].color).toBe('rgb(255, 255, 255)');
+      expect(labels[0].color).toBe('rgb(247, 248, 250)');
     });
   });
 
