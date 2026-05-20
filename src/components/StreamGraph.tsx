@@ -29,7 +29,7 @@ import {
 } from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { DisplayValue } from '@grafana/data';
+import { DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
@@ -133,17 +133,36 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
   const colorScale = useMemo((): ((i: number) => string) => {
-    if (options.colorScheme === ColorScheme.GRAFANA) {
-      const palette = theme.visualization.palette;
-      if (!palette || palette.length === 0) {
-        return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-      }
-      const resolvedColors = palette.map((name) => theme.visualization.getColorByName(name));
-      return (i: number) => resolvedColors[Math.round(i) % resolvedColors.length];
+    const d3Interpolator = SCHEME_MAP[options.colorScheme];
+    if (d3Interpolator) {
+      return scaleSequential(d3Interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
     }
-    const interpolator = SCHEME_MAP[options.colorScheme] ?? interpolateCividis;
-    return scaleSequential(interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-  }, [options.colorScheme, data.seriesNames.length, theme.visualization]);
+    // Grafana registry path — scheme value matches FieldColorModeId string directly
+    try {
+      const mode = getFieldColorMode(options.colorScheme);
+      if (mode.isContinuous) {
+        const fakeField = {
+          config: { color: { mode: options.colorScheme } },
+          state: {},
+          values: [],
+          name: '',
+          type: FieldType.number,
+        } as unknown as Field;
+        const calculator = mode.getCalculator(fakeField, theme);
+        const total = Math.max(1, data.seriesNames.length - 1);
+        return (i: number) => calculator(i, i / total);
+      }
+      if (mode.getColors) {
+        const colors = mode.getColors(theme);
+        if (colors.length > 0) {
+          return (i: number) => colors[Math.round(i) % colors.length];
+        }
+      }
+    } catch {
+      // unknown scheme — fall through to default
+    }
+    return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
+  }, [options.colorScheme, data.seriesNames.length, theme]);
 
   const stackedData = useMemo(() => {
     if (!data.rows.length) {

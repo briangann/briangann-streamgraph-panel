@@ -67,7 +67,7 @@ test.describe('Streamgraph panel', () => {
       const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
       const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
-      await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption('Grafana');
+      await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption('Classic');
       await expect(content.locator('svg')).toBeVisible();
       await expect(content.locator('svg path')).toHaveCount(5);
     });

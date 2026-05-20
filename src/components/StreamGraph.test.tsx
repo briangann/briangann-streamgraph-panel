@@ -143,7 +143,7 @@ describe('color schemes', () => {
         data={mockData}
         width={800}
         height={400}
-        options={{ ...mockOptions, colorScheme: ColorScheme.GRAFANA }}
+        options={{ ...mockOptions, colorScheme: ColorScheme.GRAFANA_CLASSIC }}
         seriesCalcs={emptyCalcs}
       />
     );
