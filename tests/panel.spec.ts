@@ -86,7 +86,7 @@ test.describe('Streamgraph panel', () => {
       expect(dAfter).not.toBe(dBefore);
     });
 
-    test('clicking legend item again restores the band', async ({
+    test('clicking legend item again re-enables the series in the legend', async ({
       gotoPanelEditPage,
       readProvisionedDashboard,
       page,
@@ -94,17 +94,16 @@ test.describe('Streamgraph panel', () => {
       const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
       await gotoPanelEditPage({ dashboard, id: '1' });
       const content = page.getByTestId('data-testid panel content');
+      const legendItem = content.getByTestId(/VizLegend series/).first();
 
-      const dOriginal = await content.locator('svg path').first().getAttribute('d');
-      const legendButton = content.getByTestId(/VizLegend series/).first().locator('button');
-
-      await legendButton.click();
+      await legendItem.locator('button').click();
       await page.waitForTimeout(450);
-      await legendButton.click();
-      await page.waitForTimeout(450);
+      // Emotion appends the label 'LegendLabelDisabled' to the class when disabled
+      expect(await legendItem.getAttribute('class')).toContain('Disabled');
 
-      const dRestored = await content.locator('svg path').first().getAttribute('d');
-      expect(dRestored).toBe(dOriginal);
+      await legendItem.locator('button').click();
+      await page.waitForTimeout(450);
+      expect(await legendItem.getAttribute('class')).not.toContain('Disabled');
     });
 
     test('disabling transitions makes legend toggle instant', async ({
