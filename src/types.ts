@@ -60,6 +60,7 @@ export interface StreamgraphOptions {
   colorScheme: ColorScheme;
   fillOpacity: number;
   showXAxis: boolean;
+  showCrosshair: boolean;
   showBandLabels: boolean;
   bandLabelColor: BandLabelColor;
   bandLabelMinFontSize: number;
@@ -72,6 +73,8 @@ export interface StreamgraphOptions {
     mode: TooltipDisplayMode;
     sort: SortOrder;
     hideZeros: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
   };
   legend: {
     showLegend: boolean;

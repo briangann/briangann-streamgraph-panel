@@ -100,6 +100,13 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       defaultValue: true,
     })
     .addBooleanSwitch({
+      path: 'showCrosshair',
+      name: 'Show crosshair',
+      description: 'Show a vertical line that follows the cursor to align the tooltip with the time axis.',
+      category: ['Axis'],
+      defaultValue: true,
+    })
+    .addBooleanSwitch({
       path: 'showBandLabels',
       name: 'Show labels',
       description: 'Render each series name inside its band at the widest visible point.',
@@ -220,6 +227,20 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       category: ['Tooltip'],
       defaultValue: false,
       showIf: (config) => config.tooltip?.mode === TooltipDisplayMode.Multi,
+    })
+    .addNumberInput({
+      path: 'tooltip.maxWidth',
+      name: 'Max width',
+      description: 'Maximum width of the tooltip in pixels. Leave blank for automatic sizing.',
+      category: ['Tooltip'],
+      settings: { placeholder: 'Auto', min: 1 },
+    })
+    .addNumberInput({
+      path: 'tooltip.maxHeight',
+      name: 'Max height',
+      description: 'Maximum height of the tooltip in pixels when showing all series. Leave blank for automatic sizing.',
+      category: ['Tooltip'],
+      settings: { placeholder: 'Auto', min: 1 },
     })
     .addBooleanSwitch({
       path: 'legend.showLegend',

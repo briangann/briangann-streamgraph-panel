@@ -29,7 +29,7 @@ import {
 } from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
+import { dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
@@ -55,6 +55,7 @@ interface TooltipState {
   visible: boolean;
   clientX: number;
   clientY: number;
+  svgX: number;
   timeValue: number;
   hoveredSeries: string;
   seriesRows: SeriesRow[];
@@ -104,6 +105,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     visible: false,
     clientX: 0,
     clientY: 0,
+    svgX: 0,
     timeValue: 0,
     hoveredSeries: '',
     seriesRows: [],
@@ -289,11 +291,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         if (
           previousTooltip.visible &&
           previousTooltip.timeValue === timeValue &&
-          previousTooltip.hoveredSeries === hoveredSeries
+          previousTooltip.hoveredSeries === hoveredSeries &&
+          previousTooltip.svgX === mouseX
         ) {
           return previousTooltip;
         }
-        return { visible: true, clientX: event.clientX, clientY: event.clientY, timeValue, hoveredSeries, seriesRows };
+        return {
+          visible: true,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          svgX: mouseX,
+          timeValue,
+          hoveredSeries,
+          seriesRows,
+        };
       });
     },
     [xScale, stackedData, colorScale, options.tooltip, data.seriesNames]
@@ -338,6 +349,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 onMouseLeave={handlePathMouseLeave}
               />
             ))}
+            {options.showCrosshair && tooltip.visible && (
+              <line
+                x1={tooltip.svgX}
+                x2={tooltip.svgX}
+                y1={0}
+                y2={innerHeight}
+                stroke="currentColor"
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            )}
             {options.showXAxis && <XAxis xScale={xScale} innerWidth={innerWidth} innerHeight={innerHeight} />}
             {bandLabels.map((label) => (
               <text
@@ -363,14 +386,23 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         {tooltip.visible && (
           <VizTooltip
             content={
-              <SeriesTable
-                series={tooltip.seriesRows.map((r) => ({
-                  color: r.color,
-                  label: r.seriesName,
-                  value: r.value.toFixed(2),
-                  isActive: r.seriesName === tooltip.hoveredSeries,
-                }))}
-              />
+              <div style={options.tooltip.maxWidth ? { maxWidth: options.tooltip.maxWidth } : undefined}>
+                <div
+                  style={
+                    options.tooltip.maxHeight ? { maxHeight: options.tooltip.maxHeight, overflowY: 'auto' } : undefined
+                  }
+                >
+                  <SeriesTable
+                    timestamp={dateTimeFormat(tooltip.timeValue, { timeZone: 'browser' })}
+                    series={tooltip.seriesRows.map((r) => ({
+                      color: r.color,
+                      label: r.seriesName,
+                      value: r.value.toFixed(2),
+                      isActive: r.seriesName === tooltip.hoveredSeries,
+                    }))}
+                  />
+                </div>
+              </div>
             }
             position={{ x: tooltip.clientX, y: tooltip.clientY }}
             offset={{ x: 10, y: 10 }}

@@ -16,6 +16,20 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Tooltip
+
+- Tooltip shows the hovered timestamp as a header above the series rows
+- Added Max width and Max height options to control tooltip size; useful when
+  showing many series in All series mode
+- Single (hovered series), All series, or Hidden modes
+- Sort order (Ascending/Descending/None) in All series mode
+- Hide zeros toggle in All series mode
+
+#### Crosshair
+
+- Vertical cursor line appears on hover to align the tooltip position with the
+  time axis; toggle on or off in the Axis section of the panel editor (default on)
+
 #### Color schemes
 
 - Added Plasma, Inferno, Magma, Cool, Warm, and Rainbow gradient palettes
@@ -65,12 +79,6 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 - Table mode: configurable calc columns (min, max, mean, sum, count, first,
   last, etc.), defaults to min, max, mean, last non-null
 - Dynamic sizing — legend takes natural space, chart fills the remainder
-
-#### Tooltip
-
-- Single (hovered series), All series, or Hidden
-- Sort order (Ascending/Descending/None) in All series mode
-- Hide zeros toggle in All series mode
 
 ### Bug fixes
 
