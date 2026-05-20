@@ -29,7 +29,7 @@ const mockOptions: StreamgraphOptions = {
   bandLabelFontScaleFactor: 0.7,
   bandLabelStrokeWidth: 0,
   bandLabelOpacityFade: true,
-  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false },
+  tooltip: { mode: TooltipDisplayMode.Single, sort: SortOrder.None, hideZeros: false, maxWidth: undefined, maxHeight: undefined },
   legend: { showLegend: true, placement: 'bottom' as const, displayMode: LegendDisplayMode.List, calcs: [] },
 };
 
