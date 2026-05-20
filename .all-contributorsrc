@@ -1,0 +1,16 @@
+{
+  "projectName": "briangann-streamgraph-panel",
+  "projectOwner": "briangann",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "contributors": [
+    {
+      "login": "briangann",
+      "name": "Brian Gann",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7364245?v=4",
+      "profile": "https://github.com/briangann",
+      "contributions": ["code", "doc", "maintenance"]
+    }
+  ],
+  "contributorsPerLine": 7
+}
