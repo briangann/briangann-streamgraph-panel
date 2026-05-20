@@ -21,10 +21,29 @@ export enum CurveType {
 }
 
 export enum ColorScheme {
+  // D3 gradients (d3-scale-chromatic)
   CIVIDIS = 'cividis',
   TURBO = 'turbo',
   VIRIDIS = 'viridis',
   SPECTRAL = 'spectral',
+  PLASMA = 'plasma',
+  INFERNO = 'inferno',
+  MAGMA = 'magma',
+  COOL = 'cool',
+  WARM = 'warm',
+  RAINBOW = 'rainbow',
+  // Grafana palette registry (values match FieldColorModeId for direct lookup)
+  GRAFANA_CLASSIC = 'palette-classic',
+  GRAFANA_GR_YL_RD = 'continuous-GrYlRd',
+  GRAFANA_RD_YL_GR = 'continuous-RdYlGr',
+  GRAFANA_BL_YL_RD = 'continuous-BlYlRd',
+  GRAFANA_YL_RD = 'continuous-YlRd',
+  GRAFANA_BL_PU = 'continuous-BlPu',
+  GRAFANA_YL_BL = 'continuous-YlBl',
+  GRAFANA_BLUES = 'continuous-blues',
+  GRAFANA_REDS = 'continuous-reds',
+  GRAFANA_GREENS = 'continuous-greens',
+  GRAFANA_PURPLES = 'continuous-purples',
 }
 
 export enum BandLabelColor {

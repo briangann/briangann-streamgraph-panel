@@ -16,6 +16,14 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Color schemes
+
+- Added Plasma, Inferno, Magma, Cool, Warm, and Rainbow gradient palettes
+- Added 11 Grafana palette registry schemes: Classic (theme series colors),
+  Green-Yellow-Red, Red-Yellow-Green, Blue-Yellow-Red, Yellow-Red, Blue-Purple,
+  Yellow-Blue, Blues, Reds, Greens, and Purples — all adapt automatically to
+  Grafana's dark and light themes
+
 #### Band labels
 
 - Configurable label color: Inverse (default), Auto (contrast), White, Black

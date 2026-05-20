@@ -110,3 +110,44 @@ describe('StreamGraph', () => {
     expect(container).toMatchSnapshot();
   });
 });
+
+describe('color schemes', () => {
+  const schemeOptions = [
+    ColorScheme.PLASMA,
+    ColorScheme.INFERNO,
+    ColorScheme.MAGMA,
+    ColorScheme.COOL,
+    ColorScheme.WARM,
+    ColorScheme.RAINBOW,
+  ];
+
+  schemeOptions.forEach((scheme) => {
+    it(`renders without crashing with ${scheme} color scheme`, () => {
+      const { container } = render(
+        <StreamGraph
+          data={mockData}
+          width={800}
+          height={400}
+          options={{ ...mockOptions, colorScheme: scheme }}
+          seriesCalcs={emptyCalcs}
+        />
+      );
+      expect(container.querySelector('svg')).toBeInTheDocument();
+      expect(container.querySelectorAll('path')).toHaveLength(2);
+    });
+  });
+
+  it('renders without crashing with Grafana categorical scheme', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, colorScheme: ColorScheme.GRAFANA_CLASSIC }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
+    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+});

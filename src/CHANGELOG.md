@@ -44,6 +44,12 @@ components.
 - Updated `build-plugin`, `bundle-size`, `create-plugin-update`,
   `wait-for-grafana` to latest versions
 
+#### StreamGraph.tsx
+
+- Added useTheme2 hook to support theme-aware Grafana categorical palette
+- Color scale computation split into sequential gradient path and categorical
+  palette path
+
 #### E2E tests
 
 - Replaced scaffold tests with streamgraph smoke tests
@@ -52,6 +58,14 @@ components.
 
 ### Code Quality
 
+#### bandLabels.ts
+
+- Replaced custom luminance-based contrast function with Grafana's built-in
+  text color utility from @grafana/ui — behavior is consistent with the rest
+  of Grafana's UI
+- Replaced custom RGB string parser with Grafana's color decomposition utility
+  from @grafana/data
+
 #### StreamGraph.tsx / Axis.tsx
 
 - Migrated from D3 DOM manipulation to React SVG rendering — D3 is now
@@ -59,14 +73,6 @@ components.
 - Removed `d3-selection`; bundle size dropped ~32 KiB
 - Resize no longer tears down and rebuilds the SVG, eliminating label flicker
 - X axis rewritten as a React component
-
-#### bandLabels.ts
-
-- New module containing all band label placement logic, isolated from rendering
-  and covered by 18 unit tests
-- Label color, font sizing, band height threshold, opacity fade, and font scale
-  are all user-configurable with safe fallbacks for invalid values
-- All tuning values are named constants with comments explaining their purpose
 
 #### types.ts
 

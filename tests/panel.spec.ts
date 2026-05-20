@@ -48,4 +48,36 @@ test.describe('Streamgraph panel', () => {
     const content = page.getByTestId('data-testid panel content');
     await expect(content.locator('svg .x-axis')).toBeVisible();
   });
+
+  test.describe('color schemes', () => {
+    const newSchemes = ['Plasma', 'Inferno', 'Magma', 'Cool', 'Warm', 'Rainbow'];
+
+    for (const scheme of newSchemes) {
+      test(`renders correctly with ${scheme} color scheme`, async ({
+        gotoPanelEditPage,
+        readProvisionedDashboard,
+        page,
+      }) => {
+        const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
+        const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
+        const content = page.getByTestId('data-testid panel content');
+        await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption(scheme);
+        await expect(content.locator('svg')).toBeVisible();
+        await expect(content.locator('svg path')).toHaveCount(5);
+      });
+    }
+
+    test('renders correctly with Grafana categorical palette', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
+      const dashboard = await readProvisionedDashboard({ fileName: 'band-labels.json' });
+      const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
+      const content = page.getByTestId('data-testid panel content');
+      await panelEditPage.getCustomOptions('Streamgraph').getSelect('Color scheme').selectOption('Classic');
+      await expect(content.locator('svg')).toBeVisible();
+      await expect(content.locator('svg path')).toHaveCount(5);
+    });
+  });
 });

@@ -1,25 +1,14 @@
 import { BandLabelColor } from '../types';
-
-const RGB_REGEX = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
-
-function parseRgb(rgb: string): [number, number, number] | null {
-  const match = rgb.match(RGB_REGEX);
-  if (!match) { return null; }
-  return [Number(match[1]), Number(match[2]), Number(match[3])];
-}
+import { getTextColorForBackground } from '@grafana/ui';
+import { colorManipulator } from '@grafana/data';
 
 export function invertColor(rgb: string): string {
-  const channels = parseRgb(rgb);
-  if (!channels) { return 'rgb(255, 255, 255)'; }
-  return `rgb(${255 - channels[0]}, ${255 - channels[1]}, ${255 - channels[2]})`;
-}
-
-// ITU-R BT.601 perceived luminance — >0.5 means band is light, use dark text
-function autoContrastColor(rgb: string): string {
-  const channels = parseRgb(rgb);
-  if (!channels) { return 'rgb(255, 255, 255)'; }
-  const luminance = (0.299 * channels[0] + 0.587 * channels[1] + 0.114 * channels[2]) / 255;
-  return luminance > 0.5 ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
+  try {
+    const { values } = colorManipulator.decomposeColor(rgb);
+    return `rgb(${255 - values[0]}, ${255 - values[1]}, ${255 - values[2]})`;
+  } catch {
+    return 'rgb(255, 255, 255)';
+  }
 }
 
 const DEFAULT_MIN_FONT = 8;
@@ -111,7 +100,9 @@ export function computeBandLabels(
         }
       }
     }
-    if (maxIndices.length === 0) { continue; }
+    if (maxIndices.length === 0) {
+      continue;
+    }
     const maxIdx = maxIndices[Math.floor(maxIndices.length / 2)];
 
     const point = series[maxIdx];
@@ -188,7 +179,7 @@ export function computeBandLabels(
         color = 'rgb(0, 0, 0)';
         break;
       case BandLabelColor.AUTO:
-        color = autoContrastColor(bandColor);
+        color = getTextColorForBackground(bandColor);
         break;
       default:
         color = invertColor(bandColor); // INVERSE

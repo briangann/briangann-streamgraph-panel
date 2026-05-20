@@ -15,10 +15,21 @@ import {
   stackOrderNone,
 } from 'd3-shape';
 import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
-import { interpolateCividis, interpolateSpectral, interpolateTurbo, interpolateViridis } from 'd3-scale-chromatic';
-import { SeriesTable, VizLegend, VizTooltip } from '@grafana/ui';
+import {
+  interpolateCividis,
+  interpolateCool,
+  interpolateInferno,
+  interpolateMagma,
+  interpolatePlasma,
+  interpolateRainbow,
+  interpolateSpectral,
+  interpolateTurbo,
+  interpolateViridis,
+  interpolateWarm,
+} from 'd3-scale-chromatic';
+import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { DisplayValue } from '@grafana/data';
+import { DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
@@ -72,11 +83,17 @@ const CURVE_MAP = {
   [CurveType.STEP]: curveStep,
 };
 
-const SCHEME_MAP = {
+const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
   [ColorScheme.CIVIDIS]: interpolateCividis,
   [ColorScheme.TURBO]: interpolateTurbo,
   [ColorScheme.VIRIDIS]: interpolateViridis,
   [ColorScheme.SPECTRAL]: interpolateSpectral,
+  [ColorScheme.PLASMA]: interpolatePlasma,
+  [ColorScheme.INFERNO]: interpolateInferno,
+  [ColorScheme.MAGMA]: interpolateMagma,
+  [ColorScheme.COOL]: interpolateCool,
+  [ColorScheme.WARM]: interpolateWarm,
+  [ColorScheme.RAINBOW]: interpolateRainbow,
 };
 
 export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {
@@ -110,13 +127,43 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     return () => resizeObserver.disconnect();
   }, []);
 
+  const theme = useTheme2();
+
   const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
-  const colorScale = useMemo(
-    () => scaleSequential(SCHEME_MAP[options.colorScheme]).domain([0, Math.max(1, data.seriesNames.length - 1)]),
-    [options.colorScheme, data.seriesNames.length]
-  );
+  const colorScale = useMemo((): ((i: number) => string) => {
+    const d3Interpolator = SCHEME_MAP[options.colorScheme];
+    if (d3Interpolator) {
+      return scaleSequential(d3Interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
+    }
+    // Grafana registry path — scheme value matches FieldColorModeId string directly
+    try {
+      const mode = getFieldColorMode(options.colorScheme);
+      if (mode.isContinuous) {
+        const fakeField = {
+          config: { color: { mode: options.colorScheme } },
+          state: {},
+          values: [],
+          name: '',
+          type: FieldType.number,
+        } as unknown as Field;
+        const calculator = mode.getCalculator(fakeField, theme);
+        const total = Math.max(1, data.seriesNames.length - 1);
+        return (i: number) => calculator(i, i / total);
+      }
+      if (mode.getColors) {
+        const colors = mode.getColors(theme);
+        if (colors.length > 0) {
+          return (i: number) => colors[Math.floor(i) % colors.length];
+        }
+      }
+    } catch {
+      // getFieldColorMode throws for unrecognised IDs; any other registry error
+      // also falls back to the default rather than crashing the panel
+    }
+    return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
+  }, [options.colorScheme, data.seriesNames.length, theme]);
 
   const stackedData = useMemo(() => {
     if (!data.rows.length) {
