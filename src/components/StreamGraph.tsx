@@ -155,11 +155,12 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       if (mode.getColors) {
         const colors = mode.getColors(theme);
         if (colors.length > 0) {
-          return (i: number) => colors[Math.round(i) % colors.length];
+          return (i: number) => colors[Math.floor(i) % colors.length];
         }
       }
     } catch {
-      // unknown scheme — fall through to default
+      // getFieldColorMode throws for unrecognised IDs; any other registry error
+      // also falls back to the default rather than crashing the panel
     }
     return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
   }, [options.colorScheme, data.seriesNames.length, theme]);
