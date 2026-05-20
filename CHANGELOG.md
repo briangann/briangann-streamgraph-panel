@@ -16,6 +16,12 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Animated transitions
+
+- Band paths now animate smoothly when series are hidden or shown via the legend,
+  and when new data arrives — configurable via Enable transitions toggle and
+  Transition duration slider in the Streamgraph section
+
 #### Tooltip
 
 - Tooltip shows the hovered timestamp as a header above the series rows

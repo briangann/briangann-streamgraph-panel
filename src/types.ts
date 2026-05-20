@@ -59,6 +59,8 @@ export interface StreamgraphOptions {
   curveType: CurveType;
   colorScheme: ColorScheme;
   fillOpacity: number;
+  enableTransitions: boolean;
+  transitionDuration: number;
   showXAxis: boolean;
   showCrosshair: boolean;
   hoverDimming: boolean;

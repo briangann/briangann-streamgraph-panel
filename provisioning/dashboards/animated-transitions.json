@@ -1,0 +1,112 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "grafana-testdata-datasource", "uid": "trlxrdZVk" },
+      "description": "Click legend items to hide and show series — bands animate smoothly to and from zero height",
+      "gridPos": { "h": 14, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "stackOffset": "wiggle",
+        "stackOrder": "insideOut",
+        "curveType": "smooth",
+        "colorScheme": "turbo",
+        "fillOpacity": 0.8,
+        "showXAxis": true,
+        "showCrosshair": true,
+        "hoverDimming": true,
+        "hoverDimmingOpacity": 0.3,
+        "enableTransitions": true,
+        "transitionDuration": 300,
+        "showBandLabels": true,
+        "bandLabelColor": "inverse",
+        "bandLabelMinFontSize": 8,
+        "bandLabelMaxFontSize": 48,
+        "bandLabelMinBandHeight": 8,
+        "bandLabelFontScaleFactor": 0.7,
+        "bandLabelStrokeWidth": 0,
+        "bandLabelOpacityFade": true,
+        "tooltip": { "mode": "multi", "sort": "descending", "hideZeros": false },
+        "legend": { "showLegend": true, "placement": "bottom", "displayMode": "list", "calcs": [] }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-testdata-datasource", "uid": "trlxrdZVk" },
+          "refId": "A",
+          "scenarioId": "csv_content",
+          "csvContent": "Time,Alpha,Beta,Gamma,Delta,Epsilon\n1704067200000,10,10,10,40,10\n1704069000000,30,10,10,40,10\n1704070800000,80,15,10,40,10\n1704072600000,60,20,10,40,10\n1704074400000,40,50,15,40,10\n1704076200000,30,90,25,40,10\n1704078000000,20,70,45,40,15\n1704079800000,15,40,75,40,20\n1704081600000,10,25,90,40,30\n1704083400000,10,15,65,40,50\n1704085200000,10,10,35,40,70\n1704087000000,10,10,20,40,90\n1704088800000,10,10,10,40,80"
+        }
+      ],
+      "title": "Animated Transitions (300 ms) — click legend to toggle",
+      "type": "briangann-streamgraph-panel"
+    },
+    {
+      "datasource": { "type": "grafana-testdata-datasource", "uid": "trlxrdZVk" },
+      "description": "Transitions disabled — toggle is instant for comparison",
+      "gridPos": { "h": 14, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "stackOffset": "wiggle",
+        "stackOrder": "insideOut",
+        "curveType": "smooth",
+        "colorScheme": "turbo",
+        "fillOpacity": 0.8,
+        "showXAxis": true,
+        "showCrosshair": true,
+        "hoverDimming": true,
+        "hoverDimmingOpacity": 0.3,
+        "enableTransitions": false,
+        "transitionDuration": 300,
+        "showBandLabels": false,
+        "bandLabelColor": "inverse",
+        "bandLabelMinFontSize": 8,
+        "bandLabelMaxFontSize": 48,
+        "bandLabelMinBandHeight": 8,
+        "bandLabelFontScaleFactor": 0.7,
+        "bandLabelStrokeWidth": 0,
+        "bandLabelOpacityFade": true,
+        "tooltip": { "mode": "multi", "sort": "descending", "hideZeros": false },
+        "legend": { "showLegend": true, "placement": "bottom", "displayMode": "list", "calcs": [] }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-testdata-datasource", "uid": "trlxrdZVk" },
+          "refId": "A",
+          "scenarioId": "csv_content",
+          "csvContent": "Time,Alpha,Beta,Gamma,Delta,Epsilon\n1704067200000,10,10,10,40,10\n1704069000000,30,10,10,40,10\n1704070800000,80,15,10,40,10\n1704072600000,60,20,10,40,10\n1704074400000,40,50,15,40,10\n1704076200000,30,90,25,40,10\n1704078000000,20,70,45,40,15\n1704079800000,15,40,75,40,20\n1704081600000,10,25,90,40,30\n1704083400000,10,15,65,40,50\n1704085200000,10,10,35,40,70\n1704087000000,10,10,20,40,90\n1704088800000,10,10,10,40,80"
+        }
+      ],
+      "title": "No Transitions — instant toggle for comparison",
+      "type": "briangann-streamgraph-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 39,
+  "tags": [],
+  "templating": { "list": [] },
+  "time": { "from": "2024-01-01T00:00:00.000Z", "to": "2024-01-01T06:00:00.000Z" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Animated Transitions Demo",
+  "uid": "streamgraph-transitions",
+  "version": 1,
+  "weekStart": ""
+}

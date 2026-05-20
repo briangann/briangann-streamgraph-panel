@@ -49,6 +49,82 @@ test.describe('Streamgraph panel', () => {
     await expect(content.locator('svg .x-axis')).toBeVisible();
   });
 
+  test.describe('legend series toggle and transitions', () => {
+    test('clicking a legend item keeps all paths in DOM (band collapses to zero height)', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
+      await gotoPanelEditPage({ dashboard, id: '1' });
+      const content = page.getByTestId('data-testid panel content');
+      await expect(content.locator('svg path')).toHaveCount(5);
+
+      // Click first legend item to hide that series
+      await content.getByTestId(/VizLegend series/).first().locator('button').click();
+
+      // Path count unchanged — band morphs to zero height, not removed
+      await expect(content.locator('svg path')).toHaveCount(5);
+    });
+
+    test('hidden series band path d attribute changes after animation completes', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
+      await gotoPanelEditPage({ dashboard, id: '1' });
+      const content = page.getByTestId('data-testid panel content');
+
+      const dBefore = await content.locator('svg path').first().getAttribute('d');
+
+      await content.getByTestId(/VizLegend series/).first().locator('button').click();
+      // Wait for 300ms default transition + buffer
+      await page.waitForTimeout(450);
+
+      const dAfter = await content.locator('svg path').first().getAttribute('d');
+      expect(dAfter).not.toBe(dBefore);
+    });
+
+    test('clicking legend item again re-enables the series in the legend', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
+      await gotoPanelEditPage({ dashboard, id: '1' });
+      const content = page.getByTestId('data-testid panel content');
+      const legendItem = content.getByTestId(/VizLegend series/).first();
+
+      await legendItem.locator('button').click();
+      await page.waitForTimeout(450);
+      // Emotion appends the label 'LegendLabelDisabled' to the class when disabled
+      expect(await legendItem.getAttribute('class')).toContain('Disabled');
+
+      await legendItem.locator('button').click();
+      await page.waitForTimeout(450);
+      expect(await legendItem.getAttribute('class')).not.toContain('Disabled');
+    });
+
+    test('disabling transitions makes legend toggle instant', async ({
+      gotoPanelEditPage,
+      readProvisionedDashboard,
+      page,
+    }) => {
+      const dashboard = await readProvisionedDashboard({ fileName: 'animated-transitions.json' });
+      const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
+      const content = page.getByTestId('data-testid panel content');
+
+      await panelEditPage.getCustomOptions('Streamgraph').getSwitch('Enable transitions').uncheck();
+
+      const dBefore = await content.locator('svg path').first().getAttribute('d');
+      await content.getByTestId(/VizLegend series/).first().locator('button').click();
+      // No wait needed — immediate mode
+      const dAfter = await content.locator('svg path').first().getAttribute('d');
+      expect(dAfter).not.toBe(dBefore);
+    });
+  });
+
   test.describe('color schemes', () => {
     const newSchemes = ['Plasma', 'Inferno', 'Magma', 'Cool', 'Warm', 'Rainbow'];
 

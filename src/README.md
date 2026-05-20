@@ -46,56 +46,56 @@ Grafana 12.3.0+
 
 ### Streamgraph
 
-| Option | Values | Default |
-| --- | --- | --- |
-| Stack offset | Wiggle, Silhouette, Zero, Expand | Wiggle |
-| Stack order | Inside out, Ascending, Descending, None | Inside out |
-| Curve type | Smooth, Linear, Step | Smooth |
-| Color scheme | 21 options across D3 Gradients and Grafana Palettes groups | Cividis |
-| Fill opacity | 0–1 | 0.8 |
-| Dim on hover | on/off | on |
-| Dim opacity | 0–1 — opacity of non-hovered bands | 0.3 |
+| Option       | Values                                                     | Default    |
+| ------------ | ---------------------------------------------------------- | ---------- |
+| Stack offset | Wiggle, Silhouette, Zero, Expand                           | Wiggle     |
+| Stack order  | Inside out, Ascending, Descending, None                    | Inside out |
+| Curve type   | Smooth, Linear, Step                                       | Smooth     |
+| Color scheme | 21 options across D3 Gradients and Grafana Palettes groups | Cividis    |
+| Fill opacity | 0–1                                                        | 0.8        |
+| Dim on hover | on/off                                                     | on         |
+| Dim opacity  | 0–1 — opacity of non-hovered bands                         | 0.3        |
 
 ### Axis
 
-| Option | Values | Default |
-| --- | --- | --- |
-| Show X axis | on/off | on |
-| Show crosshair | on/off | on |
+| Option         | Values | Default |
+| -------------- | ------ | ------- |
+| Show X axis    | on/off | on      |
+| Show crosshair | on/off | on      |
 
 ### Band Labels
 
 All band label options are hidden until **Show labels** is enabled.
 
-| Option | Values | Default |
-| --- | --- | --- |
-| Show labels | on/off | off |
-| Label color | Inverse, Auto (contrast), White, Black | Inverse |
-| Min font size | px | 8 |
-| Max font size | px | 48 |
-| Min band height | px — bands narrower than this are unlabeled | 8 |
-| Font scale | 0.1–1.5 | 0.7 |
-| Stroke width | 0–3 px | 0 |
-| Opacity fade | on/off | on |
+| Option          | Values                                      | Default |
+| --------------- | ------------------------------------------- | ------- |
+| Show labels     | on/off                                      | off     |
+| Label color     | Inverse, Auto (contrast), White, Black      | Inverse |
+| Min font size   | px                                          | 8       |
+| Max font size   | px                                          | 48      |
+| Min band height | px — bands narrower than this are unlabeled | 8       |
+| Font scale      | 0.1–1.5                                     | 0.7     |
+| Stroke width    | 0–3 px                                      | 0       |
+| Opacity fade    | on/off                                      | on      |
 
 ### Tooltip
 
-| Option | Values | Default |
-| --- | --- | --- |
-| Tooltip mode | Single, All series, Hidden | Single |
-| Sort order | None, Ascending, Descending | None |
-| Hide zeros | on/off | off |
-| Max width | px, blank = automatic | — |
-| Max height | px, blank = automatic | — |
+| Option       | Values                      | Default |
+| ------------ | --------------------------- | ------- |
+| Tooltip mode | Single, All series, Hidden  | Single  |
+| Sort order   | None, Ascending, Descending | None    |
+| Hide zeros   | on/off                      | off     |
+| Max width    | px, blank = automatic       | —       |
+| Max height   | px, blank = automatic       | —       |
 
 ### Legend
 
-| Option | Values | Default |
-| --- | --- | --- |
-| Show legend | on/off | on |
-| Legend mode | List, Table | List |
-| Legend placement | Bottom, Right | Bottom |
-| Legend values | Min, Max, Mean, Sum, Count, First, Last, etc. | — |
+| Option           | Values                                        | Default |
+| ---------------- | --------------------------------------------- | ------- |
+| Show legend      | on/off                                        | on      |
+| Legend mode      | List, Table                                   | List    |
+| Legend placement | Bottom, Right                                 | Bottom  |
+| Legend values    | Min, Max, Mean, Sum, Count, First, Last, etc. | —       |
 
 ## Contributing
 

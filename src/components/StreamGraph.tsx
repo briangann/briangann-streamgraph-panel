@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSprings, animated } from '@react-spring/web';
 import {
   area,
   curveBasis,
@@ -63,7 +64,6 @@ interface TooltipState {
 
 const MARGIN = { top: 10, right: 10, left: 10 };
 const AXIS_HEIGHT = 30;
-const PATH_TRANSITION_STYLE = { transition: 'fill-opacity 150ms ease' };
 
 const OFFSET_MAP = {
   [StackOffset.WIGGLE]: stackOffsetWiggle,
@@ -188,21 +188,33 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [colorScale, data.seriesNames]
   );
 
-  const visibleSeriesNames = useMemo(
-    () => data.seriesNames.filter((name) => !hiddenSeries.has(name)),
-    [data.seriesNames, hiddenSeries]
+  // Zero out hidden series values instead of removing them from the stack.
+  // This keeps all series in D3's stack at all times so React Spring can animate
+  // each band's path from its current shape to the new zero-height shape.
+  const zeroedRows = useMemo(
+    () =>
+      hiddenSeries.size === 0
+        ? data.rows
+        : data.rows.map((row) => {
+            const result = { ...row };
+            hiddenSeries.forEach((name) => {
+              result[name] = 0;
+            });
+            return result;
+          }),
+    [data.rows, hiddenSeries]
   );
 
   const stackedData = useMemo(() => {
-    if (!data.rows.length || !visibleSeriesNames.length) {
+    if (!zeroedRows.length) {
       return [];
     }
     const stackGen = stack<Record<string, number>>()
-      .keys(visibleSeriesNames)
+      .keys(data.seriesNames)
       .offset(OFFSET_MAP[options.stackOffset])
       .order(ORDER_MAP[options.stackOrder]);
-    return stackGen(data.rows);
-  }, [data.rows, visibleSeriesNames, options.stackOffset, options.stackOrder]);
+    return stackGen(zeroedRows);
+  }, [zeroedRows, data.seriesNames, options.stackOffset, options.stackOrder]);
 
   const xScale = useMemo(
     () =>
@@ -277,6 +289,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     innerHeight,
   ]);
 
+  const springConfigs = useMemo(
+    () =>
+      stackedData.map((series) => ({
+        to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
+        immediate: !options.enableTransitions,
+        config: { duration: options.transitionDuration },
+      })),
+    [stackedData, areaGen, options.enableTransitions, options.transitionDuration]
+  );
+
+  const pathSprings = useSprings(stackedData.length, springConfigs);
+
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
       if (options.tooltip.mode === TooltipDisplayMode.None) {
@@ -296,7 +320,9 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
       let seriesRows: SeriesRow[];
       if (options.tooltip.mode === TooltipDisplayMode.Single) {
-        seriesRows = [{ seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) }];
+        seriesRows = [
+          { seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) },
+        ];
       } else {
         seriesRows = stackedData.map((s) => {
           const name = (s as any).key as string;
@@ -365,16 +391,17 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg width={svgSize.width} height={svgSize.height}>
           <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-            {stackedData.map((series, i) => {
+            {pathSprings.map((springProps, i) => {
+              const series = stackedData[i];
               const seriesName = (series as any).key as string;
               const isDimmed = options.hoverDimming && tooltip.visible && tooltip.hoveredSeries !== seriesName;
               return (
-                <path
+                <animated.path
                   key={seriesName}
-                  d={areaGen(series as unknown as StackDatum[]) ?? ''}
+                  d={springProps.d}
                   fill={seriesColor(seriesName)}
                   fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
-                  style={PATH_TRANSITION_STYLE}
+                  style={{ transition: 'fill-opacity 150ms ease' }}
                   onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
                   onMouseLeave={handlePathMouseLeave}
                 />

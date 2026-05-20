@@ -24,6 +24,8 @@ const mockOptions: StreamgraphOptions = {
   showCrosshair: true,
   hoverDimming: true,
   hoverDimmingOpacity: 0.3,
+  enableTransitions: true,
+  transitionDuration: 300,
   showBandLabels: false,
   bandLabelColor: BandLabelColor.INVERSE,
   bandLabelMinFontSize: 8,
@@ -343,22 +345,86 @@ describe('legend series toggle', () => {
     }
   }
 
-  it('hides a series when its legend item is clicked', () => {
+  it('all paths remain in DOM when a series is hidden (band zeroes rather than disappears)', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
     clickFirstLegendItem(container);
-    expect(container.querySelectorAll('path')).toHaveLength(1);
+    expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 
-  it('shows the series again when clicked a second time', () => {
+  it('all paths remain in DOM after toggling a series twice', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
     );
     clickFirstLegendItem(container);
-    expect(container.querySelectorAll('path')).toHaveLength(1);
     clickFirstLegendItem(container);
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+});
+
+describe('transitions', () => {
+  // Use immediate mode (enableTransitions: false) so spring d values apply
+  // synchronously in JSDOM without a requestAnimationFrame loop.
+  const immediateOptions = { ...mockOptions, enableTransitions: false };
+
+  function clickFirstLegendItem(container: HTMLElement) {
+    const button = container.querySelector('[data-testid*="VizLegend series"] button');
+    if (button) {
+      fireEvent.click(button);
+    }
+  }
+
+  it('all paths remain in DOM when a series is hidden', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+    );
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+    clickFirstLegendItem(container);
+    // zeroedRows keeps all series in the stack — path count unchanged
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+
+  it('hidden series legend item is marked disabled after click', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+    );
+    const legendWrapper = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    expect(legendWrapper?.className).not.toContain('Disabled');
+    clickFirstLegendItem(container);
+    const legendWrapperAfter = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    // VizLegend applies itemDisabled class when disabled=true
+    expect(legendWrapperAfter?.className).toContain('Disabled');
+  });
+
+  it('legend item re-enables when clicked again', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+    );
+    clickFirstLegendItem(container);
+    clickFirstLegendItem(container);
+    const legendWrapper = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
+    expect(legendWrapper?.className).not.toContain('Disabled');
+  });
+
+  it('renders without errors with enableTransitions true', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+    );
+    expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+
+  it('renders without errors at minimum transitionDuration', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, transitionDuration: 100 }}
+        seriesCalcs={emptyCalcs}
+      />
+    );
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });
 });
