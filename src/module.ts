@@ -94,6 +94,22 @@ export const plugin = new PanelPlugin<StreamgraphOptions>(StreamGraphPanel).setP
       settings: { min: 0, max: 1, step: 0.1 },
     })
     .addBooleanSwitch({
+      path: 'hoverDimming',
+      name: 'Dim on hover',
+      description: 'Dim non-hovered bands when hovering to highlight the active series.',
+      category: ['Streamgraph'],
+      defaultValue: true,
+    })
+    .addSliderInput({
+      path: 'hoverDimmingOpacity',
+      name: 'Dim opacity',
+      description: 'Opacity of non-hovered bands when dimming is active.',
+      category: ['Streamgraph'],
+      defaultValue: 0.3,
+      showIf: (config) => config.hoverDimming,
+      settings: { min: 0, max: 1, step: 0.05 },
+    })
+    .addBooleanSwitch({
       path: 'showXAxis',
       name: 'Show X axis',
       category: ['Axis'],

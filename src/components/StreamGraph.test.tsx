@@ -22,6 +22,8 @@ const mockOptions: StreamgraphOptions = {
   fillOpacity: 0.8,
   showXAxis: true,
   showCrosshair: true,
+  hoverDimming: true,
+  hoverDimmingOpacity: 0.3,
   showBandLabels: false,
   bandLabelColor: BandLabelColor.INVERSE,
   bandLabelMinFontSize: 8,
