@@ -45,18 +45,19 @@ const mockOptions: StreamgraphOptions = {
 };
 
 const emptyCalcs = new Map<string, Array<import('@grafana/data').DisplayValue>>();
+const noopTimeRange = () => {};
 
 describe('StreamGraph', () => {
   it('renders an SVG element', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
   it('SVG has the expected width attribute', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     const svg = container.querySelector('svg')!;
     expect(Number(svg.getAttribute('width'))).toBeGreaterThan(0);
@@ -64,7 +65,7 @@ describe('StreamGraph', () => {
 
   it('renders legend items when showLegend is true', () => {
     const { getByText } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(getByText('A')).toBeInTheDocument();
     expect(getByText('B')).toBeInTheDocument();
@@ -78,6 +79,7 @@ describe('StreamGraph', () => {
         height={400}
         options={{ ...mockOptions, legend: { ...mockOptions.legend, showLegend: false } }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     expect(queryByText('A')).not.toBeInTheDocument();
@@ -91,6 +93,7 @@ describe('StreamGraph', () => {
         height={400}
         options={{ ...mockOptions, showBandLabels: true }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     const texts = Array.from(container.querySelectorAll('svg text'));
@@ -107,6 +110,7 @@ describe('StreamGraph', () => {
         height={400}
         options={{ ...mockOptions, showBandLabels: false }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     const texts = Array.from(container.querySelectorAll('svg text'));
@@ -116,7 +120,7 @@ describe('StreamGraph', () => {
 
   it('matches snapshot', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(container).toMatchSnapshot();
   });
@@ -141,6 +145,7 @@ describe('color schemes', () => {
           height={400}
           options={{ ...mockOptions, colorScheme: scheme }}
           seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
         />
       );
       expect(container.querySelector('svg')).toBeInTheDocument();
@@ -156,6 +161,7 @@ describe('color schemes', () => {
         height={400}
         options={{ ...mockOptions, colorScheme: ColorScheme.GRAFANA_CLASSIC }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     expect(container.querySelector('svg')).toBeInTheDocument();
@@ -174,7 +180,7 @@ describe('tooltip', () => {
 
   it('renders tooltip rows after hovering a path', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     hoverFirstPath(container);
     // Tooltip renders into document.body via Portal
@@ -183,7 +189,7 @@ describe('tooltip', () => {
 
   it('shows a timestamp header when hovering in Single mode', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     hoverFirstPath(container);
     expect(document.body.querySelector('[aria-label="Timestamp"]')).toBeInTheDocument();
@@ -191,7 +197,7 @@ describe('tooltip', () => {
 
   it('shows one series row in Single mode', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     hoverFirstPath(container);
     expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(1);
@@ -205,6 +211,7 @@ describe('tooltip', () => {
         height={400}
         options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, mode: TooltipDisplayMode.Multi } }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -219,6 +226,7 @@ describe('tooltip', () => {
         height={400}
         options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, mode: TooltipDisplayMode.None } }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -233,6 +241,7 @@ describe('tooltip', () => {
         height={400}
         options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxWidth: 300 } }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -249,6 +258,7 @@ describe('tooltip', () => {
         height={400}
         options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxHeight: 150 } }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -260,7 +270,7 @@ describe('tooltip', () => {
 
   it('does not apply scroll style when maxHeight is unset', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     hoverFirstPath(container);
     const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
@@ -279,7 +289,7 @@ describe('hover dimming', () => {
 
   it('dims non-hovered paths on hover', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     hoverFirstPath(container);
     const paths = container.querySelectorAll('path');
@@ -297,6 +307,7 @@ describe('hover dimming', () => {
         height={400}
         options={{ ...mockOptions, hoverDimmingOpacity: 0.1 }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -312,6 +323,7 @@ describe('hover dimming', () => {
         height={400}
         options={{ ...mockOptions, hoverDimming: false }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     hoverFirstPath(container);
@@ -324,7 +336,7 @@ describe('hover dimming', () => {
 
   it('restores full opacity on mouse leave', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     const firstPath = container.querySelector('path')!;
     hoverFirstPath(container);
@@ -347,7 +359,7 @@ describe('legend series toggle', () => {
 
   it('all paths remain in DOM when a series is hidden (band zeroes rather than disappears)', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
     clickFirstLegendItem(container);
@@ -356,7 +368,7 @@ describe('legend series toggle', () => {
 
   it('all paths remain in DOM after toggling a series twice', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     clickFirstLegendItem(container);
     clickFirstLegendItem(container);
@@ -378,7 +390,7 @@ describe('transitions', () => {
 
   it('all paths remain in DOM when a series is hidden', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
     clickFirstLegendItem(container);
@@ -388,7 +400,7 @@ describe('transitions', () => {
 
   it('hidden series legend item is marked disabled after click', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     const legendWrapper = container.querySelector('[data-testid*="VizLegend series"]') as HTMLElement;
     expect(legendWrapper?.className).not.toContain('Disabled');
@@ -400,7 +412,7 @@ describe('transitions', () => {
 
   it('legend item re-enables when clicked again', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={immediateOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     clickFirstLegendItem(container);
     clickFirstLegendItem(container);
@@ -410,7 +422,7 @@ describe('transitions', () => {
 
   it('renders without errors with enableTransitions true', () => {
     const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} />
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
   });
@@ -423,8 +435,92 @@ describe('transitions', () => {
         height={400}
         options={{ ...mockOptions, transitionDuration: 100 }}
         seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
       />
     );
     expect(container.querySelectorAll('path')).toHaveLength(2);
+  });
+});
+
+describe('time range selection', () => {
+  it('calls onChangeTimeRange when drag exceeds minimum threshold', () => {
+    const onChangeTimeRange = jest.fn();
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={mockOptions}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={onChangeTimeRange}
+      />
+    );
+    const g = container.querySelector('svg g')!;
+    fireEvent.mouseDown(g, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(g, { clientX: 300, clientY: 100 });
+    fireEvent.mouseUp(g);
+    expect(onChangeTimeRange).toHaveBeenCalledTimes(1);
+    const { from, to } = onChangeTimeRange.mock.calls[0][0];
+    expect(to).toBeGreaterThan(from);
+  });
+
+  it('does not call onChangeTimeRange for a drag below the minimum threshold', () => {
+    const onChangeTimeRange = jest.fn();
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={mockOptions}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={onChangeTimeRange}
+      />
+    );
+    const g = container.querySelector('svg g')!;
+    fireEvent.mouseDown(g, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(g, { clientX: 103, clientY: 100 });
+    fireEvent.mouseUp(g);
+    expect(onChangeTimeRange).not.toHaveBeenCalled();
+  });
+
+  it('handles right-to-left drag correctly (from < to)', () => {
+    const onChangeTimeRange = jest.fn();
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={mockOptions}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={onChangeTimeRange}
+      />
+    );
+    const g = container.querySelector('svg g')!;
+    fireEvent.mouseDown(g, { clientX: 300, clientY: 100 });
+    fireEvent.mouseMove(g, { clientX: 100, clientY: 100 });
+    fireEvent.mouseUp(g);
+    expect(onChangeTimeRange).toHaveBeenCalledTimes(1);
+    const { from, to } = onChangeTimeRange.mock.calls[0][0];
+    // from should always be less than to regardless of drag direction
+    expect(from).toBeLessThan(to);
+  });
+
+  it('cancels selection on mouse leave without calling onChangeTimeRange', () => {
+    const onChangeTimeRange = jest.fn();
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={mockOptions}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={onChangeTimeRange}
+      />
+    );
+    const g = container.querySelector('svg g')!;
+    fireEvent.mouseDown(g, { clientX: 100, clientY: 100 });
+    fireEvent.mouseMove(g, { clientX: 300, clientY: 100 });
+    fireEvent.mouseLeave(g);
+    expect(onChangeTimeRange).not.toHaveBeenCalled();
   });
 });

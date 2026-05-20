@@ -30,7 +30,7 @@ import {
 } from 'd3-scale-chromatic';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
+import { AbsoluteTimeRange, dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
 
 import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
@@ -50,6 +50,13 @@ interface StreamGraphProps {
   height: number;
   options: StreamgraphOptions;
   seriesCalcs: Map<string, DisplayValue[]>;
+  onChangeTimeRange: (timeRange: AbsoluteTimeRange) => void;
+}
+
+interface SelectionState {
+  active: boolean;
+  startSvgX: number;
+  currentSvgX: number;
 }
 
 interface TooltipState {
@@ -98,7 +105,9 @@ const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
   [ColorScheme.RAINBOW]: interpolateRainbow,
 };
 
-export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {
+const MIN_DRAG_PX = 5;
+
+export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs, onChangeTimeRange }) => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
@@ -111,6 +120,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     hoveredSeries: '',
     seriesRows: [],
   });
+
+  const [selection, setSelection] = useState<SelectionState>({ active: false, startSvgX: 0, currentSvgX: 0 });
 
   const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
 
@@ -303,7 +314,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
-      if (options.tooltip.mode === TooltipDisplayMode.None) {
+      if (options.tooltip.mode === TooltipDisplayMode.None || selection.active) {
         return;
       }
       const g = gRef.current;
@@ -358,10 +369,43 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, seriesColor, options.tooltip]
+    [xScale, stackedData, seriesColor, options.tooltip, selection.active]
   );
 
   const handlePathMouseLeave = useCallback(() => {
+    setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
+  }, []);
+
+  const handleSvgMouseDown = useCallback((event: React.MouseEvent<SVGGElement>) => {
+    const rect = gRef.current?.getBoundingClientRect();
+    if (!rect) { return; }
+    const startSvgX = event.clientX - rect.left;
+    setSelection({ active: true, startSvgX, currentSvgX: startSvgX });
+  }, []);
+
+  const handleSvgMouseMove = useCallback(
+    (event: React.MouseEvent<SVGGElement>) => {
+      if (!selection.active) { return; }
+      const rect = gRef.current?.getBoundingClientRect();
+      if (!rect) { return; }
+      setSelection((prev) => ({ ...prev, currentSvgX: event.clientX - rect.left }));
+    },
+    [selection.active]
+  );
+
+  const handleSvgMouseUp = useCallback(() => {
+    if (!selection.active) { return; }
+    const { startSvgX, currentSvgX } = selection;
+    if (Math.abs(currentSvgX - startSvgX) >= MIN_DRAG_PX) {
+      const from = xScale.invert(Math.min(startSvgX, currentSvgX)).getTime();
+      const to = xScale.invert(Math.max(startSvgX, currentSvgX)).getTime();
+      onChangeTimeRange({ from, to });
+    }
+    setSelection({ active: false, startSvgX: 0, currentSvgX: 0 });
+  }, [selection, xScale, onChangeTimeRange]);
+
+  const handleSvgMouseLeave = useCallback(() => {
+    setSelection({ active: false, startSvgX: 0, currentSvgX: 0 });
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
   }, []);
 
@@ -390,7 +434,14 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     >
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg width={svgSize.width} height={svgSize.height}>
-          <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
+          <g
+            ref={gRef}
+            transform={`translate(${MARGIN.left},${MARGIN.top})`}
+            onMouseDown={handleSvgMouseDown}
+            onMouseMove={handleSvgMouseMove}
+            onMouseUp={handleSvgMouseUp}
+            onMouseLeave={handleSvgMouseLeave}
+          >
             {pathSprings.map((springProps, i) => {
               const series = stackedData[i];
               const seriesName = (series as any).key as string;
@@ -413,6 +464,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 x2={tooltip.svgX}
                 y1={0}
                 y2={innerHeight}
+                stroke="currentColor"
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            )}
+            {selection.active && (
+              <rect
+                x={Math.min(selection.startSvgX, selection.currentSvgX)}
+                y={0}
+                width={Math.abs(selection.currentSvgX - selection.startSvgX)}
+                height={innerHeight}
+                fill="currentColor"
+                fillOpacity={0.1}
                 stroke="currentColor"
                 strokeOpacity={0.4}
                 strokeWidth={1}

@@ -34,7 +34,7 @@ function computeSeriesCalcs(series: DataFrame[], calcIds: string[]): Map<string,
   return result;
 }
 
-export const StreamGraphPanel: React.FC<Props> = ({ options, data, width, height, fieldConfig, id }) => {
+export const StreamGraphPanel: React.FC<Props> = ({ options, data, width, height, fieldConfig, id, onChangeTimeRange }) => {
   const d3Data = useMemo(() => transformToD3(data), [data]);
   const seriesCalcs = useMemo(() => {
     if (options.legend.displayMode !== LegendDisplayMode.Table) {
@@ -47,5 +47,14 @@ export const StreamGraphPanel: React.FC<Props> = ({ options, data, width, height
     return <PanelDataErrorView fieldConfig={fieldConfig} panelId={id} data={data} needsNumberField />;
   }
 
-  return <StreamGraph data={d3Data} width={width} height={height} options={options} seriesCalcs={seriesCalcs} />;
+  return (
+    <StreamGraph
+      data={d3Data}
+      width={width}
+      height={height}
+      options={options}
+      seriesCalcs={seriesCalcs}
+      onChangeTimeRange={onChangeTimeRange}
+    />
+  );
 };
