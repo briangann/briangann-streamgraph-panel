@@ -63,6 +63,7 @@ interface TooltipState {
 
 const MARGIN = { top: 10, right: 10, left: 10 };
 const AXIS_HEIGHT = 30;
+const PATH_TRANSITION_STYLE = { transition: 'fill-opacity 150ms ease' };
 
 const OFFSET_MAP = {
   [StackOffset.WIGGLE]: stackOffsetWiggle,
@@ -339,16 +340,21 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg width={svgSize.width} height={svgSize.height}>
           <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
-            {stackedData.map((series, i) => (
-              <path
-                key={(series as any).key}
-                d={areaGen(series as unknown as StackDatum[]) ?? ''}
-                fill={colorScale(i)}
-                fillOpacity={options.fillOpacity}
-                onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
-                onMouseLeave={handlePathMouseLeave}
-              />
-            ))}
+            {stackedData.map((series, i) => {
+              const seriesName = (series as any).key as string;
+              const isDimmed = options.hoverDimming && tooltip.visible && tooltip.hoveredSeries !== seriesName;
+              return (
+                <path
+                  key={seriesName}
+                  d={areaGen(series as unknown as StackDatum[]) ?? ''}
+                  fill={colorScale(i)}
+                  fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
+                  style={PATH_TRANSITION_STYLE}
+                  onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
+                  onMouseLeave={handlePathMouseLeave}
+                />
+              );
+            })}
             {options.showCrosshair && tooltip.visible && (
               <line
                 x1={tooltip.svgX}

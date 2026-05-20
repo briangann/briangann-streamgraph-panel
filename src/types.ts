@@ -61,6 +61,8 @@ export interface StreamgraphOptions {
   fillOpacity: number;
   showXAxis: boolean;
   showCrosshair: boolean;
+  hoverDimming: boolean;
+  hoverDimmingOpacity: number;
   showBandLabels: boolean;
   bandLabelColor: BandLabelColor;
   bandLabelMinFontSize: number;

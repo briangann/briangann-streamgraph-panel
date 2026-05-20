@@ -30,6 +30,12 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 - Vertical cursor line appears on hover to align the tooltip position with the
   time axis; toggle on or off in the Axis section of the panel editor (default on)
 
+#### Hover dimming
+
+- Non-hovered bands dim when hovering to highlight the active series, matching
+  the ECharts ThemeRiver interaction style
+- Configurable: toggle on/off and set the dim opacity (0–1, default 0.3)
+
 #### Color schemes
 
 - Added Plasma, Inferno, Magma, Cool, Warm, and Rainbow gradient palettes
