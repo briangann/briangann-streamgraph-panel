@@ -79,8 +79,8 @@ and performance improvements.
 
 #### Renovate
 
-- Replaced Dependabot with Renovate for dependency update PRs; `minimumReleaseAge: "5 days"`
-  blocks updates to packages published less than 5 days ago, guarding against supply-chain
+- Replaced Dependabot with Renovate for dependency update PRs; `minimumReleaseAge: "3 days"`
+  blocks updates to packages published less than 3 days ago, guarding against supply-chain
   attacks on fresh releases
 - All major-version updates disabled by default; `@grafana/plugin-e2e` exempt from the
   age wait (canary releases); grouping matches previous Dependabot config (unit-test,
