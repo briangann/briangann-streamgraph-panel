@@ -210,6 +210,11 @@ and performance improvements.
 
 - `@grafana/data`, `@grafana/runtime`, `@grafana/ui`, `@grafana/schema` at 12.4.2
 
+#### GitHub Actions
+
+- `actions/setup-node` v6.2.0 → v6.4.0 in `is-compatible.yml`
+- `davelosert/vitest-coverage-report-action` v2.11.2 → v2.12.0 in `coverage.yml`
+
 #### Minor / patch bumps
 
 - `@emotion/css` 11.10.6 → 11.13.5
