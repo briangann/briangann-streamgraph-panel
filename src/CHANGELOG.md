@@ -209,3 +209,12 @@ and performance improvements.
 #### Grafana SDK
 
 - `@grafana/data`, `@grafana/runtime`, `@grafana/ui`, `@grafana/schema` at 12.4.2
+
+#### Minor / patch bumps
+
+- `@emotion/css` 11.10.6 → 11.13.5
+- `@types/react` 18.3.28 → 18.3.29
+- `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` 8.59.3 → 8.59.4
+- `webpack` 5.106.2 → 5.107.0
+- All 66 remaining packages with `^`/`~` range prefixes pinned to exact installed
+  versions; deterministic installs without relying solely on the lock file
