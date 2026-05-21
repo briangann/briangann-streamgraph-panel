@@ -16,6 +16,27 @@ dimming, legend series toggle, and animated band transitions via React Spring.
 Earlier work: project scaffolding, React SVG migration, Grafana SDK integration,
 and performance improvements.
 
+### Performance
+
+#### Rendering / interaction
+
+- Replaced O(N) linear reduce in `handlePathMouseMove` with binary search; tooltip
+  nearest-point lookup is now O(log N) per mousemove event
+- Replaced O(N) `Array.indexOf` in `seriesColor` with a memoized `Map<string, number>`;
+  color lookups in path rendering, tooltip rows, and band labels are now O(1)
+- Memoized `vizLegendItems` with `useMemo` — previously recomputed on every render,
+  causing unnecessary `VizLegend` re-renders and O(S²) work
+- Memoized per-path `onMouseMove` handler array; avoids allocating `stackedData.length`
+  new closures on tooltip- and selection-driven renders
+- `zeroedRows`: skip `{ ...row }` copy for rows where all hidden-series values are
+  already zero, cutting allocation on re-renders after a series is fully animated out
+- `ResizeObserver` callback now checks for size equality before calling `setSvgSize`,
+  preventing spurious re-renders when the browser fires the observer with unchanged
+  dimensions
+- `unionTimestamps` rewritten as a balanced pairwise merge (O(N log K)) instead of a
+  flat Set+sort (O(N log N)) or sequential accumulation (O(N×K)); correct for any
+  number of frames and verified by tests covering K=1–4 and unequal-length inputs
+
 ### Build / Tooling
 
 #### AGENTS.md

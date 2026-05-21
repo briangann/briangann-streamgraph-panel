@@ -37,6 +37,47 @@ describe('unionTimestamps', () => {
   it('handles empty input', () => {
     expect(unionTimestamps([])).toStrictEqual([]);
   });
+
+  it('merges three arrays with overlapping values, sorted ascending', () => {
+    expect(
+      unionTimestamps([
+        [1000, 4000],
+        [2000, 4000],
+        [3000, 5000],
+      ])
+    ).toStrictEqual([1000, 2000, 3000, 4000, 5000]);
+  });
+
+  it('merges four arrays (exercises balanced merge tree)', () => {
+    expect(
+      unionTimestamps([
+        [1000, 5000],
+        [2000, 5000],
+        [3000, 6000],
+        [4000, 7000],
+      ])
+    ).toStrictEqual([1000, 2000, 3000, 4000, 5000, 6000, 7000]);
+  });
+
+  it('handles arrays of unequal length', () => {
+    expect(
+      unionTimestamps([
+        [1000, 2000, 3000, 4000],
+        [2500],
+        [3500, 5000],
+      ])
+    ).toStrictEqual([1000, 2000, 2500, 3000, 3500, 4000, 5000]);
+  });
+
+  it('handles a single empty array among others', () => {
+    expect(
+      unionTimestamps([
+        [1000, 2000],
+        [],
+        [3000],
+      ])
+    ).toStrictEqual([1000, 2000, 3000]);
+  });
 });
 
 describe('nullFill', () => {

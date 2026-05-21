@@ -53,6 +53,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
+  // Tracks the last size reported by ResizeObserver so we can skip no-op updates.
+  const svgSizeRef = useRef({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
     clientX: 0,
@@ -92,7 +94,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     }
     const resizeObserver = new ResizeObserver(([entry]) => {
       const { width: newWidth, height: newHeight } = entry.contentRect;
-      if (newWidth > 0 && newHeight > 0) {
+      if (newWidth > 0 && newHeight > 0 && (newWidth !== svgSizeRef.current.width || newHeight !== svgSizeRef.current.height)) {
+        svgSizeRef.current = { width: newWidth, height: newHeight };
         setSvgSize({ width: newWidth, height: newHeight });
       }
     });
@@ -120,10 +123,16 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const colorScale = useColorScale(options.colorScheme, data.seriesNames.length, theme);
 
+  // O(1) index lookup for seriesColor — avoids O(N) indexOf on every color access.
+  const seriesIndexMap = useMemo(
+    () => new Map(data.seriesNames.map((name, i) => [name, i])),
+    [data.seriesNames]
+  );
+
   // Color by original series index so each series keeps the same color when others are hidden.
   const seriesColor = useCallback(
-    (seriesName: string) => colorScale(Math.max(0, data.seriesNames.indexOf(seriesName))),
-    [colorScale, data.seriesNames]
+    (seriesName: string) => colorScale(seriesIndexMap.get(seriesName) ?? 0),
+    [colorScale, seriesIndexMap]
   );
 
   // Zero out hidden series values instead of removing them from the stack.
@@ -134,11 +143,19 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       hiddenSeries.size === 0
         ? data.rows
         : data.rows.map((row) => {
-            const result = { ...row };
+            // Only allocate a copy if at least one hidden series has a non-zero value.
+            let result: Record<string, number> | null = null;
             hiddenSeries.forEach((name) => {
-              result[name] = 0;
+              if (row[name] !== 0) {
+                if (!result) {
+                  result = { ...row };
+                }
+                result[name] = 0;
+              }
             });
-            return result;
+            // Safe to return the original reference: D3 stack reads rows read-only
+            // and never mutates the input datum objects.
+            return result ?? row;
           }),
     [data.rows, hiddenSeries]
   );
@@ -239,9 +256,23 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       if (mouseX === null) { return; }
       const timeValue = xScale.invert(mouseX).getTime();
       const hoveredSeries = (stackedData[seriesIdx] as any).key as string;
-      const closest = series.reduce((prev, curr) =>
-        Math.abs(curr.data['time'] - timeValue) < Math.abs(prev.data['time'] - timeValue) ? curr : prev
-      );
+      // Binary search for the nearest data point — series is time-ordered (same
+      // pattern as bandLabels). Replaces O(N) reduce with O(log N).
+      if (series.length === 0) { return; }
+      let lo = 0;
+      let hi = series.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (series[mid].data['time'] < timeValue) {
+          lo = mid + 1;
+        } else {
+          hi = mid;
+        }
+      }
+      const closest =
+        lo > 0 && Math.abs(series[lo - 1].data['time'] - timeValue) <= Math.abs(series[lo].data['time'] - timeValue)
+          ? series[lo - 1]
+          : series[lo];
 
       let seriesRows: SeriesRow[];
       if (options.tooltip.mode === TooltipDisplayMode.Single) {
@@ -284,6 +315,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       });
     },
     [xScale, stackedData, seriesColor, options.tooltip, getSvgX]
+  );
+
+  // Stable per-path handlers — only recreated when stackedData or handlePathMouseMove changes,
+  // not on every render. Avoids allocating stackedData.length new closures on renders that
+  // are driven by tooltip or selection state changes rather than data changes.
+  const pathMouseMoveHandlers = useMemo(
+    () =>
+      stackedData.map(
+        (series, i) => (e: React.MouseEvent) =>
+          handlePathMouseMove(e, i, series as unknown as StackDatum[])
+      ),
+    [stackedData, handlePathMouseMove]
   );
 
   const handlePathMouseLeave = useCallback(() => {
@@ -330,18 +373,22 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
   }, [updateSelection]);
 
-  const vizLegendItems = legendVisible
-    ? data.seriesNames.map((name) => {
-        const calcs = seriesCalcs.get(name);
-        return {
-          label: name,
-          color: seriesColor(name),
-          yAxis: 1,
-          disabled: hiddenSeries.has(name),
-          getDisplayValues: calcs ? () => calcs : undefined,
-        };
-      })
-    : null;
+  const vizLegendItems = useMemo(
+    () =>
+      legendVisible
+        ? data.seriesNames.map((name) => {
+            const calcs = seriesCalcs.get(name);
+            return {
+              label: name,
+              color: seriesColor(name),
+              yAxis: 1,
+              disabled: hiddenSeries.has(name),
+              getDisplayValues: calcs ? () => calcs : undefined,
+            };
+          })
+        : null,
+    [legendVisible, data.seriesNames, seriesCalcs, seriesColor, hiddenSeries]
+  );
 
   return (
     <div
@@ -374,7 +421,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                   fill={seriesColor(seriesName)}
                   fillOpacity={isDimmed ? options.hoverDimmingOpacity : options.fillOpacity}
                   style={{ transition: 'fill-opacity 150ms ease' }}
-                  onMouseMove={(e) => handlePathMouseMove(e, i, series as unknown as StackDatum[])}
+                  onMouseMove={pathMouseMoveHandlers[i]}
                   onMouseLeave={handlePathMouseLeave}
                 />
               );
