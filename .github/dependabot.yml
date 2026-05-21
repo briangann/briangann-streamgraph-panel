@@ -12,6 +12,8 @@ updates:
         - '@grafana/plugin-e2e'
     open-pull-requests-limit: 5
     ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
       - dependency-name: '@types/node'
         versions: ['>=25.0.0, <26.0.0']
       - dependency-name: 'typescript'

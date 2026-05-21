@@ -37,6 +37,23 @@ and performance improvements.
   flat Set+sort (O(N log N)) or sequential accumulation (O(N×K)); correct for any
   number of frames and verified by tests covering K=1–4 and unequal-length inputs
 
+#### bandLabels.ts
+
+- Finding the nearest data point to a label's rendered position now uses binary
+  search instead of a full scan — significantly faster on large datasets
+
+#### StreamGraph.tsx — y-scale and tooltip
+
+- y-scale extent computed with a direct loop rather than flattening the entire
+  dataset into a temporary array
+- Tooltip state update skips re-render when the hovered series and value have
+  not changed
+
+#### StreamGraphPanel.tsx
+
+- Data transformation memoized correctly — previously a new object reference on
+  every Grafana render defeated the memo
+
 ### Build / Tooling
 
 #### AGENTS.md
@@ -63,6 +80,8 @@ and performance improvements.
 #### Dependabot
 
 - Ignore `@types/node` 25.x and major bumps for `typescript` and `@grafana/schema`
+- Added blanket `ignore` rule for all packages (`dependency-name: '*'`) to block
+  major-version bumps; Dependabot now only proposes minor and patch updates automatically
 
 #### GitHub Actions
 
@@ -169,25 +188,6 @@ and performance improvements.
 #### utils.ts
 
 - Minor correctness fixes (type coercion guard, redundant allocation)
-
-### Performance
-
-#### bandLabels.ts
-
-- Finding the nearest data point to a label's rendered position now uses binary
-  search instead of a full scan — significantly faster on large datasets
-
-#### StreamGraph.tsx
-
-- y-scale extent computed with a direct loop rather than flattening the entire
-  dataset into a temporary array
-- Tooltip state update skips re-render when the hovered series and value have
-  not changed
-
-#### StreamGraphPanel.tsx
-
-- Data transformation memoized correctly — previously a new object reference on
-  every Grafana render defeated the memo
 
 ### E2E / Docker
 
