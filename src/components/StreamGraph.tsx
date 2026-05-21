@@ -106,6 +106,7 @@ const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
 };
 
 const MIN_DRAG_PX = 5;
+const INITIAL_SELECTION_STATE: SelectionState = { active: false, startSvgX: 0, currentSvgX: 0 };
 
 export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs, onChangeTimeRange }) => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -121,10 +122,10 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     seriesRows: [],
   });
 
-  const [selection, setSelection] = useState<SelectionState>({ active: false, startSvgX: 0, currentSvgX: 0 });
+  const [selection, setSelection] = useState<SelectionState>(INITIAL_SELECTION_STATE);
   // Ref mirrors selection state so mouseUp always reads the latest coordinates
   // without depending on potentially stale closure values.
-  const selectionRef = useRef<SelectionState>({ active: false, startSvgX: 0, currentSvgX: 0 });
+  const selectionRef = useRef<SelectionState>(INITIAL_SELECTION_STATE);
 
   const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
 
@@ -163,7 +164,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   useEffect(() => {
     const handleDocumentMouseUp = () => {
       if (!selectionRef.current.active) { return; }
-      const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+      const reset = INITIAL_SELECTION_STATE;
       selectionRef.current = reset;
       setSelection(reset);
     };
@@ -328,17 +329,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const pathSprings = useSprings(stackedData.length, springConfigs);
 
+  const getSvgX = useCallback((event: React.MouseEvent): number | null => {
+    const rect = gRef.current?.getBoundingClientRect();
+    return rect ? event.clientX - rect.left : null;
+  }, []);
+
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
       if (options.tooltip.mode === TooltipDisplayMode.None || selectionRef.current.active) {
         return;
       }
-      const g = gRef.current;
-      if (!g) {
-        return;
-      }
-      const rect = g.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
+      const mouseX = getSvgX(event);
+      if (mouseX === null) { return; }
       const timeValue = xScale.invert(mouseX).getTime();
       const hoveredSeries = (stackedData[seriesIdx] as any).key as string;
       const closest = series.reduce((prev, curr) =>
@@ -385,7 +387,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, seriesColor, options.tooltip]
+    [xScale, stackedData, seriesColor, options.tooltip, getSvgX]
   );
 
   const handlePathMouseLeave = useCallback(() => {
@@ -393,32 +395,30 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   }, []);
 
   const handleSvgMouseDown = useCallback((event: React.MouseEvent<SVGGElement>) => {
-    const rect = gRef.current?.getBoundingClientRect();
-    if (!rect) { return; }
-    const startSvgX = event.clientX - rect.left;
+    const startSvgX = getSvgX(event);
+    if (startSvgX === null) { return; }
     const next = { active: true, startSvgX, currentSvgX: startSvgX };
     selectionRef.current = next;
     setSelection(next);
-  }, []);
+  }, [getSvgX]);
 
   const handleSvgMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
       if (!selectionRef.current.active) { return; }
-      const rect = gRef.current?.getBoundingClientRect();
-      if (!rect) { return; }
-      const currentSvgX = event.clientX - rect.left;
+      const currentSvgX = getSvgX(event);
+      if (currentSvgX === null) { return; }
       const next = { ...selectionRef.current, currentSvgX };
       selectionRef.current = next;
       setSelection(next);
     },
-    []
+    [getSvgX]
   );
 
   const handleSvgMouseUp = useCallback(() => {
     const current = selectionRef.current;
     if (!current.active) { return; }
     const { startSvgX, currentSvgX } = current;
-    const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+    const reset = INITIAL_SELECTION_STATE;
     selectionRef.current = reset;
     setSelection(reset);
     if (Math.abs(currentSvgX - startSvgX) >= MIN_DRAG_PX) {
@@ -429,7 +429,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   }, [xScale, onChangeTimeRange]);
 
   const handleSvgMouseLeave = useCallback(() => {
-    const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+    const reset = INITIAL_SELECTION_STATE;
     selectionRef.current = reset;
     setSelection(reset);
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
