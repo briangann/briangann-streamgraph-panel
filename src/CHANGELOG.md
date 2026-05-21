@@ -35,6 +35,9 @@ and performance improvements.
 - Added `ResizeObserver` mock for JSDOM test environment
 - Added jest-suppress-logs.js via setupFiles to silence the i18next/Locize
   marketing banner that printed on every test run
+- Added unit tests for `computeSeriesCalcs`, `useColorScale`,
+  `buildStreamgraphYScale`, `grafanaTimeFormat`, and `XAxis` — 9 test suites
+  covering 115 tests total
 
 #### Dependabot
 
@@ -80,6 +83,42 @@ and performance improvements.
   so they target labels specifically rather than all SVG text
 
 ### Code Quality
+
+#### streamgraphConstants.ts (new)
+
+- Extracted all module-level D3 function maps and layout constants from
+  `StreamGraph.tsx` — `OFFSET_MAP`, `ORDER_MAP`, `CURVE_MAP`, `SCHEME_MAP`,
+  `MARGIN`, `AXIS_HEIGHT`
+
+#### useColorScale.ts (new)
+
+- Extracted the color scale computation hook from `StreamGraph.tsx` — handles
+  both d3-scale-chromatic gradient path and Grafana palette registry path with
+  Cividis fallback for unknown scheme IDs
+
+#### buildStreamgraphYScale.ts (new)
+
+- Extracted y-scale construction from `StreamGraph.tsx` — pure function that
+  scans stacked data for the full y-extent and returns a D3 linear scale;
+  handles empty data and non-finite values
+
+#### seriesCalcs.ts (new)
+
+- Extracted `computeSeriesCalcs` from `StreamGraphPanel.tsx` — pure data
+  transformation with no component dependencies
+
+#### Axis.tsx
+
+- Exported `grafanaTimeFormat` to enable direct unit testing of boundary
+  conditions
+
+#### StreamGraph.tsx — time range selection and refactors
+
+- Time range selection: click-drag overlay with `selectionRef` mirror pattern
+  for stale-closure safety; document-level `mouseup` clears stuck selection;
+  `updateSelection` helper unifies the ref+state sync pattern;
+  `getSvgX` helper eliminates duplicate coordinate extraction
+- Reduced from ~570 lines to ~470 lines after module extractions
 
 #### bandLabels.ts
 

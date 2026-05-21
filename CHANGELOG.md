@@ -16,6 +16,12 @@ tooltip (Single, All series, and Hidden modes with sort and zero filtering).
 
 ### Features / Enhancements
 
+#### Time range selection
+
+- Click and drag on the chart to select a time range — the same interaction as
+  Grafana's built-in time series panel; releases the selection and updates the
+  dashboard time range for all panels
+
 #### Animated transitions
 
 - Band paths now animate smoothly when series are hidden or shown via the legend,

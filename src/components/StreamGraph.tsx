@@ -1,40 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSprings, animated } from '@react-spring/web';
-import {
-  area,
-  curveBasis,
-  curveLinear,
-  curveStep,
-  stack,
-  stackOffsetExpand,
-  stackOffsetNone,
-  stackOffsetSilhouette,
-  stackOffsetWiggle,
-  stackOrderAscending,
-  stackOrderDescending,
-  stackOrderInsideOut,
-  stackOrderNone,
-} from 'd3-shape';
-import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
-import {
-  interpolateCividis,
-  interpolateCool,
-  interpolateInferno,
-  interpolateMagma,
-  interpolatePlasma,
-  interpolateRainbow,
-  interpolateSpectral,
-  interpolateTurbo,
-  interpolateViridis,
-  interpolateWarm,
-} from 'd3-scale-chromatic';
+import { area, stack } from 'd3-shape';
+import { scaleTime } from 'd3-scale';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
+import { AbsoluteTimeRange, dateTimeFormat, DisplayValue } from '@grafana/data';
 
-import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { D3WideData, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
 import { computeBandLabels } from '../data/bandLabels';
+import { MARGIN, AXIS_HEIGHT, OFFSET_MAP, ORDER_MAP, CURVE_MAP } from './streamgraphConstants';
+import { buildStreamgraphYScale } from '../data/buildStreamgraphYScale';
+import { useColorScale } from './useColorScale';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
 
@@ -50,6 +27,13 @@ interface StreamGraphProps {
   height: number;
   options: StreamgraphOptions;
   seriesCalcs: Map<string, DisplayValue[]>;
+  onChangeTimeRange: (timeRange: AbsoluteTimeRange) => void;
+}
+
+interface SelectionState {
+  active: boolean;
+  startSvgX: number;
+  currentSvgX: number;
 }
 
 interface TooltipState {
@@ -62,43 +46,10 @@ interface TooltipState {
   seriesRows: SeriesRow[];
 }
 
-const MARGIN = { top: 10, right: 10, left: 10 };
-const AXIS_HEIGHT = 30;
+const MIN_DRAG_PX = 5;
+const INITIAL_SELECTION_STATE: SelectionState = { active: false, startSvgX: 0, currentSvgX: 0 };
 
-const OFFSET_MAP = {
-  [StackOffset.WIGGLE]: stackOffsetWiggle,
-  [StackOffset.SILHOUETTE]: stackOffsetSilhouette,
-  [StackOffset.ZERO]: stackOffsetNone,
-  [StackOffset.EXPAND]: stackOffsetExpand,
-};
-
-const ORDER_MAP = {
-  [StackOrder.INSIDE_OUT]: stackOrderInsideOut,
-  [StackOrder.ASCENDING]: stackOrderAscending,
-  [StackOrder.DESCENDING]: stackOrderDescending,
-  [StackOrder.NONE]: stackOrderNone,
-};
-
-const CURVE_MAP = {
-  [CurveType.SMOOTH]: curveBasis,
-  [CurveType.LINEAR]: curveLinear,
-  [CurveType.STEP]: curveStep,
-};
-
-const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
-  [ColorScheme.CIVIDIS]: interpolateCividis,
-  [ColorScheme.TURBO]: interpolateTurbo,
-  [ColorScheme.VIRIDIS]: interpolateViridis,
-  [ColorScheme.SPECTRAL]: interpolateSpectral,
-  [ColorScheme.PLASMA]: interpolatePlasma,
-  [ColorScheme.INFERNO]: interpolateInferno,
-  [ColorScheme.MAGMA]: interpolateMagma,
-  [ColorScheme.COOL]: interpolateCool,
-  [ColorScheme.WARM]: interpolateWarm,
-  [ColorScheme.RAINBOW]: interpolateRainbow,
-};
-
-export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs }) => {
+export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, options, seriesCalcs, onChangeTimeRange }) => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
@@ -111,6 +62,11 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     hoveredSeries: '',
     seriesRows: [],
   });
+
+  const [selection, setSelection] = useState<SelectionState>(INITIAL_SELECTION_STATE);
+  // Ref mirrors selection state so mouseUp always reads the latest coordinates
+  // without depending on potentially stale closure values.
+  const selectionRef = useRef<SelectionState>(INITIAL_SELECTION_STATE);
 
   const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
 
@@ -144,43 +100,25 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     return () => resizeObserver.disconnect();
   }, []);
 
+  // Reset selection if the user releases the mouse outside the SVG — otherwise
+  // the selection stays active indefinitely and blocks tooltip interactions.
+  useEffect(() => {
+    const handleDocumentMouseUp = () => {
+      if (!selectionRef.current.active) { return; }
+      const reset = INITIAL_SELECTION_STATE;
+      selectionRef.current = reset;
+      setSelection(reset);
+    };
+    document.addEventListener('mouseup', handleDocumentMouseUp);
+    return () => document.removeEventListener('mouseup', handleDocumentMouseUp);
+  }, []);
+
   const theme = useTheme2();
 
   const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
-  const colorScale = useMemo((): ((i: number) => string) => {
-    const d3Interpolator = SCHEME_MAP[options.colorScheme];
-    if (d3Interpolator) {
-      return scaleSequential(d3Interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-    }
-    // Grafana registry path — scheme value matches FieldColorModeId string directly
-    try {
-      const mode = getFieldColorMode(options.colorScheme);
-      if (mode.isContinuous) {
-        const fakeField = {
-          config: { color: { mode: options.colorScheme } },
-          state: {},
-          values: [],
-          name: '',
-          type: FieldType.number,
-        } as unknown as Field;
-        const calculator = mode.getCalculator(fakeField, theme);
-        const total = Math.max(1, data.seriesNames.length - 1);
-        return (i: number) => calculator(i, i / total);
-      }
-      if (mode.getColors) {
-        const colors = mode.getColors(theme);
-        if (colors.length > 0) {
-          return (i: number) => colors[Math.floor(i) % colors.length];
-        }
-      }
-    } catch {
-      // getFieldColorMode throws for unrecognised IDs; any other registry error
-      // also falls back to the default rather than crashing the panel
-    }
-    return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-  }, [options.colorScheme, data.seriesNames.length, theme]);
+  const colorScale = useColorScale(options.colorScheme, data.seriesNames.length, theme);
 
   // Color by original series index so each series keeps the same color when others are hidden.
   const seriesColor = useCallback(
@@ -224,24 +162,10 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [data.timeRange, innerWidth]
   );
 
-  const yScale = useMemo(() => {
-    let yMin = Infinity;
-    let yMax = -Infinity;
-    for (const series of stackedData) {
-      for (const point of series) {
-        if (isFinite(point[0]) && point[0] < yMin) {
-          yMin = point[0];
-        }
-        if (isFinite(point[1]) && point[1] > yMax) {
-          yMax = point[1];
-        }
-      }
-    }
-    if (!isFinite(yMin) || !isFinite(yMax)) {
-      return scaleLinear().domain([0, 1]).range([innerHeight, 0]);
-    }
-    return scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
-  }, [stackedData, innerHeight]);
+  const yScale = useMemo(
+    () => buildStreamgraphYScale(stackedData, innerHeight),
+    [stackedData, innerHeight]
+  );
 
   const areaGen = useMemo(
     () =>
@@ -301,17 +225,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const pathSprings = useSprings(stackedData.length, springConfigs);
 
+  const getSvgX = useCallback((event: React.MouseEvent): number | null => {
+    const rect = gRef.current?.getBoundingClientRect();
+    return rect ? event.clientX - rect.left : null;
+  }, []);
+
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
-      if (options.tooltip.mode === TooltipDisplayMode.None) {
+      if (options.tooltip.mode === TooltipDisplayMode.None || selectionRef.current.active) {
         return;
       }
-      const g = gRef.current;
-      if (!g) {
-        return;
-      }
-      const rect = g.getBoundingClientRect();
-      const mouseX = event.clientX - rect.left;
+      const mouseX = getSvgX(event);
+      if (mouseX === null) { return; }
       const timeValue = xScale.invert(mouseX).getTime();
       const hoveredSeries = (stackedData[seriesIdx] as any).key as string;
       const closest = series.reduce((prev, curr) =>
@@ -358,12 +283,52 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, seriesColor, options.tooltip]
+    [xScale, stackedData, seriesColor, options.tooltip, getSvgX]
   );
 
   const handlePathMouseLeave = useCallback(() => {
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
   }, []);
+
+  const updateSelection = useCallback((next: SelectionState) => {
+    selectionRef.current = next;
+    setSelection(next);
+  }, []);
+
+  const handleSvgMouseDown = useCallback((event: React.MouseEvent<SVGGElement>) => {
+    const startSvgX = getSvgX(event);
+    if (startSvgX === null) { return; }
+    const next = { active: true, startSvgX, currentSvgX: startSvgX };
+    updateSelection(next);
+    setTooltip((prev) => ({ ...prev, visible: false }));
+  }, [getSvgX, updateSelection]);
+
+  const handleSvgMouseMove = useCallback(
+    (event: React.MouseEvent<SVGGElement>) => {
+      if (!selectionRef.current.active) { return; }
+      const currentSvgX = getSvgX(event);
+      if (currentSvgX === null) { return; }
+      updateSelection({ ...selectionRef.current, currentSvgX });
+    },
+    [getSvgX, updateSelection]
+  );
+
+  const handleSvgMouseUp = useCallback(() => {
+    const current = selectionRef.current;
+    if (!current.active) { return; }
+    const { startSvgX, currentSvgX } = current;
+    updateSelection(INITIAL_SELECTION_STATE);
+    if (Math.abs(currentSvgX - startSvgX) >= MIN_DRAG_PX) {
+      const from = xScale.invert(Math.min(startSvgX, currentSvgX)).getTime();
+      const to = xScale.invert(Math.max(startSvgX, currentSvgX)).getTime();
+      onChangeTimeRange({ from, to });
+    }
+  }, [xScale, onChangeTimeRange, updateSelection]);
+
+  const handleSvgMouseLeave = useCallback(() => {
+    updateSelection(INITIAL_SELECTION_STATE);
+    setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
+  }, [updateSelection]);
 
   const vizLegendItems = legendVisible
     ? data.seriesNames.map((name) => {
@@ -390,7 +355,14 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     >
       <div ref={svgContainerRef} style={{ flex: 1, minHeight: 0, minWidth: 0, position: 'relative' }}>
         <svg width={svgSize.width} height={svgSize.height}>
-          <g ref={gRef} transform={`translate(${MARGIN.left},${MARGIN.top})`}>
+          <g
+            ref={gRef}
+            transform={`translate(${MARGIN.left},${MARGIN.top})`}
+            onMouseDown={handleSvgMouseDown}
+            onMouseMove={handleSvgMouseMove}
+            onMouseUp={handleSvgMouseUp}
+            onMouseLeave={handleSvgMouseLeave}
+          >
             {pathSprings.map((springProps, i) => {
               const series = stackedData[i];
               const seriesName = (series as any).key as string;
@@ -413,6 +385,20 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 x2={tooltip.svgX}
                 y1={0}
                 y2={innerHeight}
+                stroke="currentColor"
+                strokeOpacity={0.4}
+                strokeWidth={1}
+                pointerEvents="none"
+              />
+            )}
+            {selection.active && (
+              <rect
+                x={Math.min(selection.startSvgX, selection.currentSvgX)}
+                y={0}
+                width={Math.abs(selection.currentSvgX - selection.startSvgX)}
+                height={innerHeight}
+                fill="currentColor"
+                fillOpacity={0.1}
                 stroke="currentColor"
                 strokeOpacity={0.4}
                 strokeWidth={1}
