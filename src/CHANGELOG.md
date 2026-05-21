@@ -214,6 +214,7 @@ and performance improvements.
 
 - `actions/setup-node` v6.2.0 → v6.4.0 in `is-compatible.yml`
 - `davelosert/vitest-coverage-report-action` v2.11.2 → v2.12.0 in `coverage.yml`
+- `magefile/mage-action` v3.1.0 → v4.0.0 in `ci.yml`
 
 #### Minor / patch bumps
 
