@@ -77,11 +77,14 @@ and performance improvements.
   `buildStreamgraphYScale`, `grafanaTimeFormat`, and `XAxis` — 9 test suites
   covering 115 tests total
 
-#### Dependabot
+#### Renovate
 
-- Ignore `@types/node` 25.x and major bumps for `typescript` and `@grafana/schema`
-- Added blanket `ignore` rule for all packages (`dependency-name: '*'`) to block
-  major-version bumps; Dependabot now only proposes minor and patch updates automatically
+- Replaced Dependabot with Renovate for dependency update PRs; `minimumReleaseAge: "5 days"`
+  blocks updates to packages published less than 5 days ago, guarding against supply-chain
+  attacks on fresh releases
+- All major-version updates disabled by default; `@grafana/plugin-e2e` exempt from the
+  age wait (canary releases); grouping matches previous Dependabot config (unit-test,
+  eslint, grafana, react, github-actions)
 
 #### GitHub Actions
 

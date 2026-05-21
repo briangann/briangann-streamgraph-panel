@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["every weekend"],
+  "minimumReleaseAge": "5 days",
+  "prConcurrentLimit": 5,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["@grafana/plugin-e2e"],
+      "minimumReleaseAge": "0 days"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "minimumReleaseAge": "5 days"
+    },
+    {
+      "matchPackageNames": ["@testing-library/*", "jest*", "@types/jest"],
+      "groupName": "unit-test"
+    },
+    {
+      "matchPackageNames": ["@grafana/eslint-config", "eslint*", "@typescript-eslint/*", "@stylistic/*"],
+      "groupName": "eslint"
+    },
+    {
+      "matchPackageNames": ["@grafana/*"],
+      "matchDepTypes": ["dependencies"],
+      "groupName": "grafana"
+    },
+    {
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "groupName": "react"
+    }
+  ]
+}
