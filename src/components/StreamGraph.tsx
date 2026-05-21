@@ -394,47 +394,45 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
   }, []);
 
+  const updateSelection = useCallback((next: SelectionState) => {
+    selectionRef.current = next;
+    setSelection(next);
+  }, []);
+
   const handleSvgMouseDown = useCallback((event: React.MouseEvent<SVGGElement>) => {
     const startSvgX = getSvgX(event);
     if (startSvgX === null) { return; }
     const next = { active: true, startSvgX, currentSvgX: startSvgX };
-    selectionRef.current = next;
-    setSelection(next);
+    updateSelection(next);
     setTooltip((prev) => ({ ...prev, visible: false }));
-  }, [getSvgX]);
+  }, [getSvgX, updateSelection]);
 
   const handleSvgMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
       if (!selectionRef.current.active) { return; }
       const currentSvgX = getSvgX(event);
       if (currentSvgX === null) { return; }
-      const next = { ...selectionRef.current, currentSvgX };
-      selectionRef.current = next;
-      setSelection(next);
+      updateSelection({ ...selectionRef.current, currentSvgX });
     },
-    [getSvgX]
+    [getSvgX, updateSelection]
   );
 
   const handleSvgMouseUp = useCallback(() => {
     const current = selectionRef.current;
     if (!current.active) { return; }
     const { startSvgX, currentSvgX } = current;
-    const reset = INITIAL_SELECTION_STATE;
-    selectionRef.current = reset;
-    setSelection(reset);
+    updateSelection(INITIAL_SELECTION_STATE);
     if (Math.abs(currentSvgX - startSvgX) >= MIN_DRAG_PX) {
       const from = xScale.invert(Math.min(startSvgX, currentSvgX)).getTime();
       const to = xScale.invert(Math.max(startSvgX, currentSvgX)).getTime();
       onChangeTimeRange({ from, to });
     }
-  }, [xScale, onChangeTimeRange]);
+  }, [xScale, onChangeTimeRange, updateSelection]);
 
   const handleSvgMouseLeave = useCallback(() => {
-    const reset = INITIAL_SELECTION_STATE;
-    selectionRef.current = reset;
-    setSelection(reset);
+    updateSelection(INITIAL_SELECTION_STATE);
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
-  }, []);
+  }, [updateSelection]);
 
   const vizLegendItems = legendVisible
     ? data.seriesNames.map((name) => {
