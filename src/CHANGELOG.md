@@ -112,7 +112,7 @@ and performance improvements.
 - Exported `grafanaTimeFormat` to enable direct unit testing of boundary
   conditions
 
-#### StreamGraph.tsx
+#### StreamGraph.tsx — time range selection and refactors
 
 - Time range selection: click-drag overlay with `selectionRef` mirror pattern
   for stale-closure safety; document-level `mouseup` clears stuck selection;
