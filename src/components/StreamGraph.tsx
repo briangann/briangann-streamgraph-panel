@@ -400,6 +400,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     const next = { active: true, startSvgX, currentSvgX: startSvgX };
     selectionRef.current = next;
     setSelection(next);
+    setTooltip((prev) => ({ ...prev, visible: false }));
   }, [getSvgX]);
 
   const handleSvgMouseMove = useCallback(
