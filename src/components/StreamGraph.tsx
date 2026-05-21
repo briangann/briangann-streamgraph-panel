@@ -1,40 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSprings, animated } from '@react-spring/web';
-import {
-  area,
-  curveBasis,
-  curveLinear,
-  curveStep,
-  stack,
-  stackOffsetExpand,
-  stackOffsetNone,
-  stackOffsetSilhouette,
-  stackOffsetWiggle,
-  stackOrderAscending,
-  stackOrderDescending,
-  stackOrderInsideOut,
-  stackOrderNone,
-} from 'd3-shape';
-import { scaleLinear, scaleSequential, scaleTime } from 'd3-scale';
-import {
-  interpolateCividis,
-  interpolateCool,
-  interpolateInferno,
-  interpolateMagma,
-  interpolatePlasma,
-  interpolateRainbow,
-  interpolateSpectral,
-  interpolateTurbo,
-  interpolateViridis,
-  interpolateWarm,
-} from 'd3-scale-chromatic';
+import { area, stack } from 'd3-shape';
+import { scaleLinear, scaleTime } from 'd3-scale';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
-import { AbsoluteTimeRange, dateTimeFormat, DisplayValue, Field, FieldType, getFieldColorMode } from '@grafana/data';
+import { AbsoluteTimeRange, dateTimeFormat, DisplayValue } from '@grafana/data';
 
-import { ColorScheme, CurveType, D3WideData, StackOffset, StackOrder, StreamgraphOptions } from '../types';
+import { D3WideData, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
 import { computeBandLabels } from '../data/bandLabels';
+import { MARGIN, AXIS_HEIGHT, OFFSET_MAP, ORDER_MAP, CURVE_MAP } from './streamgraphConstants';
+import { useColorScale } from './useColorScale';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
 
@@ -68,42 +44,6 @@ interface TooltipState {
   hoveredSeries: string;
   seriesRows: SeriesRow[];
 }
-
-const MARGIN = { top: 10, right: 10, left: 10 };
-const AXIS_HEIGHT = 30;
-
-const OFFSET_MAP = {
-  [StackOffset.WIGGLE]: stackOffsetWiggle,
-  [StackOffset.SILHOUETTE]: stackOffsetSilhouette,
-  [StackOffset.ZERO]: stackOffsetNone,
-  [StackOffset.EXPAND]: stackOffsetExpand,
-};
-
-const ORDER_MAP = {
-  [StackOrder.INSIDE_OUT]: stackOrderInsideOut,
-  [StackOrder.ASCENDING]: stackOrderAscending,
-  [StackOrder.DESCENDING]: stackOrderDescending,
-  [StackOrder.NONE]: stackOrderNone,
-};
-
-const CURVE_MAP = {
-  [CurveType.SMOOTH]: curveBasis,
-  [CurveType.LINEAR]: curveLinear,
-  [CurveType.STEP]: curveStep,
-};
-
-const SCHEME_MAP: Partial<Record<ColorScheme, (t: number) => string>> = {
-  [ColorScheme.CIVIDIS]: interpolateCividis,
-  [ColorScheme.TURBO]: interpolateTurbo,
-  [ColorScheme.VIRIDIS]: interpolateViridis,
-  [ColorScheme.SPECTRAL]: interpolateSpectral,
-  [ColorScheme.PLASMA]: interpolatePlasma,
-  [ColorScheme.INFERNO]: interpolateInferno,
-  [ColorScheme.MAGMA]: interpolateMagma,
-  [ColorScheme.COOL]: interpolateCool,
-  [ColorScheme.WARM]: interpolateWarm,
-  [ColorScheme.RAINBOW]: interpolateRainbow,
-};
 
 const MIN_DRAG_PX = 5;
 const INITIAL_SELECTION_STATE: SelectionState = { active: false, startSvgX: 0, currentSvgX: 0 };
@@ -177,38 +117,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const innerWidth = svgSize.width - MARGIN.left - MARGIN.right;
   const innerHeight = svgSize.height - MARGIN.top - (options.showXAxis ? AXIS_HEIGHT : MARGIN.top);
 
-  const colorScale = useMemo((): ((i: number) => string) => {
-    const d3Interpolator = SCHEME_MAP[options.colorScheme];
-    if (d3Interpolator) {
-      return scaleSequential(d3Interpolator).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-    }
-    // Grafana registry path — scheme value matches FieldColorModeId string directly
-    try {
-      const mode = getFieldColorMode(options.colorScheme);
-      if (mode.isContinuous) {
-        const fakeField = {
-          config: { color: { mode: options.colorScheme } },
-          state: {},
-          values: [],
-          name: '',
-          type: FieldType.number,
-        } as unknown as Field;
-        const calculator = mode.getCalculator(fakeField, theme);
-        const total = Math.max(1, data.seriesNames.length - 1);
-        return (i: number) => calculator(i, i / total);
-      }
-      if (mode.getColors) {
-        const colors = mode.getColors(theme);
-        if (colors.length > 0) {
-          return (i: number) => colors[Math.floor(i) % colors.length];
-        }
-      }
-    } catch {
-      // getFieldColorMode throws for unrecognised IDs; any other registry error
-      // also falls back to the default rather than crashing the panel
-    }
-    return scaleSequential(interpolateCividis).domain([0, Math.max(1, data.seriesNames.length - 1)]);
-  }, [options.colorScheme, data.seriesNames.length, theme]);
+  const colorScale = useColorScale(options.colorScheme, data.seriesNames.length, theme);
 
   // Color by original series index so each series keeps the same color when others are hidden.
   const seriesColor = useCallback(
