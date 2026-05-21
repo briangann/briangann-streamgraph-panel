@@ -8,7 +8,7 @@ interface XAxisProps {
   innerHeight: number;
 }
 
-function grafanaTimeFormat(secondsPerTick: number): string {
+export function grafanaTimeFormat(secondsPerTick: number): string {
   if (secondsPerTick <= 45) {
     return '%H:%M:%S';
   }
