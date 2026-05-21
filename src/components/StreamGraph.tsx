@@ -122,6 +122,9 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   });
 
   const [selection, setSelection] = useState<SelectionState>({ active: false, startSvgX: 0, currentSvgX: 0 });
+  // Ref mirrors selection state so mouseUp always reads the latest coordinates
+  // without depending on potentially stale closure values.
+  const selectionRef = useRef<SelectionState>({ active: false, startSvgX: 0, currentSvgX: 0 });
 
   const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
 
@@ -153,6 +156,19 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     });
     resizeObserver.observe(containerElement);
     return () => resizeObserver.disconnect();
+  }, []);
+
+  // Reset selection if the user releases the mouse outside the SVG — otherwise
+  // the selection stays active indefinitely and blocks tooltip interactions.
+  useEffect(() => {
+    const handleDocumentMouseUp = () => {
+      if (!selectionRef.current.active) { return; }
+      const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+      selectionRef.current = reset;
+      setSelection(reset);
+    };
+    document.addEventListener('mouseup', handleDocumentMouseUp);
+    return () => document.removeEventListener('mouseup', handleDocumentMouseUp);
   }, []);
 
   const theme = useTheme2();
@@ -314,7 +330,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const handlePathMouseMove = useCallback(
     (event: React.MouseEvent, seriesIdx: number, series: StackDatum[]) => {
-      if (options.tooltip.mode === TooltipDisplayMode.None || selection.active) {
+      if (options.tooltip.mode === TooltipDisplayMode.None || selectionRef.current.active) {
         return;
       }
       const g = gRef.current;
@@ -369,7 +385,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, seriesColor, options.tooltip, selection.active]
+    [xScale, stackedData, seriesColor, options.tooltip]
   );
 
   const handlePathMouseLeave = useCallback(() => {
@@ -380,32 +396,42 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     const rect = gRef.current?.getBoundingClientRect();
     if (!rect) { return; }
     const startSvgX = event.clientX - rect.left;
-    setSelection({ active: true, startSvgX, currentSvgX: startSvgX });
+    const next = { active: true, startSvgX, currentSvgX: startSvgX };
+    selectionRef.current = next;
+    setSelection(next);
   }, []);
 
   const handleSvgMouseMove = useCallback(
     (event: React.MouseEvent<SVGGElement>) => {
-      if (!selection.active) { return; }
+      if (!selectionRef.current.active) { return; }
       const rect = gRef.current?.getBoundingClientRect();
       if (!rect) { return; }
-      setSelection((prev) => ({ ...prev, currentSvgX: event.clientX - rect.left }));
+      const currentSvgX = event.clientX - rect.left;
+      const next = { ...selectionRef.current, currentSvgX };
+      selectionRef.current = next;
+      setSelection(next);
     },
-    [selection.active]
+    []
   );
 
   const handleSvgMouseUp = useCallback(() => {
-    if (!selection.active) { return; }
-    const { startSvgX, currentSvgX } = selection;
+    const current = selectionRef.current;
+    if (!current.active) { return; }
+    const { startSvgX, currentSvgX } = current;
+    const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+    selectionRef.current = reset;
+    setSelection(reset);
     if (Math.abs(currentSvgX - startSvgX) >= MIN_DRAG_PX) {
       const from = xScale.invert(Math.min(startSvgX, currentSvgX)).getTime();
       const to = xScale.invert(Math.max(startSvgX, currentSvgX)).getTime();
       onChangeTimeRange({ from, to });
     }
-    setSelection({ active: false, startSvgX: 0, currentSvgX: 0 });
-  }, [selection, xScale, onChangeTimeRange]);
+  }, [xScale, onChangeTimeRange]);
 
   const handleSvgMouseLeave = useCallback(() => {
-    setSelection({ active: false, startSvgX: 0, currentSvgX: 0 });
+    const reset = { active: false, startSvgX: 0, currentSvgX: 0 };
+    selectionRef.current = reset;
+    setSelection(reset);
     setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
   }, []);
 
