@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSprings, animated } from '@react-spring/web';
 import { area, stack } from 'd3-shape';
-import { scaleLinear, scaleTime } from 'd3-scale';
+import { scaleTime } from 'd3-scale';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 import { AbsoluteTimeRange, dateTimeFormat, DisplayValue } from '@grafana/data';
@@ -10,6 +10,7 @@ import { D3WideData, StreamgraphOptions } from '../types';
 import { XAxis } from './Axis';
 import { computeBandLabels } from '../data/bandLabels';
 import { MARGIN, AXIS_HEIGHT, OFFSET_MAP, ORDER_MAP, CURVE_MAP } from './streamgraphConstants';
+import { buildStreamgraphYScale } from '../data/buildStreamgraphYScale';
 import { useColorScale } from './useColorScale';
 
 type StackDatum = [number, number] & { data: Record<string, number> };
@@ -161,24 +162,10 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [data.timeRange, innerWidth]
   );
 
-  const yScale = useMemo(() => {
-    let yMin = Infinity;
-    let yMax = -Infinity;
-    for (const series of stackedData) {
-      for (const point of series) {
-        if (isFinite(point[0]) && point[0] < yMin) {
-          yMin = point[0];
-        }
-        if (isFinite(point[1]) && point[1] > yMax) {
-          yMax = point[1];
-        }
-      }
-    }
-    if (!isFinite(yMin) || !isFinite(yMax)) {
-      return scaleLinear().domain([0, 1]).range([innerHeight, 0]);
-    }
-    return scaleLinear().domain([yMin, yMax]).range([innerHeight, 0]);
-  }, [stackedData, innerHeight]);
+  const yScale = useMemo(
+    () => buildStreamgraphYScale(stackedData, innerHeight),
+    [stackedData, innerHeight]
+  );
 
   const areaGen = useMemo(
     () =>

@@ -1,4 +1,4 @@
-import { createField, toDataFrame } from '@grafana/data';
+import { toDataFrame } from '@grafana/data';
 import { computeSeriesCalcs } from './seriesCalcs';
 
 describe('computeSeriesCalcs', () => {
