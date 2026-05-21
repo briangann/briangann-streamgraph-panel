@@ -153,6 +153,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 result[name] = 0;
               }
             });
+            // Safe to return the original reference: D3 stack reads rows read-only
+            // and never mutates the input datum objects.
             return result ?? row;
           }),
     [data.rows, hiddenSeries]
@@ -316,7 +318,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   );
 
   // Stable per-path handlers — only recreated when stackedData or handlePathMouseMove changes,
-  // not on every render. Prevents animated.path from always seeing a new onMouseMove reference.
+  // not on every render. Avoids allocating stackedData.length new closures on renders that
+  // are driven by tooltip or selection state changes rather than data changes.
   const pathMouseMoveHandlers = useMemo(
     () =>
       stackedData.map(

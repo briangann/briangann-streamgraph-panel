@@ -13,13 +13,23 @@ export function unionTimestamps(timestampArrays: number[][]): number[] {
   if (timestampArrays.length === 0) {
     return [];
   }
-  // Each input array is already time-sorted. k-way merge is O(N) vs O(N log N)
-  // for a flat Set+sort when there are many frames.
-  let result = timestampArrays[0];
-  for (let i = 1; i < timestampArrays.length; i++) {
-    result = mergeSortedUnique(result, timestampArrays[i]);
+  // Each input array is already sorted ascending. Use a balanced pairwise merge
+  // rather than sequential accumulation: each merge round halves the array count,
+  // so the total work is O(N log K) instead of O(N×K) for sequential merging or
+  // O(N log N) for a flat Set+sort. Typical K is 2–10 frames.
+  let queue = timestampArrays.slice();
+  while (queue.length > 1) {
+    const next: number[][] = [];
+    for (let i = 0; i < queue.length; i += 2) {
+      if (i + 1 < queue.length) {
+        next.push(mergeSortedUnique(queue[i], queue[i + 1]));
+      } else {
+        next.push(queue[i]);
+      }
+    }
+    queue = next;
   }
-  return result;
+  return queue[0];
 }
 
 /** Merge two sorted (ascending) number arrays, deduplicating equal values. */
