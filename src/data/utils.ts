@@ -10,13 +10,40 @@ export function detectFrameFormat(data: PanelData): 'wide' | 'multi' {
 }
 
 export function unionTimestamps(timestampArrays: number[][]): number[] {
-  const set = new Set<number>();
-  for (const arr of timestampArrays) {
-    for (const t of arr) {
-      set.add(t);
+  if (timestampArrays.length === 0) {
+    return [];
+  }
+  // Each input array is already time-sorted. k-way merge is O(N) vs O(N log N)
+  // for a flat Set+sort when there are many frames.
+  let result = timestampArrays[0];
+  for (let i = 1; i < timestampArrays.length; i++) {
+    result = mergeSortedUnique(result, timestampArrays[i]);
+  }
+  return result;
+}
+
+/** Merge two sorted (ascending) number arrays, deduplicating equal values. */
+function mergeSortedUnique(a: number[], b: number[]): number[] {
+  const out: number[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] < b[j]) {
+      out.push(a[i++]);
+    } else if (a[i] > b[j]) {
+      out.push(b[j++]);
+    } else {
+      out.push(a[i++]);
+      j++;
     }
   }
-  return Array.from(set).sort((a, b) => a - b);
+  while (i < a.length) {
+    out.push(a[i++]);
+  }
+  while (j < b.length) {
+    out.push(b[j++]);
+  }
+  return out;
 }
 
 export function nullFill(rows: Array<Record<string, number>>, keys: string[]): Array<Record<string, number>> {
