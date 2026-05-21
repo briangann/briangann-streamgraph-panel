@@ -316,6 +316,8 @@ CI runs via `.github/workflows/ci.yml`:
     Format: `uses: owner/repo@<sha> # <tag>`
 - **Dependencies (npm 11):**
   - `npm install --save-dev` for build/test/lint tools. `npm install` for runtime deps shipped in the bundle.
+  - **All versions in `package.json` must be exact (no `^` or `~`).** When adding or bumping a package,
+    use the exact installed version. Verify with `grep '"\^' package.json` — must return nothing.
   - Use `overrides` in package.json to pin transitive deps when needed.
   - Peer dependency warnings are expected — don't add workarounds unless something actually breaks.
 - Grafana API docs: <https://grafana.com/developers/plugin-tools/llms.txt>

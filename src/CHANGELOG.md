@@ -37,6 +37,23 @@ and performance improvements.
   flat Set+sort (O(N log N)) or sequential accumulation (O(N×K)); correct for any
   number of frames and verified by tests covering K=1–4 and unequal-length inputs
 
+#### bandLabels.ts
+
+- Finding the nearest data point to a label's rendered position now uses binary
+  search instead of a full scan — significantly faster on large datasets
+
+#### StreamGraph.tsx — y-scale and tooltip
+
+- y-scale extent computed with a direct loop rather than flattening the entire
+  dataset into a temporary array
+- Tooltip state update skips re-render when the hovered series and value have
+  not changed
+
+#### StreamGraphPanel.tsx
+
+- Data transformation memoized correctly — previously a new object reference on
+  every Grafana render defeated the memo
+
 ### Build / Tooling
 
 #### AGENTS.md
@@ -60,9 +77,14 @@ and performance improvements.
   `buildStreamgraphYScale`, `grafanaTimeFormat`, and `XAxis` — 9 test suites
   covering 115 tests total
 
-#### Dependabot
+#### Renovate
 
-- Ignore `@types/node` 25.x and major bumps for `typescript` and `@grafana/schema`
+- Replaced Dependabot with Renovate for dependency update PRs; `minimumReleaseAge: "3 days"`
+  blocks updates to packages published less than 3 days ago, guarding against supply-chain
+  attacks on fresh releases
+- All major-version updates disabled by default; `@grafana/plugin-e2e` exempt from the
+  age wait (canary releases); grouping matches previous Dependabot config (unit-test,
+  eslint, grafana, react, github-actions)
 
 #### GitHub Actions
 
@@ -170,25 +192,6 @@ and performance improvements.
 
 - Minor correctness fixes (type coercion guard, redundant allocation)
 
-### Performance
-
-#### bandLabels.ts
-
-- Finding the nearest data point to a label's rendered position now uses binary
-  search instead of a full scan — significantly faster on large datasets
-
-#### StreamGraph.tsx
-
-- y-scale extent computed with a direct loop rather than flattening the entire
-  dataset into a temporary array
-- Tooltip state update skips re-render when the hovered series and value have
-  not changed
-
-#### StreamGraphPanel.tsx
-
-- Data transformation memoized correctly — previously a new object reference on
-  every Grafana render defeated the memo
-
 ### E2E / Docker
 
 #### React 19
@@ -209,3 +212,18 @@ and performance improvements.
 #### Grafana SDK
 
 - `@grafana/data`, `@grafana/runtime`, `@grafana/ui`, `@grafana/schema` at 12.4.2
+
+#### GitHub Actions
+
+- `actions/setup-node` v6.2.0 → v6.4.0 in `is-compatible.yml`
+- `davelosert/vitest-coverage-report-action` v2.11.2 → v2.12.0 in `coverage.yml`
+- `magefile/mage-action` v3.1.0 → v4.0.0 in `ci.yml`
+
+#### Minor / patch bumps
+
+- `@emotion/css` 11.10.6 → 11.13.5
+- `@types/react` 18.3.28 → 18.3.29
+- `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` 8.59.3 → 8.59.4
+- `webpack` 5.106.2 → 5.107.0
+- All 66 remaining packages with `^`/`~` range prefixes pinned to exact installed
+  versions; deterministic installs without relying solely on the lock file
