@@ -227,6 +227,10 @@ and performance improvements.
 - Migrated from npm 11 to pnpm 10 — replaced `package-lock.json` with `pnpm-lock.yaml`,
   updated CI workflows to use `pnpm/action-setup@v6.0.8`, and added `node-linker=hoisted`
   to `.npmrc` for Grafana webpack compatibility
+- Bumped pnpm 10.34.1 → 11.5.1; removed `.npmrc` in favour of `pnpm-workspace.yaml`
+  which is the pnpm 11 native config file — `nodeLinker`, `publicHoistPattern`, and
+  `allowBuilds` (supply-chain script allowlist replacing `ignore-scripts=true`) all
+  consolidated there
 
 #### Minor / patch bumps
 
