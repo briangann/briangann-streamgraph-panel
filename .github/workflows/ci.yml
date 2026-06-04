@@ -50,6 +50,10 @@ jobs:
         run: pnpm run typecheck
       - name: Lint
         run: pnpm run lint
+      - name: Spellcheck
+        run: pnpm run spellcheck
+      - name: Markdownlint
+        run: pnpm run markdownlint
       - name: Unit tests
         run: pnpm run test:ci
       - name: Build frontend
