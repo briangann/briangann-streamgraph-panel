@@ -219,6 +219,8 @@ and performance improvements.
 - `davelosert/vitest-coverage-report-action` v2.11.2 → v2.12.0 in `coverage.yml`
 - `magefile/mage-action` v3.1.0 → v4.0.0 in `ci.yml`
 - `pnpm/action-setup@v6.0.8` added to `ci.yml`, `coverage.yml`, and `is-compatible.yml`
+- `actions/checkout` v6 → v6.0.3 across all workflows
+- `golangci/golangci-lint-action` v9.2.0 → v9.2.1 in `ci.yml`
 
 #### Package manager
 
