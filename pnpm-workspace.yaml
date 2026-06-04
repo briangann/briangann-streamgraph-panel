@@ -1,8 +1,15 @@
+# Produce a flat node_modules layout (same as npm's default).
+# Required because the Grafana plugin webpack config in .config/ expects hoisted
+# peer deps and cannot be modified (managed by @grafana/create-plugin).
 nodeLinker: hoisted
 publicHoistPattern:
   - '*'
 
-# Only explicitly listed packages may run lifecycle scripts during install.
+# Allowlist for lifecycle scripts — only these packages may run build scripts
+# during install. All others are blocked (supply-chain hardening).
+#   @parcel/watcher  — native file-system watcher, needs node-gyp compile
+#   @swc/core        — Rust-based transpiler used by Jest and webpack via swc-loader
+#   protobufjs       — Grafana SDK transitive dep; runs a codegen postinstall
 allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true
