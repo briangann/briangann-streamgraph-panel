@@ -8,10 +8,10 @@
     "test:ci": "jest --passWithNoTests --maxWorkers 4",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache .",
-    "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
+    "lint:fix": "pnpm lint -- --fix && prettier --write --list-different .",
     "e2e": "playwright test",
     "server": "docker compose up --build",
-    "sign": "npx --yes @grafana/sign-plugin@latest",
+    "sign": "pnpm dlx @grafana/sign-plugin@latest",
     "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,md,yml,yaml,json,scss,css}\"",
     "markdownlint": "markdownlint-cli2 \"**/*.md\""
   },
@@ -96,5 +96,5 @@
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
-  "packageManager": "npm@11.12.1"
+  "packageManager": "pnpm@10.34.1"
 }

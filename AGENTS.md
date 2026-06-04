@@ -3,7 +3,7 @@
 This repository contains a **Grafana plugin**. You must Read @./.config/AGENTS/instructions.md before doing changes.
 
 Grafana Streamgraph Panel plugin. React + TypeScript frontend panel plugin built with `@grafana/create-plugin`
-scaffolding. Uses npm 11, Node >= 24, React 18.
+scaffolding. Uses pnpm 10, Node >= 24, React 18.
 
 **Working code only. Finish job. Plausibility ≠ correctness.**
 
@@ -157,36 +157,36 @@ Proceed when:
 ### Build / Lint / Test Commands
 
 ```bash
-npm ci                  # Install dependencies (npm 11)
-npm run build           # Production build (webpack, outputs to dist/)
-npm run dev             # Dev build with watch mode + livereload
-npm run typecheck       # TypeScript type checking (tsc --noEmit)
-npm run lint            # ESLint (flat config, v9)
-npm run lint:fix        # ESLint autofix + Prettier
-npm run test            # Jest in watch mode (changed files only)
-npm run test:ci         # Jest CI mode (all tests, 4 workers)
-npm run spellcheck      # cspell across all source files
-npm run markdownlint    # markdownlint-cli2 across all .md files
+pnpm install --frozen-lockfile  # Install dependencies (pnpm 10)
+pnpm run build                  # Production build (webpack, outputs to dist/)
+pnpm run dev                    # Dev build with watch mode + livereload
+pnpm run typecheck              # TypeScript type checking (tsc --noEmit)
+pnpm run lint                   # ESLint (flat config, v9)
+pnpm run lint:fix               # ESLint autofix + Prettier
+pnpm run test                   # Jest in watch mode (changed files only)
+pnpm run test:ci                # Jest CI mode (all tests, 4 workers)
+pnpm run spellcheck             # cspell across all source files
+pnpm run markdownlint           # markdownlint-cli2 across all .md files
 ```
 
 #### Running a Single Test
 
 ```bash
 # By file path
-npx jest src/components/SimplePanel.test.tsx
+pnpm exec jest src/components/SimplePanel.test.tsx
 
 # By test name pattern
-npx jest -t "renders panel"
+pnpm exec jest -t "renders panel"
 
 # Single file in watch mode
-npx jest --watch src/components/SimplePanel.test.tsx
+pnpm exec jest --watch src/components/SimplePanel.test.tsx
 ```
 
 #### E2E Tests (Playwright)
 
 ```bash
-npm run server          # Start local Grafana via docker compose (port 3000)
-npm run e2e             # Run Playwright tests
+pnpm run server         # Start local Grafana via docker compose (port 3000)
+pnpm run e2e            # Run Playwright tests
 ```
 
 E2E tests require a running Grafana instance at `http://localhost:3000`. CI runs E2E against a matrix of Grafana
@@ -292,7 +292,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 - **ESLint 9** flat config extending `@grafana/eslint-config`
 - **Docker compose** runs Grafana at `localhost:3000`
 - **grafanaDependency**: `>=12.3.0` (minimum supported Grafana version)
-- **Node**: `>=24`, **package manager**: npm 11
+- **Node**: `>=24`, **package manager**: pnpm 10
 
 ### CI Workflow
 
@@ -314,8 +314,8 @@ CI runs via `.github/workflows/ci.yml`:
     This applies to every action — `actions/*`, `grafana/*`, third-party. The repo
     enforces this; tag refs like `@v6` will fail CI.
     Format: `uses: owner/repo@<sha> # <tag>`
-- **Dependencies (npm 11):**
-  - `npm install --save-dev` for build/test/lint tools. `npm install` for runtime deps shipped in the bundle.
+- **Dependencies (pnpm 10):**
+  - `pnpm add --save-dev` for build/test/lint tools. `pnpm add` for runtime deps shipped in the bundle.
   - **All versions in `package.json` must be exact (no `^` or `~`).** When adding or bumping a package,
     use the exact installed version. Verify with `grep '"\^' package.json` — must return nothing.
   - Use `overrides` in package.json to pin transitive deps when needed.
@@ -326,11 +326,11 @@ CI runs via `.github/workflows/ci.yml`:
 
 Run all and fix issues before committing:
 
-1. `npm run typecheck` — when any `src/` files are changed
-2. `npm run test:ci` — when any `src/` files are changed
-3. `npm run lint` — fix errors with `npm run lint:fix`
-4. `npm run markdownlint` — on any `.md` file created or modified
-5. `npm run spellcheck` — fix issues, add legit words to `cspell.config.json`
+1. `pnpm run typecheck` — when any `src/` files are changed
+2. `pnpm run test:ci` — when any `src/` files are changed
+3. `pnpm run lint` — fix errors with `pnpm run lint:fix`
+4. `pnpm run markdownlint` — on any `.md` file created or modified
+5. `pnpm run spellcheck` — fix issues, add legit words to `cspell.config.json`
 6. Update changelog(s) — see Changelog Policy for which file and format
 
 ### ESLint Rules

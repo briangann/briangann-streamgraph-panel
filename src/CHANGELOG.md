@@ -218,6 +218,13 @@ and performance improvements.
 - `actions/setup-node` v6.2.0 → v6.4.0 in `is-compatible.yml`
 - `davelosert/vitest-coverage-report-action` v2.11.2 → v2.12.0 in `coverage.yml`
 - `magefile/mage-action` v3.1.0 → v4.0.0 in `ci.yml`
+- `pnpm/action-setup@v6.0.8` added to `ci.yml`, `coverage.yml`, and `is-compatible.yml`
+
+#### Package manager
+
+- Migrated from npm 11 to pnpm 10 — replaced `package-lock.json` with `pnpm-lock.yaml`,
+  updated CI workflows to use `pnpm/action-setup@v6.0.8`, and added `node-linker=hoisted`
+  to `.npmrc` for Grafana webpack compatibility
 
 #### Minor / patch bumps
 
