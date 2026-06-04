@@ -1,3 +1,8 @@
+nodeLinker: hoisted
+publicHoistPattern:
+  - '*'
+
+# Only explicitly listed packages may run lifecycle scripts during install.
 allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true
