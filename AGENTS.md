@@ -3,7 +3,7 @@
 This repository contains a **Grafana plugin**. You must Read @./.config/AGENTS/instructions.md before doing changes.
 
 Grafana Streamgraph Panel plugin. React + TypeScript frontend panel plugin built with `@grafana/create-plugin`
-scaffolding. Uses pnpm 10, Node >= 24, React 18.
+scaffolding. Uses pnpm 11, Node >= 24, React 18.
 
 **Working code only. Finish job. Plausibility ≠ correctness.**
 
@@ -292,7 +292,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
 - **ESLint 9** flat config extending `@grafana/eslint-config`
 - **Docker compose** runs Grafana at `localhost:3000`
 - **grafanaDependency**: `>=12.3.0` (minimum supported Grafana version)
-- **Node**: `>=24`, **package manager**: pnpm 10
+- **Node**: `>=24`, **package manager**: pnpm 11
 
 ### CI Workflow
 
@@ -314,7 +314,7 @@ CI runs via `.github/workflows/ci.yml`:
     This applies to every action — `actions/*`, `grafana/*`, third-party. The repo
     enforces this; tag refs like `@v6` will fail CI.
     Format: `uses: owner/repo@<sha> # <tag>`
-- **Dependencies (pnpm 10):**
+- **Dependencies (pnpm 11):**
   - `pnpm add --save-dev` for build/test/lint tools. `pnpm add` for runtime deps shipped in the bundle.
   - **All versions in `package.json` must be exact (no `^` or `~`).** When adding or bumping a package,
     use the exact installed version. Verify with `grep '"\^' package.json` — must return nothing.

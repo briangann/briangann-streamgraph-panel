@@ -77,11 +77,11 @@ setup and is also read by AI coding assistants.
 Quick start:
 
 ```bash
-npm ci           # install dependencies
-npm run dev      # dev build with watch + livereload
-npm run server   # start Grafana via Docker on localhost:3000
-npm run test:ci  # unit tests
-npm run lint     # ESLint
+pnpm install --frozen-lockfile  # install dependencies
+pnpm run dev                    # dev build with watch + livereload
+pnpm run server                 # start Grafana via Docker on localhost:3000
+pnpm run test:ci                # unit tests
+pnpm run lint                   # ESLint
 ```
 
 ## Contributors

@@ -6,7 +6,6 @@ export default defineConfig([
     ignores: [
       '**/logs',
       '**/*.log',
-      '**/npm-debug.log*',
       '**/yarn-debug.log*',
       '**/yarn-error.log*',
       '**/.pnpm-debug.log*',
