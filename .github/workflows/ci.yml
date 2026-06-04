@@ -20,6 +20,7 @@ jobs:
   build:
     name: Build, lint and unit tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -39,7 +40,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -104,8 +105,6 @@ jobs:
       - name: Get plugin metadata
         id: metadata
         run: |
-          sudo apt-get install jq
-
           export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
           export GRAFANA_PLUGIN_VERSION=$(cat dist/plugin.json | jq -r .info.version)
           export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-${GRAFANA_PLUGIN_VERSION}.zip
@@ -195,7 +194,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: '22'
+          node-version-file: .nvmrc
           cache: 'pnpm'
 
       - name: Install dev dependencies
@@ -232,6 +231,7 @@ jobs:
           docker logs briangann-streamgraph-panel >& grafana-server.log
 
       - name: Stop grafana docker
+        if: always()
         run: docker compose down
 
       # Uncomment this step to upload the server log to Github artifacts. Remember Github artifacts are public on the Internet if the repository is public.
@@ -245,6 +245,7 @@ jobs:
 
   publish-report:
     if: ${{ always() && !cancelled() }}
+    timeout-minutes: 10
     permissions:
       contents: write
       id-token: write

@@ -11,6 +11,7 @@ permissions: {}
 
 jobs:
   release:
+    timeout-minutes: 15
     permissions:
       contents: write
     runs-on: ubuntu-latest

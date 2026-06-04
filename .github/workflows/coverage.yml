@@ -60,7 +60,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage (base)
-        continue-on-error: true
+        continue-on-error: true # base branch may have failing tests; still compare coverage even if so
         run: pnpm exec jest --ci --coverage --coverageReporters=json-summary --coverageReporters=json --maxWorkers=4
 
       - name: Save base coverage
