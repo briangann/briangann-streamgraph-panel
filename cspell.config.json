@@ -11,6 +11,7 @@
     "src/dashboards/**",
     "tests/__mocks__/**",
     "package-lock.json",
+    "pnpm-lock.yaml",
     "playwright-report/**",
     "provisioning-private/**",
     "test-results/**"
@@ -40,7 +41,11 @@
     "unparseable",
     "unrecognised",
     "unrequested",
-    "viridis"
+    "viridis",
+    "codegen",
+    "lavamoat",
+    "npmjs",
+    "protobufjs"
   ],
   "enabled": true
 }
