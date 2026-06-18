@@ -192,6 +192,61 @@ and performance improvements.
 
 - Minor correctness fixes (type coercion guard, redundant allocation)
 
+#### StreamGraph.tsx — code style
+
+- Moved `updateSelection` before the effects that use it; document `mouseup`
+  effect now calls `updateSelection` directly instead of duplicating the
+  ref+state sync inline
+- `toggleSeries`: destructure `item` at the parameter level, if/else for the
+  Set toggle, `prev` as the conventional functional-updater argument name
+- `prev` replaces `previousTooltip` in both `setTooltip` functional updaters
+- Removed comments that restated what the code does; kept comments that document
+  non-obvious invariants (restored `svgSizeRef` comment removed in error)
+
+#### buildColorScale (extracted from useColorScale.ts)
+
+- Extracted the color scale computation from `useColorScale` into a standalone
+  `buildColorScale(scheme, count, theme)` pure function; the hook becomes a
+  one-line `useMemo` wrapper — `buildColorScale` tested without `renderHook`;
+  hook contract (stable reference, recomputes on dep change) covered by three
+  new `renderHook` tests for `useColorScale` directly
+- Drops D3 `any[]` cast: `stackedData` parameters in `bandLabels.ts` and
+  `buildStreamgraphYScale.ts` now use `Array<Series<Record<string, number>, string>>`
+  from `d3-shape`; all `(s as any).key` casts replaced by `.key` directly
+- `StackDatum` type in `StreamGraph.tsx` now uses `SeriesPoint<Record<string, number>>`
+  from `d3-shape`; `as unknown as StackDatum[]` casts removed
+
+#### seriesName.ts (new)
+
+- Extracted `deriveSeriesName(field, frame, isWide)` shared between `transformer.ts`
+  and `seriesCalcs.ts`; the "Must mirror" comment deleted — divergence is now
+  structurally impossible
+- Removed tautological "cross-caller parity" describe block whose tests called
+  `deriveSeriesName` twice with identical args and compared the results; parity
+  is enforced structurally, not by assertion
+
+#### tooltipRows.ts (new)
+
+- Extracted `buildTooltipRows(datum, seriesNames, hoveredSeries, config, colorFn)`
+  from `handlePathMouseMove` in `StreamGraph.tsx`; `SeriesRow` and `TooltipRowConfig`
+  types move here
+- `SortOrder` import removed from `StreamGraph.tsx` — no longer needed in the component
+- 5 tooltip content/mode/sort/hideZeros tests moved to `tooltipRows.test.ts` as
+  10 direct function-call tests; size-constraint tests (maxWidth, maxHeight,
+  no-scroll) restored in `StreamGraph.test.tsx`; 2 integration smoke tests remain
+- Added missing `data.seriesNames` dep to `handlePathMouseMove` deps array;
+  ESLint `react-hooks/exhaustive-deps` now clean
+- Test call sites refactored to use named config consts — all lines within 120-char limit
+
+#### Code review fixes (StreamGraph.tsx / StreamGraph.test.tsx)
+
+- Restored three non-obvious comments stripped during code style pass: O(1) index
+  lookup rationale on `seriesIndexMap`, lazy-copy allocation note in `zeroedRows`,
+  and D3 read-only datum safety invariant
+- Re-added three DOM integration tests that `tooltipRows.test.ts` cannot cover:
+  timestamp header renders in Single mode, Single mode shows exactly one
+  `SeriesTableRow`, Multi mode shows one row per series
+
 ### E2E / Docker
 
 #### React 19
