@@ -1,4 +1,5 @@
 import { ScaleLinear, scaleLinear } from 'd3-scale';
+import { Series } from 'd3-shape';
 
 /**
  * Builds a linear Y scale for a streamgraph from pre-stacked D3 data.
@@ -6,10 +7,8 @@ import { ScaleLinear, scaleLinear } from 'd3-scale';
  * SVG pixel space (top = 0, bottom = innerHeight).
  * Falls back to [0, 1] when data is empty or all values are non-finite.
  */
-// D3's Series type uses complex generics that don't align with simple tuples;
-// any[] accepts the real runtime shape without fighting the type system.
 export function buildStreamgraphYScale(
-  stackedData: any[],
+  stackedData: Array<Series<Record<string, number>, string>>,
   innerHeight: number
 ): ScaleLinear<number, number> {
   let yMin = Infinity;

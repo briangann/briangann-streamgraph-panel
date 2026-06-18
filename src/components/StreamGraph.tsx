@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSprings, animated } from '@react-spring/web';
-import { area, stack } from 'd3-shape';
+import { area, stack, SeriesPoint } from 'd3-shape';
 import { scaleTime } from 'd3-scale';
 import { SeriesTable, VizLegend, VizTooltip, useTheme2 } from '@grafana/ui';
-import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
+import { LegendDisplayMode, TooltipDisplayMode } from '@grafana/schema';
 import { AbsoluteTimeRange, dateTimeFormat, DisplayValue } from '@grafana/data';
 
 import { D3WideData, StreamgraphOptions } from '../types';
@@ -12,14 +12,9 @@ import { computeBandLabels } from '../data/bandLabels';
 import { MARGIN, AXIS_HEIGHT, OFFSET_MAP, ORDER_MAP, CURVE_MAP } from './streamgraphConstants';
 import { buildStreamgraphYScale } from '../data/buildStreamgraphYScale';
 import { useColorScale } from './useColorScale';
+import { buildTooltipRows, SeriesRow } from '../data/tooltipRows';
 
-type StackDatum = [number, number] & { data: Record<string, number> };
-
-interface SeriesRow {
-  seriesName: string;
-  value: number;
-  color: string;
-}
+type StackDatum = SeriesPoint<Record<string, number>>;
 
 interface StreamGraphProps {
   data: D3WideData;
@@ -196,7 +191,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       stackedData,
       (time: number) => xScale(time),
       (val: number) => yScale(val),
-      (i: number) => seriesColor((stackedData[i] as any).key as string),
+      (i: number) => seriesColor(stackedData[i].key),
       innerWidth,
       innerHeight,
       {
@@ -227,7 +222,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const springConfigs = useMemo(
     () =>
       stackedData.map((series) => ({
-        to: { d: areaGen(series as unknown as StackDatum[]) ?? '' },
+        to: { d: areaGen(series) ?? '' },
         immediate: !options.enableTransitions,
         config: { duration: options.transitionDuration },
       })),
@@ -249,7 +244,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       const mouseX = getSvgX(event);
       if (mouseX === null) { return; }
       const timeValue = xScale.invert(mouseX).getTime();
-      const hoveredSeries = (stackedData[seriesIdx] as any).key as string;
+      const hoveredSeries = stackedData[seriesIdx].key;
       // Binary search for the nearest data point — series is time-ordered (same
       // pattern as bandLabels). Replaces O(N) reduce with O(log N).
       if (series.length === 0) { return; }
@@ -268,25 +263,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
           ? series[lo - 1]
           : series[lo];
 
-      let seriesRows: SeriesRow[];
-      if (options.tooltip.mode === TooltipDisplayMode.Single) {
-        seriesRows = [
-          { seriesName: hoveredSeries, value: closest.data[hoveredSeries] ?? 0, color: seriesColor(hoveredSeries) },
-        ];
-      } else {
-        seriesRows = stackedData.map((s) => {
-          const name = (s as any).key as string;
-          return { seriesName: name, value: closest.data[name] ?? 0, color: seriesColor(name) };
-        });
-        if (options.tooltip.hideZeros) {
-          seriesRows = seriesRows.filter((r) => r.value !== 0);
-        }
-        if (options.tooltip.sort === SortOrder.Ascending) {
-          seriesRows.sort((a, b) => a.value - b.value);
-        } else if (options.tooltip.sort === SortOrder.Descending) {
-          seriesRows.sort((a, b) => b.value - a.value);
-        }
-      }
+      const seriesRows = buildTooltipRows(closest.data, data.seriesNames, hoveredSeries, options.tooltip, seriesColor);
 
       setTooltip((prev) => {
         if (
@@ -316,7 +293,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     () =>
       stackedData.map(
         (series, i) => (e: React.MouseEvent) =>
-          handlePathMouseMove(e, i, series as unknown as StackDatum[])
+          handlePathMouseMove(e, i, series)
       ),
     [stackedData, handlePathMouseMove]
   );
@@ -399,7 +376,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
           >
             {pathSprings.map((springProps, i) => {
               const series = stackedData[i];
-              const seriesName = (series as any).key as string;
+              const seriesName = series.key;
               const isDimmed = options.hoverDimming && tooltip.visible && tooltip.hoveredSeries !== seriesName;
               return (
                 <animated.path

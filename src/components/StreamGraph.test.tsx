@@ -170,55 +170,19 @@ describe('color schemes', () => {
 });
 
 describe('tooltip', () => {
-  // Fire a mousemove over the first SVG path. JSDOM returns 0 for getBoundingClientRect
-  // so mouseX = clientX - 0 = clientX. The xScale maps [1000,3000] → [0, 780].
-  // clientX=390 lands near the midpoint, giving timeValue ≈ 2000.
-  function hoverFirstPath(container: HTMLElement) {
-    const path = container.querySelector('path')!;
-    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
-  }
-
-  it('renders tooltip rows after hovering a path', () => {
+  // Row content, mode, sort, hideZeros, and size constraints are covered by
+  // tooltipRows.test.ts. This test only verifies the integration: that the
+  // tooltip actually appears in the DOM when the mouse moves over a path.
+  it('renders a tooltip after hovering a path', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
     );
-    hoverFirstPath(container);
-    // Tooltip renders into document.body via Portal
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
     expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]').length).toBeGreaterThan(0);
   });
 
-  it('shows a timestamp header when hovering in Single mode', () => {
-    const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
-    );
-    hoverFirstPath(container);
-    expect(document.body.querySelector('[aria-label="Timestamp"]')).toBeInTheDocument();
-  });
-
-  it('shows one series row in Single mode', () => {
-    const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
-    );
-    hoverFirstPath(container);
-    expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(1);
-  });
-
-  it('shows all series rows in All series mode', () => {
-    const { container } = render(
-      <StreamGraph
-        data={mockData}
-        width={800}
-        height={400}
-        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, mode: TooltipDisplayMode.Multi } }}
-        seriesCalcs={emptyCalcs}
-        onChangeTimeRange={noopTimeRange}
-      />
-    );
-    hoverFirstPath(container);
-    expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(2);
-  });
-
-  it('does not show tooltip when mode is Hidden', () => {
+  it('does not render a tooltip when mode is Hidden', () => {
     const { container } = render(
       <StreamGraph
         data={mockData}
@@ -229,55 +193,9 @@ describe('tooltip', () => {
         onChangeTimeRange={noopTimeRange}
       />
     );
-    hoverFirstPath(container);
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
     expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(0);
-  });
-
-  it('applies maxWidth to the tooltip wrapper when set', () => {
-    const { container } = render(
-      <StreamGraph
-        data={mockData}
-        width={800}
-        height={400}
-        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxWidth: 300 } }}
-        seriesCalcs={emptyCalcs}
-        onChangeTimeRange={noopTimeRange}
-      />
-    );
-    hoverFirstPath(container);
-    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
-    const wrapper = timestamp?.closest('div[style]') as HTMLElement | null;
-    expect(wrapper?.style.maxWidth).toBe('300px');
-  });
-
-  it('applies maxHeight and overflowY to the inner div when set', () => {
-    const { container } = render(
-      <StreamGraph
-        data={mockData}
-        width={800}
-        height={400}
-        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxHeight: 150 } }}
-        seriesCalcs={emptyCalcs}
-        onChangeTimeRange={noopTimeRange}
-      />
-    );
-    hoverFirstPath(container);
-    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
-    const scrollWrapper = timestamp?.parentElement as HTMLElement | null;
-    expect(scrollWrapper?.style.maxHeight).toBe('150px');
-    expect(scrollWrapper?.style.overflowY).toBe('auto');
-  });
-
-  it('does not apply scroll style when maxHeight is unset', () => {
-    const { container } = render(
-      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
-    );
-    hoverFirstPath(container);
-    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
-    const scrollWrapper = timestamp?.parentElement as HTMLElement | null;
-    // style is undefined when maxHeight is not set — no overflowY constraint
-    expect(scrollWrapper?.style.maxHeight).toBeFalsy();
-    expect(scrollWrapper?.style.overflowY).toBeFalsy();
   });
 });
 

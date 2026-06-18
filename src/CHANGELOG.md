@@ -203,6 +203,35 @@ and performance improvements.
 - Removed comments that restated what the code does rather than explaining
   the design decision; kept comments that document non-obvious invariants
 
+#### buildColorScale (extracted from useColorScale.ts)
+
+- Extracted the color scale computation from `useColorScale` into a standalone
+  `buildColorScale(scheme, count, theme)` pure function; the hook becomes a
+  one-line `useMemo` wrapper — tests no longer require `renderHook`
+- Drops D3 `any[]` cast: `stackedData` parameters in `bandLabels.ts` and
+  `buildStreamgraphYScale.ts` now use `Array<Series<Record<string, number>, string>>`
+  from `d3-shape`; all `(s as any).key` casts replaced by `.key` directly
+- `StackDatum` type in `StreamGraph.tsx` now uses `SeriesPoint<Record<string, number>>`
+  from `d3-shape`; `as unknown as StackDatum[]` casts removed
+
+#### seriesName.ts (new)
+
+- Extracted `deriveSeriesName(field, frame, isWide)` shared between `transformer.ts`
+  and `seriesCalcs.ts`; the "Must mirror" comment deleted — divergence is now
+  structurally impossible
+- 9 unit tests covering wide/multi-frame fallback chains and a cross-caller parity
+  test that verifies both files produce the same key for the same input
+
+#### tooltipRows.ts (new)
+
+- Extracted `buildTooltipRows(datum, seriesNames, hoveredSeries, config, colorFn)`
+  from `handlePathMouseMove` in `StreamGraph.tsx`; `SeriesRow` and `TooltipRowConfig`
+  types move here
+- `SortOrder` import removed from `StreamGraph.tsx` — no longer needed in the component
+- 8 tooltip tests removed from `StreamGraph.test.tsx` (Single/Multi mode, sort,
+  hideZeros, size constraints) and replaced by 10 direct function-call tests in
+  `tooltipRows.test.ts`; 2 integration smoke tests remain in the component suite
+
 ### E2E / Docker
 
 #### React 19

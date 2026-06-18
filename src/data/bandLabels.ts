@@ -1,3 +1,4 @@
+import { Series } from 'd3-shape';
 import { BandLabelColor } from '../types';
 import { getTextColorForBackground } from '@grafana/ui';
 import { colorManipulator } from '@grafana/data';
@@ -44,7 +45,7 @@ export interface BandLabelComputeOptions {
 }
 
 export function computeBandLabels(
-  stackedData: any[],
+  stackedData: Array<Series<Record<string, number>, string>>,
   xScale: (time: number) => number,
   yScale: (val: number) => number,
   colorFn: (index: number) => string,
@@ -74,7 +75,7 @@ export function computeBandLabels(
 
   for (let i = 0; i < stackedData.length; i++) {
     const series = stackedData[i];
-    const seriesName = (series as any).key as string;
+    const seriesName = series.key;
 
     let maxHeight = 0;
     const maxIndices: number[] = [];
