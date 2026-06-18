@@ -192,6 +192,17 @@ and performance improvements.
 
 - Minor correctness fixes (type coercion guard, redundant allocation)
 
+#### StreamGraph.tsx — code style
+
+- Moved `updateSelection` before the effects that use it; document `mouseup`
+  effect now calls `updateSelection` directly instead of duplicating the
+  ref+state sync inline
+- `toggleSeries`: destructure `item` at the parameter level, ternary for the
+  Set toggle, `prev` as the conventional functional-updater argument name
+- `prev` replaces `previousTooltip` in both `setTooltip` functional updaters
+- Removed comments that restated what the code does rather than explaining
+  the design decision; kept comments that document non-obvious invariants
+
 ### E2E / Docker
 
 #### React 19

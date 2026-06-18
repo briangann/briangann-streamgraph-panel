@@ -53,7 +53,6 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
-  // Tracks the last size reported by ResizeObserver so we can skip no-op updates.
   const svgSizeRef = useRef({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
@@ -70,16 +69,17 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   // without depending on potentially stale closure values.
   const selectionRef = useRef<SelectionState>(INITIAL_SELECTION_STATE);
 
+  const updateSelection = useCallback((next: SelectionState) => {
+    selectionRef.current = next;
+    setSelection(next);
+  }, []);
+
   const [hiddenSeries, setHiddenSeries] = useState(new Set<string>());
 
-  const toggleSeries = useCallback((item: { label: string }) => {
-    setHiddenSeries((previousHidden) => {
-      const next = new Set(previousHidden);
-      if (next.has(item.label)) {
-        next.delete(item.label);
-      } else {
-        next.add(item.label);
-      }
+  const toggleSeries = useCallback(({ label }: { label: string }) => {
+    setHiddenSeries((prev) => {
+      const next = new Set(prev);
+      next.has(label) ? next.delete(label) : next.add(label);
       return next;
     });
   }, []);
@@ -106,15 +106,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   // Reset selection if the user releases the mouse outside the SVG — otherwise
   // the selection stays active indefinitely and blocks tooltip interactions.
   useEffect(() => {
-    const handleDocumentMouseUp = () => {
+    const onMouseUp = () => {
       if (!selectionRef.current.active) { return; }
-      const reset = INITIAL_SELECTION_STATE;
-      selectionRef.current = reset;
-      setSelection(reset);
+      updateSelection(INITIAL_SELECTION_STATE);
     };
-    document.addEventListener('mouseup', handleDocumentMouseUp);
-    return () => document.removeEventListener('mouseup', handleDocumentMouseUp);
-  }, []);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => document.removeEventListener('mouseup', onMouseUp);
+  }, [updateSelection]);
 
   const theme = useTheme2();
 
@@ -123,7 +121,6 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const colorScale = useColorScale(options.colorScheme, data.seriesNames.length, theme);
 
-  // O(1) index lookup for seriesColor — avoids O(N) indexOf on every color access.
   const seriesIndexMap = useMemo(
     () => new Map(data.seriesNames.map((name, i) => [name, i])),
     [data.seriesNames]
@@ -143,7 +140,6 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       hiddenSeries.size === 0
         ? data.rows
         : data.rows.map((row) => {
-            // Only allocate a copy if at least one hidden series has a non-zero value.
             let result: Record<string, number> | null = null;
             hiddenSeries.forEach((name) => {
               if (row[name] !== 0) {
@@ -153,8 +149,6 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 result[name] = 0;
               }
             });
-            // Safe to return the original reference: D3 stack reads rows read-only
-            // and never mutates the input datum objects.
             return result ?? row;
           }),
     [data.rows, hiddenSeries]
@@ -294,14 +288,14 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         }
       }
 
-      setTooltip((previousTooltip) => {
+      setTooltip((prev) => {
         if (
-          previousTooltip.visible &&
-          previousTooltip.timeValue === timeValue &&
-          previousTooltip.hoveredSeries === hoveredSeries &&
-          previousTooltip.svgX === mouseX
+          prev.visible &&
+          prev.timeValue === timeValue &&
+          prev.hoveredSeries === hoveredSeries &&
+          prev.svgX === mouseX
         ) {
-          return previousTooltip;
+          return prev;
         }
         return {
           visible: true,
@@ -317,9 +311,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
     [xScale, stackedData, seriesColor, options.tooltip, getSvgX]
   );
 
-  // Stable per-path handlers — only recreated when stackedData or handlePathMouseMove changes,
-  // not on every render. Avoids allocating stackedData.length new closures on renders that
-  // are driven by tooltip or selection state changes rather than data changes.
+  // Stable per-path handlers — only recreated when stackedData or handlePathMouseMove changes.
   const pathMouseMoveHandlers = useMemo(
     () =>
       stackedData.map(
@@ -330,12 +322,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   );
 
   const handlePathMouseLeave = useCallback(() => {
-    setTooltip((previousTooltip) => ({ ...previousTooltip, visible: false }));
-  }, []);
-
-  const updateSelection = useCallback((next: SelectionState) => {
-    selectionRef.current = next;
-    setSelection(next);
+    setTooltip((prev) => ({ ...prev, visible: false }));
   }, []);
 
   const handleSvgMouseDown = useCallback((event: React.MouseEvent<SVGGElement>) => {
