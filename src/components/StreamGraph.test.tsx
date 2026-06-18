@@ -171,8 +171,9 @@ describe('color schemes', () => {
 
 describe('tooltip', () => {
   // Row content, mode, sort, and hideZeros are covered by tooltipRows.test.ts.
-  // These tests verify the integration: that the tooltip renders and that size
-  // constraints (maxWidth, maxHeight) are applied to the wrapper divs.
+  // These tests verify the integration: that the tooltip renders, that a
+  // timestamp header appears, and that size constraints (maxWidth, maxHeight)
+  // are applied to the wrapper divs.
   it('renders a tooltip after hovering a path', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
@@ -180,6 +181,40 @@ describe('tooltip', () => {
     const path = container.querySelector('path')!;
     fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
     expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]').length).toBeGreaterThan(0);
+  });
+
+  it('renders a timestamp header when hovering in Single mode', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    expect(document.body.querySelector('[aria-label="Timestamp"]')).toBeInTheDocument();
+  });
+
+  it('renders exactly one SeriesTableRow in Single mode', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(1);
+  });
+
+  it('renders a row for every series in Multi mode', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, mode: TooltipDisplayMode.Multi } }}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
+      />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(2);
   });
 
   it('does not render a tooltip when mode is Hidden', () => {

@@ -121,6 +121,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
 
   const colorScale = useColorScale(options.colorScheme, data.seriesNames.length, theme);
 
+  // O(1) index lookup for seriesColor — avoids O(N) indexOf on every color access.
   const seriesIndexMap = useMemo(
     () => new Map(data.seriesNames.map((name, i) => [name, i])),
     [data.seriesNames]
@@ -140,6 +141,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
       hiddenSeries.size === 0
         ? data.rows
         : data.rows.map((row) => {
+            // Only allocate a copy if at least one hidden series has a non-zero value.
             let result: Record<string, number> | null = null;
             hiddenSeries.forEach((name) => {
               if (row[name] !== 0) {
@@ -149,6 +151,8 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
                 result[name] = 0;
               }
             });
+            // Safe to return the original reference: D3 stack reads rows read-only
+            // and never mutates the input datum objects.
             return result ?? row;
           }),
     [data.rows, hiddenSeries]

@@ -238,6 +238,15 @@ and performance improvements.
   ESLint `react-hooks/exhaustive-deps` now clean
 - Test call sites refactored to use named config consts — all lines within 120-char limit
 
+#### Code review fixes (StreamGraph.tsx / StreamGraph.test.tsx)
+
+- Restored three non-obvious comments stripped during code style pass: O(1) index
+  lookup rationale on `seriesIndexMap`, lazy-copy allocation note in `zeroedRows`,
+  and D3 read-only datum safety invariant
+- Re-added three DOM integration tests that `tooltipRows.test.ts` cannot cover:
+  timestamp header renders in Single mode, Single mode shows exactly one
+  `SeriesTableRow`, Multi mode shows one row per series
+
 ### E2E / Docker
 
 #### React 19
