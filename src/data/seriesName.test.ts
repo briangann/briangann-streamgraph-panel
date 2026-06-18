@@ -1,6 +1,5 @@
-import { FieldType } from '@grafana/data';
+import { FieldType, type Field, type DataFrame } from '@grafana/data';
 import { deriveSeriesName } from './seriesName';
-import type { Field, DataFrame } from '@grafana/data';
 
 function makeField(name: string, displayName?: string): Field {
   return {
@@ -50,26 +49,6 @@ describe('deriveSeriesName', () => {
       field.name = undefined as unknown as string;
       field.config = {};
       expect(deriveSeriesName(field, makeFrame(undefined), false)).toBe('value');
-    });
-  });
-
-  describe('cross-caller parity', () => {
-    it('wide and seriesCalcs paths produce identical output for the same field+frame', () => {
-      const field = makeField('raw', 'DisplayName');
-      const frame = makeFrame('frameName');
-      // transformer.ts wide path
-      const transformerName = deriveSeriesName(field, frame, true);
-      // seriesCalcs.ts wide path
-      const calcName = deriveSeriesName(field, frame, true);
-      expect(transformerName).toBe(calcName);
-    });
-
-    it('multi-frame paths produce identical output for the same field+frame', () => {
-      const field = makeField('raw');
-      const frame = makeFrame('frameName');
-      const transformerName = deriveSeriesName(field, frame, false);
-      const calcName = deriveSeriesName(field, frame, false);
-      expect(transformerName).toBe(calcName);
     });
   });
 });

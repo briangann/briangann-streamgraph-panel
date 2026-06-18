@@ -1,5 +1,6 @@
+import { renderHook } from '@testing-library/react';
 import { createTheme } from '@grafana/data';
-import { buildColorScale } from './useColorScale';
+import { buildColorScale, useColorScale } from './useColorScale';
 import { ColorScheme } from '../types';
 
 const theme = createTheme();
@@ -51,5 +52,37 @@ describe('buildColorScale', () => {
     const scale10 = buildColorScale(ColorScheme.TURBO, 10, theme);
     // index 4 maps to a different fraction of the gradient with 5 vs 10 series
     expect(scale5(4)).not.toBe(scale10(4));
+  });
+});
+
+describe('useColorScale', () => {
+  it('returns the same function reference when deps are unchanged', () => {
+    const { result, rerender } = renderHook(
+      ({ scheme, count }: { scheme: ColorScheme; count: number }) => useColorScale(scheme, count, theme),
+      { initialProps: { scheme: ColorScheme.TURBO, count: 5 } }
+    );
+    const first = result.current;
+    rerender({ scheme: ColorScheme.TURBO, count: 5 });
+    expect(result.current).toBe(first);
+  });
+
+  it('returns a new function reference when seriesCount changes', () => {
+    const { result, rerender } = renderHook(
+      ({ count }: { count: number }) => useColorScale(ColorScheme.TURBO, count, theme),
+      { initialProps: { count: 5 } }
+    );
+    const first = result.current;
+    rerender({ count: 10 });
+    expect(result.current).not.toBe(first);
+  });
+
+  it('returns a new function reference when colorScheme changes', () => {
+    const { result, rerender } = renderHook(
+      ({ scheme }: { scheme: ColorScheme }) => useColorScale(scheme, 5, theme),
+      { initialProps: { scheme: ColorScheme.TURBO } }
+    );
+    const first = result.current;
+    rerender({ scheme: ColorScheme.VIRIDIS });
+    expect(result.current).not.toBe(first);
   });
 });

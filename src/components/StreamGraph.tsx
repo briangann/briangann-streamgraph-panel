@@ -48,6 +48,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const gRef = useRef<SVGGElement>(null);
   const [svgSize, setSvgSize] = useState({ width, height });
+  // Tracks the last size reported by ResizeObserver so we can skip no-op updates.
   const svgSizeRef = useRef({ width, height });
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
@@ -74,7 +75,11 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
   const toggleSeries = useCallback(({ label }: { label: string }) => {
     setHiddenSeries((prev) => {
       const next = new Set(prev);
-      next.has(label) ? next.delete(label) : next.add(label);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
       return next;
     });
   }, []);
@@ -285,7 +290,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({ data, width, height, o
         };
       });
     },
-    [xScale, stackedData, seriesColor, options.tooltip, getSvgX]
+    [xScale, stackedData, seriesColor, options.tooltip, getSvgX, data.seriesNames]
   );
 
   // Stable per-path handlers — only recreated when stackedData or handlePathMouseMove changes.

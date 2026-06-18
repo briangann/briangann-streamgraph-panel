@@ -170,9 +170,9 @@ describe('color schemes', () => {
 });
 
 describe('tooltip', () => {
-  // Row content, mode, sort, hideZeros, and size constraints are covered by
-  // tooltipRows.test.ts. This test only verifies the integration: that the
-  // tooltip actually appears in the DOM when the mouse moves over a path.
+  // Row content, mode, sort, and hideZeros are covered by tooltipRows.test.ts.
+  // These tests verify the integration: that the tooltip renders and that size
+  // constraints (maxWidth, maxHeight) are applied to the wrapper divs.
   it('renders a tooltip after hovering a path', () => {
     const { container } = render(
       <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
@@ -196,6 +196,56 @@ describe('tooltip', () => {
     const path = container.querySelector('path')!;
     fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
     expect(document.body.querySelectorAll('[data-testid="SeriesTableRow"]')).toHaveLength(0);
+  });
+
+  it('applies maxWidth to the tooltip wrapper when set', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxWidth: 300 } }}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
+      />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
+    const wrapper = timestamp?.closest('div[style]') as HTMLElement | null;
+    expect(wrapper?.style.maxWidth).toBe('300px');
+  });
+
+  it('applies maxHeight and overflowY to the inner div when set', () => {
+    const { container } = render(
+      <StreamGraph
+        data={mockData}
+        width={800}
+        height={400}
+        options={{ ...mockOptions, tooltip: { ...mockOptions.tooltip, maxHeight: 150 } }}
+        seriesCalcs={emptyCalcs}
+        onChangeTimeRange={noopTimeRange}
+      />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
+    const scrollWrapper = timestamp?.parentElement as HTMLElement | null;
+    expect(scrollWrapper?.style.maxHeight).toBe('150px');
+    expect(scrollWrapper?.style.overflowY).toBe('auto');
+  });
+
+  it('does not apply scroll style when maxHeight is unset', () => {
+    const { container } = render(
+      <StreamGraph data={mockData} width={800} height={400} options={mockOptions} seriesCalcs={emptyCalcs} onChangeTimeRange={noopTimeRange} />
+    );
+    const path = container.querySelector('path')!;
+    fireEvent.mouseMove(path, { clientX: 390, clientY: 200 });
+    const timestamp = document.body.querySelector('[aria-label="Timestamp"]');
+    const scrollWrapper = timestamp?.parentElement as HTMLElement | null;
+    // style is undefined when maxHeight is not set — no overflowY constraint
+    expect(scrollWrapper?.style.maxHeight).toBeFalsy();
+    expect(scrollWrapper?.style.overflowY).toBeFalsy();
   });
 });
 
